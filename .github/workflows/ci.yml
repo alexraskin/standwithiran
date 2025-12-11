@@ -3,8 +3,27 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - README.md
+      - .gitignore
+      - docker-compose.yml
+      - LICENSE
+      - start.sh
+      - static/*
+      - templates/*
+      - .dockerignore
+
   pull_request:
     branches: [main]
+    paths-ignore:
+      - README.md
+      - .gitignore
+      - docker-compose.yml
+      - LICENSE
+      - start.sh
+      - static/*
+      - templates/*
+      - .dockerignore
 
 jobs:
   test:
