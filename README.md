@@ -7,7 +7,8 @@ Welcome to the Stand With Iran project! This website is designed to help share r
 
 ## Add the badge to your README
 
-[![StandWithIran](https://raw.githubusercontent.com/alexraskin/standwithiran/refs/heads/main/static/images/standwithir.png)](https://standwithiran.com)
+[![StandWithIran](https://raw.githubusercontent.com/alexraskin/standwithiran/refs/heads/main/static/images/standwithir.png)](https://standwithiran.com) [![codecov](https://codecov.io/github/alexraskin/standwithiran/graph/badge.svg?token=T0EN5SGCRQ)](https://codecov.io/github/alexraskin/standwithiran) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/alexraskin/standwithiran)
+
 
 ```markdown
 [![StandWithIran](https://raw.githubusercontent.com/alexraskin/standwithiran/refs/heads/main/static/images/standwithir.png)](https://standwithiran.com)
