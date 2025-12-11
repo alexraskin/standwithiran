@@ -24,7 +24,7 @@ func (s *Server) Routes() http.Handler {
 	r.Mount("/static", http.FileServer(s.assets))
 
 	r.Handle("/robots.txt", s.serveFile("static/robots.txt"))
-	r.Handle("/favicon.ico", s.serveFile("static/favicon.ico"))
+	r.Handle("/favicon.ico", s.serveFile("static/images/favicon.ico"))
 
 	r.Get("/", s.HandleIndex)
 	r.Get("/admin/login", s.HandleLoginPage)

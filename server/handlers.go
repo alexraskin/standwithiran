@@ -266,7 +266,8 @@ func (s *Server) serveFile(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		file, err := s.assets.Open(path)
 		if err != nil {
-			http.Error(w, "File not found", http.StatusNotFound)
+			slog.Error("Failed to serve file", "error", err)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 			return
 		}
 		defer func() { _ = file.Close() }()
