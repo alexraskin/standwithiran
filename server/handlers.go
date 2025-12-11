@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/alexraskin/standwithiran/internal/models"
@@ -271,4 +272,16 @@ func (s *Server) serveFile(path string) http.HandlerFunc {
 		defer func() { _ = file.Close() }()
 		_, _ = io.Copy(w, file)
 	}
+}
+
+func (s *Server) cacheControl(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+			next.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		next.ServeHTTP(w, r)
+	})
 }

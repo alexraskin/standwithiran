@@ -19,11 +19,12 @@ func (s *Server) Routes() http.Handler {
 	r.Use(middleware.Compress(5))
 	r.Use(httprate.Limit(500, time.Minute))
 	r.Use(middleware.Heartbeat("/health"))
+	r.Use(s.cacheControl)
 
 	r.Mount("/static", http.FileServer(s.assets))
 
-	r.Handle("/robots.txt", s.serveFile("assets/robots.txt"))
-	r.Handle("/favicon.ico", s.serveFile("assets/favicon.ico"))
+	r.Handle("/robots.txt", s.serveFile("static/robots.txt"))
+	r.Handle("/favicon.ico", s.serveFile("static/favicon.ico"))
 
 	r.Get("/", s.HandleIndex)
 	r.Get("/admin/login", s.HandleLoginPage)
