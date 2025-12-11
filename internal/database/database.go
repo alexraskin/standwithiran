@@ -12,12 +12,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Database struct {
+type Database interface {
+	Close()
+	GetProfile(ctx context.Context) (models.Profile, error)
+	UpdateProfile(ctx context.Context, p models.Profile) error
+	GetLinks(ctx context.Context) ([]models.Link, error)
+	AddLink(ctx context.Context, l models.Link) error
+	DeleteLink(ctx context.Context, id string) error
+	UpdateLinkFeatured(ctx context.Context, id string, featured bool) error
+	VerifyPassword(ctx context.Context, password string) (bool, error)
+	SetPassword(ctx context.Context, password string) error
+	GetBanner(ctx context.Context) (models.Banner, error)
+	UpdateBanner(ctx context.Context, b models.Banner) error
+}
+
+type database struct {
 	db    *pgxpool.Pool
 	cache *cache.Cache
 }
 
-func NewDatabase(ctx context.Context, dbURL string) (*Database, error) {
+func NewDatabase(ctx context.Context, dbURL string) (Database, error) {
 	config, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse database URL: %w", err)
@@ -39,17 +53,17 @@ func NewDatabase(ctx context.Context, dbURL string) (*Database, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	return &Database{
+	return &database{
 		db:    pool,
 		cache: cache.NewCache(60 * time.Minute),
 	}, nil
 }
 
-func (d *Database) Close() {
+func (d *database) Close() {
 	d.db.Close()
 }
 
-func (d *Database) GetProfile(ctx context.Context) (models.Profile, error) {
+func (d *database) GetProfile(ctx context.Context) (models.Profile, error) {
 	if p, ok := d.cache.GetProfile(); ok {
 		return *p, nil
 	}
@@ -65,7 +79,7 @@ func (d *Database) GetProfile(ctx context.Context) (models.Profile, error) {
 	return p, nil
 }
 
-func (d *Database) UpdateProfile(ctx context.Context, p models.Profile) error {
+func (d *database) UpdateProfile(ctx context.Context, p models.Profile) error {
 	_, err := d.db.Exec(ctx, `UPDATE profile SET name=$1, title=$2, subtitle=$3, description=$4, avatar=$5 WHERE id=1`,
 		p.Name, p.Title, p.Subtitle, p.Description, p.Avatar)
 	if err == nil {
@@ -74,7 +88,7 @@ func (d *Database) UpdateProfile(ctx context.Context, p models.Profile) error {
 	return err
 }
 
-func (d *Database) GetLinks(ctx context.Context) ([]models.Link, error) {
+func (d *database) GetLinks(ctx context.Context) ([]models.Link, error) {
 	if links, ok := d.cache.GetLinks(); ok {
 		return links, nil
 	}
@@ -101,7 +115,7 @@ func (d *Database) GetLinks(ctx context.Context) ([]models.Link, error) {
 	return links, nil
 }
 
-func (d *Database) AddLink(ctx context.Context, l models.Link) error {
+func (d *database) AddLink(ctx context.Context, l models.Link) error {
 	_, err := d.db.Exec(ctx, `INSERT INTO links (id, title, url, category, icon, featured) VALUES ($1, $2, $3, $4, $5, $6)`,
 		l.ID, l.Title, l.URL, l.Category, l.Icon, l.Featured)
 	if err == nil {
@@ -110,7 +124,7 @@ func (d *Database) AddLink(ctx context.Context, l models.Link) error {
 	return err
 }
 
-func (d *Database) DeleteLink(ctx context.Context, id string) error {
+func (d *database) DeleteLink(ctx context.Context, id string) error {
 	_, err := d.db.Exec(ctx, `DELETE FROM links WHERE id = $1`, id)
 	if err == nil {
 		d.cache.InvalidateLinks()
@@ -118,7 +132,7 @@ func (d *Database) DeleteLink(ctx context.Context, id string) error {
 	return err
 }
 
-func (d *Database) UpdateLinkFeatured(ctx context.Context, id string, featured bool) error {
+func (d *database) UpdateLinkFeatured(ctx context.Context, id string, featured bool) error {
 	_, err := d.db.Exec(ctx, `UPDATE links SET featured = $1 WHERE id = $2`, featured, id)
 	if err == nil {
 		d.cache.InvalidateLinks()
@@ -126,7 +140,7 @@ func (d *Database) UpdateLinkFeatured(ctx context.Context, id string, featured b
 	return err
 }
 
-func (d *Database) VerifyPassword(ctx context.Context, password string) (bool, error) {
+func (d *database) VerifyPassword(ctx context.Context, password string) (bool, error) {
 	var hashedPassword string
 	err := d.db.QueryRow(ctx, `SELECT value FROM settings WHERE key = 'admin_password'`).Scan(&hashedPassword)
 	if err != nil {
@@ -145,7 +159,7 @@ func (d *Database) VerifyPassword(ctx context.Context, password string) (bool, e
 	return err == nil, nil
 }
 
-func (d *Database) SetPassword(ctx context.Context, password string) error {
+func (d *database) SetPassword(ctx context.Context, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -154,7 +168,7 @@ func (d *Database) SetPassword(ctx context.Context, password string) error {
 	return err
 }
 
-func (d *Database) GetBanner(ctx context.Context) (models.Banner, error) {
+func (d *database) GetBanner(ctx context.Context) (models.Banner, error) {
 	if b, ok := d.cache.GetBanner(); ok {
 		return *b, nil
 	}
@@ -190,7 +204,7 @@ func (d *Database) GetBanner(ctx context.Context) (models.Banner, error) {
 	return b, rows.Err()
 }
 
-func (d *Database) UpdateBanner(ctx context.Context, b models.Banner) error {
+func (d *database) UpdateBanner(ctx context.Context, b models.Banner) error {
 	enabled := "false"
 	if b.Enabled {
 		enabled = "true"

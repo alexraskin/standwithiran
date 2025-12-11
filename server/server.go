@@ -22,10 +22,10 @@ type Server struct {
 	tmplFunc   ExecuteTemplateFunc
 	sessions   map[string]time.Time
 	sessionsMu sync.RWMutex
-	db         *database.Database
+	db         database.Database
 }
 
-func NewServer(version string, port string, assets http.FileSystem, tmplFunc ExecuteTemplateFunc, db *database.Database) *Server {
+func NewServer(version string, port string, assets http.FileSystem, tmplFunc ExecuteTemplateFunc, db database.Database) *Server {
 
 	s := &Server{
 		version:    version,
