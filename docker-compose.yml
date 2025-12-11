@@ -1,0 +1,45 @@
+services:
+  migrate:
+    profiles: [migrate]
+    build:
+      context: .
+      dockerfile: migrations/Dockerfile.migrate
+    environment:
+      - DATABASE_URL=postgres://iran:iran@db:5432/iran?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://iran:iran@db:5432/iran?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=iran
+      - POSTGRES_PASSWORD=iran
+      - POSTGRES_DB=iran
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iran"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

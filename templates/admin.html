@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin Panel</title>
+    <link rel="icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="flag-stripe"></div>
+    
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>✊ Admin Panel</h1>
+            <p>Manage links and profile settings</p>
+        </header>
+        
+        <nav class="admin-nav">
+            <a href="/">← View Site</a>
+            <a href="/admin/logout">Logout</a>
+        </nav>
+
+        {{if .Message}}
+        <div class="message success">{{.Message}}</div>
+        {{end}}
+        
+        {{if .Error}}
+        <div class="message error">{{.Error}}</div>
+        {{end}}
+
+        <div class="card">
+            <h2>Add New Link</h2>
+            <form method="POST" action="/admin/links/add">
+                <div class="form-group">
+                    <label for="title">Link Title</label>
+                    <input type="text" id="title" name="title" placeholder="e.g., Donate to Iran Relief Fund" required>
+                </div>
+                <div class="form-group">
+                    <label for="url">URL</label>
+                    <input type="url" id="url" name="url" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="fundraiser">Fundraiser</option>
+                        <option value="demonstration">Demonstration</option>
+                        <option value="organization">Organization</option>
+                        <option value="news">News</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="icon">Icon</label>
+                    <select id="icon" name="icon">
+                        <option value="heart">❤️ Heart</option>
+                        <option value="money">💰 Money</option>
+                        <option value="megaphone">📢 Megaphone</option>
+                        <option value="people">👥 People</option>
+                        <option value="fist">✊ Fist</option>
+                        <option value="shield">🛡️ Shield</option>
+                        <option value="globe">🌍 Globe</option>
+                        <option value="book">📖 Book</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" name="featured" value="true">
+                        Featured (highlighted with gradient)
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Link</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Existing Links</h2>
+            <div class="link-list">
+                {{range .Links}}
+                <div class="link-list-item">
+                    <div class="link-info">
+                        <div class="link-title">
+                            {{if .Featured}}⭐ {{end}}{{.Title}}
+                        </div>
+                        <div class="link-url">{{.URL}}</div>
+                    </div>
+                    <span class="category-badge category-{{.Category}}">{{.Category}}</span>
+                    <div class="link-actions">
+                        <form method="POST" action="/admin/links/featured" style="display:inline;">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <input type="hidden" name="featured" value="{{if .Featured}}false{{else}}true{{end}}">
+                            <button type="submit" class="btn btn-secondary btn-small">{{if .Featured}}Unfeature{{else}}Feature{{end}}</button>
+                        </form>
+                        <form method="POST" action="/admin/links/delete" style="display:inline;">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Delete this link?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {{else}}
+                <p style="color: var(--text-muted); text-align: center; padding: 1rem;">No links yet. Add one above!</p>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Profile Settings</h2>
+            <form method="POST" action="/admin/profile">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" value="{{.Profile.Name}}" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile_title">Title</label>
+                    <input type="text" id="profile_title" name="title" value="{{.Profile.Title}}">
+                </div>
+                <div class="form-group">
+                    <label for="subtitle">Subtitle (Persian)</label>
+                    <input type="text" id="subtitle" name="subtitle" value="{{.Profile.Subtitle}}" dir="rtl">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="3">{{.Profile.Description}}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="avatar">Avatar URL (optional)</label>
+                    <input type="url" id="avatar" name="avatar" value="{{.Profile.Avatar}}" placeholder="https://...">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>📢 Announcement Banner</h2>
+            <form method="POST" action="/admin/banner">
+                <div class="form-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" name="banner_enabled" value="true" {{if .Banner.Enabled}}checked{{end}}>
+                        Enable banner
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="banner_text">Banner Text</label>
+                    <input type="text" id="banner_text" name="banner_text" value="{{.Banner.Text}}" placeholder="e.g., Urgent: Join the rally this Saturday!">
+                </div>
+                <div class="form-group">
+                    <label for="banner_link">Link URL (optional)</label>
+                    <input type="url" id="banner_link" name="banner_link" value="{{.Banner.Link}}" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="banner_type">Style</label>
+                    <select id="banner_type" name="banner_type">
+                        <option value="info" {{if eq .Banner.Type "info"}}selected{{end}}>ℹ️ Info (Blue)</option>
+                        <option value="urgent" {{if eq .Banner.Type "urgent"}}selected{{end}}>🚨 Urgent (Red)</option>
+                        <option value="success" {{if eq .Banner.Type "success"}}selected{{end}}>✅ Success (Green)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Banner</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Change Password</h2>
+            <form method="POST" action="/admin/password">
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-secondary">Update Password</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
