@@ -4,9 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
-	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -49,14 +47,13 @@ func NewServer(version string, port string, assets http.FileSystem, tmplFunc Exe
 
 func (s *Server) Start() {
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		slog.Error("Error while listening", slog.Any("err", err))
-		os.Exit(-1)
+		panic(err)
 	}
 }
 
 func (s *Server) Close() {
 	if err := s.server.Close(); err != nil {
-		slog.Error("Error while closing server", slog.Any("err", err))
+		panic(err)
 	}
 }
 
