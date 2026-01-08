@@ -63,7 +63,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// Start FDD data syncer in background
 	syncer := fdd.NewSyncer(db)
 	go syncer.Start(context.Background())
 

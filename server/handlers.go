@@ -99,10 +99,14 @@ func (s *Server) HandleProtestsAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "public, max-age=300")
 
 	// Manual JSON encoding with proper escaping
-	w.Write([]byte("["))
+	if _, err := w.Write([]byte("[")); err != nil {
+		return
+	}
 	for i, p := range protests {
 		if i > 0 {
-			w.Write([]byte(","))
+			if _, err := w.Write([]byte(",")); err != nil {
+				return
+			}
 		}
 		intensity := "low"
 		if p.EstimatedSize >= 100 {
@@ -120,10 +124,14 @@ func (s *Server) HandleProtestsAPI(w http.ResponseWriter, r *http.Request) {
 		source := escapeJSON(p.Source)
 		link := escapeJSON(p.Link)
 
-		fmt.Fprintf(w, `{"city":"%s","lat":%f,"lng":%f,"intensity":"%s","participants":%d,"date":"%s","description":"%s","province":"%s","source":"%s","link":"%s"}`,
-			city, p.Latitude, p.Longitude, intensity, p.EstimatedSize, p.Date, description, province, source, link)
+		if _, err := fmt.Fprintf(w, `{"city":"%s","lat":%f,"lng":%f,"intensity":"%s","participants":%d,"date":"%s","description":"%s","province":"%s","source":"%s","link":"%s"}`,
+			city, p.Latitude, p.Longitude, intensity, p.EstimatedSize, p.Date, description, province, source, link); err != nil {
+			return
+		}
 	}
-	w.Write([]byte("]"))
+	if _, err := w.Write([]byte("]")); err != nil {
+		return
+	}
 }
 
 func escapeJSON(s string) string {

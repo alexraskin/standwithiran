@@ -38,14 +38,14 @@ func (s *Server) HandleAddProtest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	if lng := r.FormValue("longitude"); lng != "" {
 		if err := parseFloat(lng, &protest.Longitude); err != nil {
 			http.Redirect(w, r, "/admin?error=Invalid+longitude", http.StatusSeeOther)
 			return
 		}
 	}
-	
+
 	if size := r.FormValue("estimated_size"); size != "" {
 		if err := parseInt(size, &protest.EstimatedSize); err != nil {
 			http.Redirect(w, r, "/admin?error=Invalid+size", http.StatusSeeOther)

@@ -62,11 +62,8 @@ func (d *database) GetProtestStats(ctx context.Context) (models.ProtestStats, er
 		return stats, err
 	}
 
-	// For now, set minors killed to a placeholder (FDD data doesn't distinguish minors in all fields)
-	// This would need to be calculated from description or a separate field if available
 	stats.MinorsKilled = 0
 
-	// Count descriptions mentioning minors/children
 	var minorCount int
 	err = d.db.QueryRow(ctx, `
 		SELECT COUNT(DISTINCT id)
@@ -183,7 +180,9 @@ func (d *database) UpsertProtests(ctx context.Context, protests []models.Protest
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	for _, p := range protests {
 		_, err := tx.Exec(ctx, `
