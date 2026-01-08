@@ -27,6 +27,8 @@ func (s *Server) Routes() http.Handler {
 	r.Handle("/favicon.ico", s.serveFile("static/images/favicon.ico"))
 
 	r.Get("/", s.HandleIndex)
+	r.Get("/protests", s.HandleProtestMap)
+	r.Get("/api/protests", s.HandleProtestsAPI)
 	r.Get("/admin/login", s.HandleLoginPage)
 	r.Post("/admin/login", s.HandleLogin)
 	r.Get("/admin/logout", s.HandleLogout)
@@ -40,6 +42,9 @@ func (s *Server) Routes() http.Handler {
 		r.Post("/admin/profile", s.HandleUpdateProfile)
 		r.Post("/admin/password", s.HandleUpdatePassword)
 		r.Post("/admin/banner", s.HandleUpdateBanner)
+		r.Post("/admin/protests/add", s.HandleAddProtest)
+		r.Post("/admin/protests/delete", s.HandleDeleteProtest)
+		r.Post("/admin/protests/sync", s.HandleSyncProtests)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

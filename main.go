@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/alexraskin/standwithiran/internal/database"
+	"github.com/alexraskin/standwithiran/internal/fdd"
 	"github.com/alexraskin/standwithiran/server"
 )
 
@@ -61,6 +62,10 @@ func main() {
 		panic(fmt.Errorf("failed to initialize database: %w", err))
 	}
 	defer db.Close()
+
+	// Start FDD data syncer in background
+	syncer := fdd.NewSyncer(db)
+	go syncer.Start(context.Background())
 
 	srv := server.NewServer(version, port, assets, tmplFunc, db)
 

@@ -26,6 +26,16 @@ type Database interface {
 	UpdateBanner(ctx context.Context, b models.Banner) error
 	GetLastUpdated(ctx context.Context) (time.Time, error)
 	UpdateLastUpdated(ctx context.Context) error
+	GetProtests(ctx context.Context, limit int) ([]models.Protest, error)
+	AddProtest(ctx context.Context, p models.Protest) error
+	UpdateProtest(ctx context.Context, p models.Protest) error
+	DeleteProtest(ctx context.Context, id string) error
+	GetProtestByID(ctx context.Context, id string) (models.Protest, error)
+	UpsertProtests(ctx context.Context, protests []models.Protest) error
+	GetProtestsLastSync(ctx context.Context) (time.Time, error)
+	UpdateProtestsLastSync(ctx context.Context) error
+	GetProtestStats(ctx context.Context) (models.ProtestStats, error)
+	GetRecentProtestVideos(ctx context.Context, limit int) ([]models.Protest, error)
 }
 
 type database struct {

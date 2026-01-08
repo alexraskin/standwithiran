@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Live map of protests and demonstrations across Iran">
+    <meta name="theme-color" content="#0a0f1a">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://standwithiran.org/protests">
+    <meta property="og:title" content="Iran Protest Map - Woman, Life, Freedom">
+    <meta property="og:description" content="Live map of protests and demonstrations across Iran">
+    <meta property="og:image" content="https://standwithiran.org/static/images/standwithiran.webp">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://standwithiran.org/protests">
+    <meta name="twitter:title" content="Iran Protest Map - Woman, Life, Freedom">
+    <meta name="twitter:description" content="Live map of protests and demonstrations across Iran">
+    <meta name="twitter:image" content="https://standwithiran.org/static/images/standwithiran.webp">
+    
+    <title>Iran Protest Map - Woman, Life, Freedom</title>
+    <link rel="stylesheet" href="/static/style.css" fetchpriority="high">
+    <link rel="stylesheet" href="/static/protests.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="icon" href="/static/images/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/images/standwithiran.webp" type="image/webp">
+</head>
+<body>
+    <div class="flag-stripe"></div>
+    
+    <div class="update-beacon">
+        <div class="pulse"></div>
+        <div class="text">Last updated: <span class="date">{{.LastUpdated}}</span></div>
+    </div>
+    
+    <div class="protest-page">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <div class="protest-header">
+            <h1>✊ Iran Protest Map</h1>
+            <p>Tracking demonstrations and protests across Iran</p>
+        </div>
+
+        {{if .Stats}}
+        <div class="stats-container">
+            {{if gt .Stats.MinorsKilled 0}}
+            <div class="stat-card">
+                <h3>Minors Killed</h3>
+                <div class="number">{{.Stats.MinorsKilled}}</div>
+                <div class="since">Since {{.Stats.SinceDate}}</div>
+            </div>
+            {{end}}
+            <div class="stat-card">
+                <h3>Protestors Killed</h3>
+                <div class="number">{{.Stats.TotalKilled}}</div>
+                <div class="since">Since {{.Stats.SinceDate}}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Protestors Arrested</h3>
+                <div class="number">{{.Stats.TotalArrested}}</div>
+                <div class="since">Since {{.Stats.SinceDate}}</div>
+            </div>
+        </div>
+        {{end}}
+
+        {{if .RecentVideos}}
+        <div class="videos-section">
+            <div class="videos-header">
+                <h2>Recent Protest Videos</h2>
+            </div>
+            <div class="videos-grid">
+                {{range .RecentVideos}}
+                <a href="{{.MediaURL}}" target="_blank" rel="noopener noreferrer" class="video-card">
+                    <div class="play-button">▶</div>
+                    <div class="video-overlay">
+                        <div class="video-title">{{if .CityVillage}}{{.CityVillage}}{{else}}{{.County}}{{end}}</div>
+                        <div class="video-meta">
+                            <span>📅 {{.Date}}</span>
+                            {{if .Province}}<span>📍 {{.Province}}</span>{{end}}
+                        </div>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+
+        <div id="map"></div>
+        
+        <div class="data-footer">
+            <h3>📊 Data Sources</h3>
+            <p>
+                Protest data is sourced from the <a href="https://www.fdd.org/" target="_blank" rel="noopener noreferrer">Foundation for Defense of Democracies (FDD)</a> Iran Protest Tracker, 
+                which aggregates information from social media, news reports, and on-the-ground sources. 
+                Data is automatically synchronized hourly to provide up-to-date information on demonstrations and civil actions across Iran.
+                <br><br>
+                <strong>Note:</strong> This map shows protests from December 2025 onwards. Historical data dating back to 2022 is available in our database.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="/static/protests.js"></script>
+</body>
+</html>

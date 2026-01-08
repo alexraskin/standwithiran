@@ -85,6 +85,51 @@ func (m *MockDatabase) UpdateLastUpdated(ctx context.Context) error {
 	return nil
 }
 
+func (m *MockDatabase) GetProtests(ctx context.Context, limit int) ([]models.Protest, error) {
+	return []models.Protest{}, nil
+}
+
+func (m *MockDatabase) AddProtest(ctx context.Context, p models.Protest) error {
+	return nil
+}
+
+func (m *MockDatabase) UpdateProtest(ctx context.Context, p models.Protest) error {
+	return nil
+}
+
+func (m *MockDatabase) DeleteProtest(ctx context.Context, id string) error {
+	return nil
+}
+
+func (m *MockDatabase) GetProtestByID(ctx context.Context, id string) (models.Protest, error) {
+	return models.Protest{}, nil
+}
+
+func (m *MockDatabase) UpsertProtests(ctx context.Context, protests []models.Protest) error {
+	return nil
+}
+
+func (m *MockDatabase) GetProtestsLastSync(ctx context.Context) (time.Time, error) {
+	return time.Now(), nil
+}
+
+func (m *MockDatabase) UpdateProtestsLastSync(ctx context.Context) error {
+	return nil
+}
+
+func (m *MockDatabase) GetProtestStats(ctx context.Context) (models.ProtestStats, error) {
+	return models.ProtestStats{
+		TotalKilled:   682,
+		MinorsKilled:  86,
+		TotalArrested: 26754,
+		SinceDate:     "Dec 2025",
+	}, nil
+}
+
+func (m *MockDatabase) GetRecentProtestVideos(ctx context.Context, limit int) ([]models.Protest, error) {
+	return []models.Protest{}, nil
+}
+
 func mockTemplateFunc(wr io.Writer, name string, data any) error {
 	_, err := wr.Write([]byte("rendered: " + name))
 	return err

@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -55,6 +56,95 @@ func (s *Server) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if err := s.tmplFunc(w, "index.html", data); err != nil {
 		slog.Error("Failed to render index template", "error", err)
 	}
+}
+
+func (s *Server) HandleProtestMap(w http.ResponseWriter, r *http.Request) {
+	lastUpdated, err := s.db.GetLastUpdated(r.Context())
+	if err != nil {
+		slog.Error("Failed to get last updated time", "error", err)
+		lastUpdated = time.Now()
+	}
+
+	stats, err := s.db.GetProtestStats(r.Context())
+	if err != nil {
+		slog.Error("Failed to get protest stats", "error", err)
+	}
+
+	videos, err := s.db.GetRecentProtestVideos(r.Context(), 8)
+	if err != nil {
+		slog.Error("Failed to get recent videos", "error", err)
+	}
+
+	data := models.ProtestMapData{
+		LastUpdated:  lastUpdated.Format("Jan 2, 2006"),
+		Stats:        stats,
+		RecentVideos: videos,
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := s.tmplFunc(w, "protests.html", data); err != nil {
+		slog.Error("Failed to render protests template", "error", err)
+	}
+}
+
+func (s *Server) HandleProtestsAPI(w http.ResponseWriter, r *http.Request) {
+	protests, err := s.db.GetProtests(r.Context(), 0)
+	if err != nil {
+		slog.Error("Failed to load protests", "error", err)
+		http.Error(w, "Failed to load protests", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "public, max-age=300")
+
+	// Manual JSON encoding with proper escaping
+	w.Write([]byte("["))
+	for i, p := range protests {
+		if i > 0 {
+			w.Write([]byte(","))
+		}
+		intensity := "low"
+		if p.EstimatedSize >= 100 {
+			intensity = "high"
+		} else if p.EstimatedSize >= 50 {
+			intensity = "medium"
+		}
+
+		city := escapeJSON(p.CityVillage)
+		if city == "" {
+			city = escapeJSON(p.County)
+		}
+		description := escapeJSON(p.Description)
+		province := escapeJSON(p.Province)
+		source := escapeJSON(p.Source)
+		link := escapeJSON(p.Link)
+
+		fmt.Fprintf(w, `{"city":"%s","lat":%f,"lng":%f,"intensity":"%s","participants":%d,"date":"%s","description":"%s","province":"%s","source":"%s","link":"%s"}`,
+			city, p.Latitude, p.Longitude, intensity, p.EstimatedSize, p.Date, description, province, source, link)
+	}
+	w.Write([]byte("]"))
+}
+
+func escapeJSON(s string) string {
+	result := ""
+	for _, c := range s {
+		switch c {
+		case '"':
+			result += `\"`
+		case '\\':
+			result += `\\`
+		case '\n':
+			result += `\n`
+		case '\r':
+			result += `\r`
+		case '\t':
+			result += `\t`
+		default:
+			result += string(c)
+		}
+	}
+	return result
 }
 
 func (s *Server) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
