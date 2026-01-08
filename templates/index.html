@@ -5,20 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="{{.Profile.Description}}">
     <meta name="theme-color" content="#0a0f1a">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://standwithiran.org/">
     <meta property="og:title" content="{{.Profile.Name}}">
     <meta property="og:description" content="{{.Profile.Description}}">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="https://standwithiran.org/static/images/standwithiran.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://standwithiran.org/">
     <meta name="twitter:title" content="{{.Profile.Name}}">
     <meta name="twitter:description" content="{{.Profile.Description}}">
+    <meta name="twitter:image" content="https://standwithiran.org/static/images/standwithiran.webp">
+    
     <title>{{.Profile.Name}} - {{.Profile.Title}}</title>
     <link rel="preload" href="/static/fonts/anton.ttf" as="font" type="font/ttf" crossorigin fetchpriority="high">
     <link rel="preload" href="/static/images/standwithiran.webp" as="image" fetchpriority="high">
     <link rel="stylesheet" href="/static/style.css" fetchpriority="high">
     <link rel="icon" href="/static/images/favicon.ico" sizes="any">
     <link rel="icon" href="/static/images/standwithiran.webp" type="image/webp">
-    <meta property="og:image" content="/static/images/standwithiran.webp">
-    <meta name="twitter:image" content="/static/images/standwithiran.webp">
 </head>
 <body>
     <div class="flag-stripe"></div>
