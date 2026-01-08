@@ -38,11 +38,17 @@ func (s *Server) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 	banner, _ := s.db.GetBanner(r.Context())
 
+	lastUpdated, err := s.db.GetLastUpdated(r.Context())
+	if err != nil {
+		slog.Error("Failed to get last updated time", "error", err)
+		lastUpdated = time.Now()
+	}
+
 	data := models.IndexPageData{
 		Profile:     profile,
 		Links:       links,
 		Banner:      banner,
-		LastUpdated: time.Now().Format("Jan 2, 2006"),
+		LastUpdated: lastUpdated.Format("Jan 2, 2006"),
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

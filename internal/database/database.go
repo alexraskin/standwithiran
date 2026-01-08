@@ -24,6 +24,8 @@ type Database interface {
 	SetPassword(ctx context.Context, password string) error
 	GetBanner(ctx context.Context) (models.Banner, error)
 	UpdateBanner(ctx context.Context, b models.Banner) error
+	GetLastUpdated(ctx context.Context) (time.Time, error)
+	UpdateLastUpdated(ctx context.Context) error
 }
 
 type database struct {
@@ -84,6 +86,7 @@ func (d *database) UpdateProfile(ctx context.Context, p models.Profile) error {
 		p.Name, p.Title, p.Subtitle, p.Description, p.Avatar)
 	if err == nil {
 		d.cache.InvalidateProfile()
+		_ = d.UpdateLastUpdated(ctx)
 	}
 	return err
 }
@@ -120,6 +123,7 @@ func (d *database) AddLink(ctx context.Context, l models.Link) error {
 		l.ID, l.Title, l.URL, l.Category, l.Icon, l.Featured)
 	if err == nil {
 		d.cache.InvalidateLinks()
+		_ = d.UpdateLastUpdated(ctx)
 	}
 	return err
 }
@@ -128,6 +132,7 @@ func (d *database) DeleteLink(ctx context.Context, id string) error {
 	_, err := d.db.Exec(ctx, `DELETE FROM links WHERE id = $1`, id)
 	if err == nil {
 		d.cache.InvalidateLinks()
+		_ = d.UpdateLastUpdated(ctx)
 	}
 	return err
 }
@@ -136,6 +141,7 @@ func (d *database) UpdateLinkFeatured(ctx context.Context, id string, featured b
 	_, err := d.db.Exec(ctx, `UPDATE links SET featured = $1 WHERE id = $2`, featured, id)
 	if err == nil {
 		d.cache.InvalidateLinks()
+		_ = d.UpdateLastUpdated(ctx)
 	}
 	return err
 }
@@ -224,5 +230,42 @@ func (d *database) UpdateBanner(ctx context.Context, b models.Banner) error {
 	}
 
 	d.cache.InvalidateBanner()
+	_ = d.UpdateLastUpdated(ctx)
 	return nil
+}
+
+func (d *database) GetLastUpdated(ctx context.Context) (time.Time, error) {
+	if t, ok := d.cache.GetLastUpdated(); ok {
+		return *t, nil
+	}
+
+	var timestampStr string
+	err := d.db.QueryRow(ctx, `SELECT value FROM settings WHERE key = 'last_updated'`).Scan(&timestampStr)
+	if err != nil {
+		// If not found, return current time and initialize it
+		now := time.Now()
+		_ = d.UpdateLastUpdated(ctx)
+		return now, nil
+	}
+
+	// Parse Unix timestamp
+	var timestamp int64
+	if _, err := fmt.Sscanf(timestampStr, "%d", &timestamp); err != nil {
+		return time.Now(), err
+	}
+
+	t := time.Unix(timestamp, 0)
+	d.cache.SetLastUpdated(t)
+	return t, nil
+}
+
+func (d *database) UpdateLastUpdated(ctx context.Context) error {
+	timestamp := time.Now().Unix()
+	_, err := d.db.Exec(ctx,
+		`INSERT INTO settings (key, value) VALUES ('last_updated', $1) ON CONFLICT (key) DO UPDATE SET value = $1`,
+		fmt.Sprintf("%d", timestamp))
+	if err == nil {
+		d.cache.InvalidateLastUpdated()
+	}
+	return err
 }

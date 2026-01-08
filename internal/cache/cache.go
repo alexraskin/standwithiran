@@ -8,14 +8,16 @@ import (
 )
 
 type Cache struct {
-	mu         sync.RWMutex
-	profile    *models.Profile
-	profileExp time.Time
-	links      []models.Link
-	linksExp   time.Time
-	banner     *models.Banner
-	bannerExp  time.Time
-	ttl        time.Duration
+	mu             sync.RWMutex
+	profile        *models.Profile
+	profileExp     time.Time
+	links          []models.Link
+	linksExp       time.Time
+	banner         *models.Banner
+	bannerExp      time.Time
+	lastUpdated    *time.Time
+	lastUpdatedExp time.Time
+	ttl            time.Duration
 }
 
 func NewCache(ttl time.Duration) *Cache {
@@ -92,4 +94,28 @@ func (c *Cache) InvalidateBanner() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.banner = nil
+}
+
+func (c *Cache) GetLastUpdated() (*time.Time, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.lastUpdated == nil || time.Now().After(c.lastUpdatedExp) {
+		return nil, false
+	}
+	return c.lastUpdated, true
+}
+
+func (c *Cache) SetLastUpdated(t time.Time) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.lastUpdated = &t
+	c.lastUpdatedExp = time.Now().Add(c.ttl)
+}
+
+func (c *Cache) InvalidateLastUpdated() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.lastUpdated = nil
 }

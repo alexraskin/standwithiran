@@ -77,6 +77,14 @@ func (m *MockDatabase) UpdateBanner(ctx context.Context, b models.Banner) error 
 	return m.updateErr
 }
 
+func (m *MockDatabase) GetLastUpdated(ctx context.Context) (time.Time, error) {
+	return time.Now(), nil
+}
+
+func (m *MockDatabase) UpdateLastUpdated(ctx context.Context) error {
+	return nil
+}
+
 func mockTemplateFunc(wr io.Writer, name string, data any) error {
 	_, err := wr.Write([]byte("rendered: " + name))
 	return err
