@@ -50,7 +50,7 @@ export const links: Link[] = [
   },
   {
     id: 6,
-    title: 'Iran Rights',
+    title: 'Abdorrahman Boroumand Center',
     url: 'https://www.iranrights.org',
     icon: 'shield',
     category: 'organization',

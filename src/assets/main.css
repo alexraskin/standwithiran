@@ -257,9 +257,11 @@ body:has(.banner) .container {
 .profile-desc {
   font-size: 0.8rem;
   color: var(--text-muted);
-  max-width: 340px;
+  max-width: 100%;
   margin: 0 auto;
   line-height: 1.6;
+  text-align: left;
+  white-space: pre-line;
 }
 
 /* ── Links ── */
