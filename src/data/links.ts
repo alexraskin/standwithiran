@@ -1,14 +1,3 @@
-/**
- * Links Configuration
- *
- * To add a new link, add an object to the `links` array below.
- * Each link requires: id, title, url, icon, category
- * Optional: featured (boolean) - highlights the link
- *
- * Available icons: heart, shield, book, megaphone, globe, money, people, fist
- * Available categories: fundraiser, demonstration, organization, news
- */
-
 export interface Link {
   id: number
   title: string
@@ -24,7 +13,7 @@ export const links: Link[] = [
     title: 'Iran Victims',
     url: 'https://iranvictims.com/',
     icon: 'heart',
-    category: 'organization',
+    category: 'information',
     featured: true,
   },
   {
@@ -32,7 +21,7 @@ export const links: Link[] = [
     title: 'Terminate Hadi Ardeshir Larijani’s Employment',
     url: 'https://c.org/6qDmhFnPgR',
     icon: 'megaphone',
-    category: 'demonstration',
+    category: 'information',
     featured: false,
   },
   {
@@ -40,15 +29,15 @@ export const links: Link[] = [
     title: 'Letter to United Nations',
     url: 'https://c.org/bwHfPNHhVm',
     icon: 'book',
-    category: 'news',
+    category: 'information',
     featured: false,
   },
   {
     id: 4,
     title: 'Make Your Voice Heard',
     url: 'https://support-iran.org/',
-    icon: 'megaphone',
-    category: 'demonstration',
+    icon: 'rocket',
+    category: 'information',
     featured: false,
   },
   {

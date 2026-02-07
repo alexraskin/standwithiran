@@ -1,9 +1,3 @@
-/**
- * Translations
- *
- * English and Farsi translations for all UI text.
- */
-
 export const translations = {
   en: {
     resources: 'RESOURCES',

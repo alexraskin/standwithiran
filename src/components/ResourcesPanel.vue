@@ -13,6 +13,12 @@ const iconMap: Record<string, string> = {
   money: '💰',
   people: '👥',
   fist: '✊',
+  flame: '🔥',
+  star: '⭐',
+  rocket: '🚀',
+  lightning: '⚡',
+  hand: '👊',
+  peace: '🤝',
 }
 
 function getIcon(icon: string): string {

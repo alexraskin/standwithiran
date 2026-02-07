@@ -362,6 +362,12 @@ body:has(.banner) .container {
   border-color: var(--accent-yellow);
 }
 
+.cat-information {
+  background: #e0e7ff;
+  color: #4338ca;
+  border-color: #4338ca;
+}
+
 .link-arrow {
   color: var(--text-muted);
   font-size: 1.1rem;

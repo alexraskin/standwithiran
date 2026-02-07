@@ -1,9 +1,3 @@
-/**
- * Site Configuration
- *
- * Edit this file to update profile info, banner, and site metadata.
- */
-
 export const profile = {
   name: 'STAND WITH IRAN',
   title: 'WOMAN, LIFE, FREEDOM',
