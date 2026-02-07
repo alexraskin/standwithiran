@@ -1,11 +1,30 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+import FlagStripe from '@/components/FlagStripe.vue'
+import LangToggle from '@/components/LangToggle.vue'
+import SiteBanner from '@/components/SiteBanner.vue'
+import ProfilePanel from '@/components/ProfilePanel.vue'
+import ResourcesPanel from '@/components/ResourcesPanel.vue'
+import SharePanel from '@/components/SharePanel.vue'
+import SiteFooter from '@/components/SiteFooter.vue'
+
+const { lang, dir } = useI18n()
+
+onMounted(() => {
+  document.documentElement.setAttribute('lang', lang.value)
+})
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
-</template>
+  <FlagStripe />
+  <LangToggle />
+  <SiteBanner />
 
-<style scoped></style>
+  <main class="container" :dir="dir">
+    <ProfilePanel />
+    <ResourcesPanel />
+    <SharePanel />
+    <SiteFooter />
+  </main>
+</template>
