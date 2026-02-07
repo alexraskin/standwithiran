@@ -8,7 +8,8 @@ export const profile = {
 
 export const banner = {
   enabled: true,
-  type: 'info' as 'info' | 'urgent' | 'success',
+  // type: 'info' as 'info' | 'urgent' | 'success',
+  type: 'urgent',
   text: 'Iran Victims',
   link: 'https://iranvictims.com/',
 }
