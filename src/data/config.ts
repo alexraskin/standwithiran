@@ -16,7 +16,4 @@ export const banner = {
 export const siteUrl = 'https://standwithiran.org'
 export const contactEmail = 'hi@standwithiran.org'
 
-/**
- * Last updated date - change this when you update links
- */
 export const lastUpdated = 'Feb 7, 2026'
