@@ -37,10 +37,7 @@ onMounted(async () => {
       <ProfilePanel :description="siteData.profile.description" />
       <ResourcesPanel :links="siteData.links" />
       <SharePanel />
-      <SiteFooter
-        :contact-email="siteData.contactEmail"
-        :last-updated="siteData.lastUpdated"
-      />
+      <SiteFooter :contact-email="siteData.contactEmail" :last-updated="siteData.lastUpdated" />
     </main>
   </template>
 

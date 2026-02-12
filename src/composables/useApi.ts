@@ -20,7 +20,7 @@ async function apiFetch<T = any>(path: string, options: RequestInit = {}): Promi
   const token = getToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   }
 
   if (token) {

@@ -37,8 +37,20 @@ const editingId = ref<number | null>(null)
 const editForm = ref<Partial<Link>>({})
 
 const iconOptions = [
-  'heart', 'shield', 'book', 'megaphone', 'globe', 'money',
-  'people', 'fist', 'flame', 'star', 'rocket', 'lightning', 'hand', 'peace',
+  'heart',
+  'shield',
+  'book',
+  'megaphone',
+  'globe',
+  'money',
+  'people',
+  'fist',
+  'flame',
+  'star',
+  'rocket',
+  'lightning',
+  'hand',
+  'peace',
 ]
 
 const categoryOptions = ['information', 'organization', 'fundraiser', 'demonstration', 'news']
@@ -62,10 +74,7 @@ function handleLogout() {
 
 async function loadData() {
   try {
-    const [linksData, configData] = await Promise.all([
-      fetchLinks(),
-      fetchConfig(),
-    ])
+    const [linksData, configData] = await Promise.all([fetchLinks(), fetchConfig()])
     links.value = linksData.links
     config.value = configData.config
   } catch (e: any) {
@@ -167,7 +176,9 @@ async function handleSaveConfig() {
 
 function showMessage(msg: string) {
   message.value = msg
-  setTimeout(() => { message.value = '' }, 3000)
+  setTimeout(() => {
+    message.value = ''
+  }, 3000)
 }
 
 onMounted(() => {
@@ -224,7 +235,11 @@ onMounted(() => {
                   <input
                     type="checkbox"
                     :checked="config.banner_enabled === '1'"
-                    @change="config.banner_enabled = ($event.target as HTMLInputElement).checked ? '1' : '0'"
+                    @change="
+                      config.banner_enabled = ($event.target as HTMLInputElement).checked
+                        ? '1'
+                        : '0'
+                    "
                   />
                   Enabled
                 </label>
@@ -259,10 +274,7 @@ onMounted(() => {
             <div class="admin-form">
               <div class="form-group">
                 <label>About Text (separate paragraphs with blank lines)</label>
-                <textarea
-                  v-model="config.profile_description"
-                  rows="10"
-                />
+                <textarea v-model="config.profile_description" rows="10" />
               </div>
               <button class="btn btn-primary" :disabled="saving" @click="handleSaveConfig">
                 Save Profile
@@ -301,11 +313,7 @@ onMounted(() => {
           <div class="panel-body">
             <!-- Existing Links -->
             <div class="admin-links-list">
-              <div
-                v-for="(link, index) in links"
-                :key="link.id"
-                class="admin-link-item"
-              >
+              <div v-for="(link, index) in links" :key="link.id" class="admin-link-item">
                 <template v-if="editingId === link.id">
                   <div class="admin-form edit-form">
                     <div class="form-group">
@@ -326,7 +334,9 @@ onMounted(() => {
                       <div class="form-group">
                         <label>Category</label>
                         <select v-model="editForm.category">
-                          <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                          <option v-for="cat in categoryOptions" :key="cat" :value="cat">
+                            {{ cat }}
+                          </option>
                         </select>
                       </div>
                     </div>
@@ -335,7 +345,13 @@ onMounted(() => {
                       Featured
                     </label>
                     <div class="form-actions">
-                      <button class="btn btn-primary btn-small" :disabled="saving" @click="saveEdit">Save</button>
+                      <button
+                        class="btn btn-primary btn-small"
+                        :disabled="saving"
+                        @click="saveEdit"
+                      >
+                        Save
+                      </button>
                       <button class="btn btn-small" @click="cancelEdit">Cancel</button>
                     </div>
                   </div>
@@ -350,10 +366,26 @@ onMounted(() => {
                     </span>
                   </div>
                   <div class="link-actions">
-                    <button class="btn btn-small" title="Move up" :disabled="index === 0" @click="handleMoveUp(link, index)">&uarr;</button>
-                    <button class="btn btn-small" title="Move down" :disabled="index >= links.length - 1" @click="handleMoveDown(link, index)">&darr;</button>
+                    <button
+                      class="btn btn-small"
+                      title="Move up"
+                      :disabled="index === 0"
+                      @click="handleMoveUp(link, index)"
+                    >
+                      &uarr;
+                    </button>
+                    <button
+                      class="btn btn-small"
+                      title="Move down"
+                      :disabled="index >= links.length - 1"
+                      @click="handleMoveDown(link, index)"
+                    >
+                      &darr;
+                    </button>
                     <button class="btn btn-small" @click="startEdit(link)">Edit</button>
-                    <button class="btn btn-small btn-danger" @click="handleDelete(link.id)">Del</button>
+                    <button class="btn btn-small btn-danger" @click="handleDelete(link.id)">
+                      Del
+                    </button>
                   </div>
                 </template>
               </div>
@@ -380,7 +412,9 @@ onMounted(() => {
                 <div class="form-group">
                   <label>Category</label>
                   <select v-model="newLink.category">
-                    <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                    <option v-for="cat in categoryOptions" :key="cat" :value="cat">
+                      {{ cat }}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -388,7 +422,11 @@ onMounted(() => {
                 <input v-model="newLink.featured" type="checkbox" />
                 Featured
               </label>
-              <button class="btn btn-primary" :disabled="saving || !newLink.title || !newLink.url" @click="handleAddLink">
+              <button
+                class="btn btn-primary"
+                :disabled="saving || !newLink.title || !newLink.url"
+                @click="handleAddLink"
+              >
                 Add Link
               </button>
             </div>
@@ -529,7 +567,9 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .btn:hover {
