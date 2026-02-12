@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { banner } from '@/data/config'
+defineProps<{
+  banner: {
+    enabled: boolean
+    type: string
+    text: string
+    link: string
+  }
+}>()
 </script>
 
 <template>

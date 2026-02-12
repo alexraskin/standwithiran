@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from '@/composables/useI18n'
-import { links } from '@/data/links'
+import type { Link } from '@/composables/useApi'
+
+defineProps<{
+  links: Link[]
+}>()
 
 const { t } = useI18n()
 

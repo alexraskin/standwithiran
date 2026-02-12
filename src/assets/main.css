@@ -259,9 +259,16 @@ body:has(.banner) .container {
   color: var(--text-muted);
   max-width: 100%;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.7;
   text-align: left;
-  white-space: pre-line;
+}
+
+.profile-desc p {
+  margin-bottom: 0.85rem;
+}
+
+.profile-desc p:last-child {
+  margin-bottom: 0;
 }
 
 /* ── Links ── */
