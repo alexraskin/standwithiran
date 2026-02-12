@@ -265,7 +265,7 @@ body:has(.banner) .container {
 
 .profile-desc {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: #333;
   max-width: 100%;
   margin: 0 auto;
   line-height: 1.75;
