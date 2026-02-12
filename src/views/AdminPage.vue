@@ -441,11 +441,11 @@ onMounted(() => {
 .admin-wrap {
   min-height: 100vh;
   background: var(--bg);
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem 3rem;
 }
 
 .admin-container {
-  max-width: 600px;
+  max-width: 620px;
   margin: 0 auto;
 }
 
@@ -453,12 +453,14 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .admin-header h1 {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -469,48 +471,51 @@ onMounted(() => {
   background: var(--accent-green);
   color: white;
   padding: 0.6rem 1rem;
-  margin-bottom: 1rem;
-  font-size: 0.8rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 2px solid #007a2e;
+  border-radius: var(--card-radius);
 }
 
 .admin-form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .form-group label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.6rem 0.75rem;
-  border: 2px solid var(--text-dark);
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 5px;
   background: white;
   color: var(--text-dark);
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 140px;
+  line-height: 1.6;
 }
 
 .form-group input:focus,
@@ -518,6 +523,7 @@ onMounted(() => {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(51, 85, 255, 0.1);
 }
 
 .form-row {
@@ -529,14 +535,14 @@ onMounted(() => {
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+  gap: 0.45rem;
+  font-size: 0.78rem;
   color: var(--text-dark);
   cursor: pointer;
 }
@@ -547,7 +553,7 @@ onMounted(() => {
 
 .form-error {
   color: var(--accent-red);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
@@ -557,27 +563,30 @@ onMounted(() => {
 }
 
 .btn {
-  padding: 0.6rem 1.2rem;
-  border: 2px solid var(--text-dark);
+  padding: 0.55rem 1.15rem;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 5px;
   background: white;
   color: var(--text-dark);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition:
-    background 0.12s,
-    color 0.12s;
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .btn:hover {
-  background: #e8e8e8;
+  background: #f0f0f0;
+  border-color: #bbb;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -589,31 +598,35 @@ onMounted(() => {
 
 .btn-primary:hover {
   background: #007a2e;
+  border-color: #007a2e;
 }
 
 .btn-danger {
-  background: var(--accent-red);
-  color: white;
+  background: transparent;
+  color: var(--accent-red);
   border-color: var(--accent-red);
 }
 
 .btn-danger:hover {
-  background: #a00d24;
+  background: var(--accent-red);
+  color: white;
 }
 
 .btn-logout {
   background: transparent;
-  color: var(--text-light);
-  border-color: #555;
+  color: #999;
+  border-color: #444;
 }
 
 .btn-logout:hover {
-  background: #333;
+  color: var(--text-light);
+  border-color: #777;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .btn-small {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.68rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.65rem;
 }
 
 /* Links list */
@@ -621,7 +634,7 @@ onMounted(() => {
 .admin-links-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin-bottom: 1.5rem;
 }
 
@@ -630,45 +643,53 @@ onMounted(() => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem;
-  border: 2px solid #ddd;
+  padding: 0.8rem 0.85rem;
+  border: 1.5px solid #e8e8e8;
+  border-radius: var(--card-radius);
   background: white;
+  transition: border-color 0.15s;
+}
+
+.admin-link-item:hover {
+  border-color: #ccc;
 }
 
 .link-info {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   min-width: 0;
   flex: 1;
 }
 
 .link-title-admin {
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-dark);
 }
 
 .link-url-admin {
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  font-size: 0.68rem;
+  color: #999;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .link-meta-admin {
-  font-size: 0.65rem;
-  color: #999;
+  font-size: 0.62rem;
+  color: #bbb;
   text-transform: uppercase;
+  margin-top: 0.1rem;
 }
 
 .link-actions {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.25rem;
   flex-shrink: 0;
+  align-items: center;
 }
 
 .edit-form {
@@ -676,13 +697,13 @@ onMounted(() => {
 }
 
 .add-link-form {
-  padding-top: 1rem;
-  border-top: 2px solid #ddd;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e8e8e8;
 }
 
 .add-link-form h3 {
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;

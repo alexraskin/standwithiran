@@ -1,12 +1,15 @@
 /* ── Reset & Base ── */
 
 :root {
-  --bg: #111;
-  --panel-bg: #f5f5f5;
-  --panel-border: 3px solid #111;
+  --bg: #0f0f0f;
+  --panel-bg: #fff;
+  --panel-border: 2px solid #222;
+  --panel-radius: 8px;
+  --panel-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --card-radius: 6px;
   --text-dark: #111;
   --text-light: #fff;
-  --text-muted: #555;
+  --text-muted: #5a5a5a;
   --accent-blue: #3355ff;
   --accent-green: #009b3a;
   --accent-green-light: #dcfce7;
@@ -35,13 +38,13 @@ body {
   background: var(--bg);
   min-height: 100vh;
   color: var(--text-light);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* ── Flag Stripe ── */
 
 .flag-stripe {
-  height: 6px;
+  height: 5px;
   background: linear-gradient(
     90deg,
     var(--accent-green) 0%,
@@ -62,45 +65,46 @@ body {
 
 .lang-toggle {
   position: fixed;
-  top: 14px;
+  top: 13px;
   right: 1rem;
   z-index: 10001;
-  background: var(--text-dark);
+  background: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(8px);
   color: var(--text-light);
-  border: 2px solid var(--text-light);
-  padding: 0.4rem 0.9rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition:
-    background 0.15s,
-    color 0.15s;
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .lang-toggle:hover {
-  background: var(--text-light);
-  color: var(--text-dark);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* ── Banner ── */
 
 .banner {
   position: fixed;
-  top: 6px;
+  top: 5px;
   left: 0;
   right: 0;
   z-index: 99;
-  padding: 0.65rem 1rem;
+  padding: 0.6rem 1rem;
   text-align: center;
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  border-bottom: var(--panel-border);
 }
 
 .banner-link {
@@ -116,7 +120,7 @@ body {
 }
 
 .banner-arrow {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .banner-info {
@@ -137,14 +141,14 @@ body {
 /* ── Container ── */
 
 .container {
-  max-width: 520px;
+  max-width: 580px;
   margin: 0 auto;
   padding: 2rem 1rem 3rem;
-  padding-top: calc(6px + 2rem);
+  padding-top: calc(5px + 2rem);
 }
 
 body:has(.banner) .container {
-  padding-top: calc(6px + 2.5rem + 2rem);
+  padding-top: calc(5px + 2.4rem + 2rem);
 }
 
 /* ── Panel ── */
@@ -152,25 +156,27 @@ body:has(.banner) .container {
 .panel {
   background: var(--panel-bg);
   border: var(--panel-border);
-  margin-bottom: 1rem;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  margin-bottom: 1.25rem;
   display: block;
   text-decoration: none;
   color: inherit;
+  overflow: hidden;
 }
 
 .panel-header {
   background: var(--text-dark);
   color: var(--text-light);
-  padding: 0.7rem 1rem;
+  padding: 0.65rem 1.1rem;
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: var(--panel-border);
 }
 
 .header-blue {
@@ -178,21 +184,22 @@ body:has(.banner) .container {
 }
 
 .header-dark {
-  background: #222;
+  background: #1a1a1a;
 }
 
 .panel-body {
-  padding: 1.25rem;
+  padding: 1.35rem;
 }
 
 /* ── Badges ── */
 
 .badge {
   font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.15rem 0.55rem;
-  border: 2px solid currentColor;
+  padding: 0.15rem 0.5rem;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
   letter-spacing: 0.05em;
   white-space: nowrap;
 }
@@ -206,8 +213,8 @@ body:has(.banner) .container {
 /* ── Profile ── */
 
 .profile-body {
-  text-align: center;
   color: var(--text-dark);
+  padding: 1.5rem 1.35rem;
 }
 
 .avatar-frame {
@@ -215,6 +222,7 @@ body:has(.banner) .container {
   height: auto;
   margin: 0 auto 1.25rem;
   border: var(--panel-border);
+  border-radius: var(--card-radius);
   background: white;
   padding: 4px;
 }
@@ -224,6 +232,7 @@ body:has(.banner) .container {
   height: auto;
   display: block;
   object-fit: contain;
+  border-radius: 4px;
 }
 
 .profile-name {
@@ -255,16 +264,16 @@ body:has(.banner) .container {
 }
 
 .profile-desc {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   max-width: 100%;
   margin: 0 auto;
-  line-height: 1.7;
+  line-height: 1.75;
   text-align: left;
 }
 
 .profile-desc p {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.9rem;
 }
 
 .profile-desc p:last-child {
@@ -274,49 +283,54 @@ body:has(.banner) .container {
 /* ── Links ── */
 
 .links-body {
-  padding: 0.75rem;
+  padding: 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .link-card {
   display: flex;
   align-items: center;
-  padding: 0.7rem 0.85rem;
-  border: 2px solid var(--text-dark);
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--card-radius);
   text-decoration: none;
   color: var(--text-dark);
   background: white;
   transition:
-    background 0.12s,
-    transform 0.12s;
-  gap: 0.6rem;
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+  gap: 0.65rem;
 }
 
 .link-card:hover {
-  background: #e8e8e8;
-  transform: translateX(3px);
+  border-color: #bbb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateX(2px);
 }
 
 .link-card:active {
-  transform: scale(0.99);
+  transform: scale(0.995);
 }
 
 .link-featured {
   background: var(--accent-green-light);
-  border-color: var(--accent-green);
+  border-color: #86efac;
 }
 
 .link-featured:hover {
   background: #bbf7d0;
+  border-color: var(--accent-green);
 }
 
 .link-icon {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--text-dark);
-  background: var(--panel-bg);
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,7 +342,7 @@ body:has(.banner) .container {
   flex: 1;
   min-width: 0;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   word-wrap: break-word;
@@ -337,10 +351,11 @@ body:has(.banner) .container {
 
 .cat-badge {
   font-family: var(--font-body);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
   padding: 0.15rem 0.45rem;
-  border: 2px solid currentColor;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   flex-shrink: 0;
@@ -362,26 +377,31 @@ body:has(.banner) .container {
 .cat-organization {
   background: #dbeafe;
   color: #2563eb;
-  border-color: #2563eb;
+  border-color: #93bbfd;
 }
 
 .cat-news {
   background: var(--accent-yellow-light);
   color: #a16207;
-  border-color: var(--accent-yellow);
+  border-color: #fbbf24;
 }
 
 .cat-information {
   background: #e0e7ff;
   color: #4338ca;
-  border-color: #4338ca;
+  border-color: #a5b4fc;
 }
 
 .link-arrow {
-  color: var(--text-muted);
-  font-size: 1.1rem;
+  color: #bbb;
+  font-size: 1.05rem;
   font-weight: 700;
   flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.link-card:hover .link-arrow {
+  color: var(--text-muted);
 }
 
 /* ── Share ── */
@@ -393,7 +413,7 @@ body:has(.banner) .container {
 .share-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .share-btn {
@@ -402,19 +422,21 @@ body:has(.banner) .container {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  padding: 0.75rem 0.5rem;
-  border: 2px solid var(--text-dark);
+  padding: 0.7rem 0.5rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--card-radius);
   background: white;
   color: var(--text-dark);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition:
-    background 0.12s,
-    color 0.12s;
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .share-btn svg {
@@ -424,6 +446,7 @@ body:has(.banner) .container {
 
 .share-btn:hover {
   color: white;
+  border-color: transparent;
 }
 
 .share-x:hover {
@@ -462,23 +485,22 @@ body:has(.banner) .container {
 
 .footer {
   text-align: center;
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: var(--panel-border);
-  border-color: #333;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #2a2a2a;
 }
 
 .footer-slogan {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .footer-meta {
-  font-size: 0.7rem;
-  color: #777;
+  font-size: 0.68rem;
+  color: #666;
   margin-bottom: 0.75rem;
 }
 
@@ -490,14 +512,14 @@ body:has(.banner) .container {
 }
 
 .footer-sep {
-  color: #444;
+  color: #333;
   font-size: 0.75rem;
 }
 
 .footer-trigger {
   position: relative;
-  color: #888;
-  font-size: 0.7rem;
+  color: #777;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -514,12 +536,14 @@ body:has(.banner) .container {
   bottom: calc(100% + 0.75rem);
   left: 50%;
   transform: translateX(-50%);
-  background: #222;
-  border: 2px solid #444;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: var(--card-radius);
   padding: 0.85rem 1rem;
   width: max-content;
   max-width: 280px;
   z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .footer-popup::after {
@@ -529,7 +553,7 @@ body:has(.banner) .container {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #222;
+  border-top-color: #1e1e1e;
 }
 
 .footer-popup p {
@@ -546,7 +570,7 @@ body:has(.banner) .container {
 }
 
 [dir='rtl'] .link-card:hover {
-  transform: translateX(-3px);
+  transform: translateX(-2px);
 }
 
 [dir='rtl'] .link-arrow {
@@ -563,11 +587,11 @@ body:has(.banner) .container {
 @media (min-width: 480px) {
   .container {
     padding: 3rem 1.5rem 4rem;
-    padding-top: calc(6px + 3rem);
+    padding-top: calc(5px + 3rem);
   }
 
   body:has(.banner) .container {
-    padding-top: calc(6px + 2.5rem + 3rem);
+    padding-top: calc(5px + 2.4rem + 3rem);
   }
 
   .profile-name {
@@ -589,7 +613,7 @@ body:has(.banner) .container {
   }
 
   .cat-badge {
-    font-size: 0.55rem;
+    font-size: 0.52rem;
     padding: 0.1rem 0.35rem;
   }
 }
