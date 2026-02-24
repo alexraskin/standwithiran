@@ -6,6 +6,7 @@ import FlagStripe from '@/components/FlagStripe.vue'
 import LangToggle from '@/components/LangToggle.vue'
 import SiteBanner from '@/components/SiteBanner.vue'
 import ProfilePanel from '@/components/ProfilePanel.vue'
+import StatsPanel from '@/components/StatsPanel.vue'
 import ResourcesPanel from '@/components/ResourcesPanel.vue'
 import SharePanel from '@/components/SharePanel.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
@@ -17,7 +18,9 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    siteData.value = await fetchSiteData()
+    siteData.value = await fetchSiteData({
+      onUpdate: (fresh) => { siteData.value = fresh },
+    })
   } catch (e) {
     console.error('Failed to load site data:', e)
   } finally {
@@ -35,6 +38,7 @@ onMounted(async () => {
 
     <main class="container" :dir="dir">
       <ProfilePanel :description="siteData.profile.description" />
+      <StatsPanel />
       <ResourcesPanel :links="siteData.links" />
       <SharePanel />
       <SiteFooter :contact-email="siteData.contactEmail" :last-updated="siteData.lastUpdated" />

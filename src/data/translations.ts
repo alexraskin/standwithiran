@@ -9,6 +9,9 @@ export const translations = {
     lastUpdated: 'Last updated',
     contact: 'Contact',
     terms: 'Terms',
+    statDays: 'DAYS SINCE MAHSA JINA AMINI',
+    statProtest: 'DAYS SINCE LATEST PROTEST',
+    statBlackout: 'DAYS SINCE INTERNET BLACKOUT',
     termsText:
       'This site is provided as-is with no warranties. We curate links to third-party resources and track publicly available protest data — we are not responsible for external content. By using this site, you agree to use it responsibly and solely in support of the Iranian people\u2019s struggle for freedom.',
   },
@@ -24,6 +27,9 @@ export const translations = {
     terms: 'شرایط',
     termsText:
       'این سایت بدون هیچ گارانتی ارائه می‌شود. ما لینک‌هایی به منابع شخص ثالث گردآوری می‌کنیم و داده‌های اعتراضات عمومی را پیگیری می‌کنیم.',
+    statDays: 'روز از مهسا ژینا امینی',
+    statProtest: 'روز از آخرین اعتراضات',
+    statBlackout: 'روز از قطع اینترنت',
   },
 } as const
 

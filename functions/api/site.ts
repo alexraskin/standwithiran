@@ -39,6 +39,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     contactEmail: config.contact_email || '',
     lastUpdated: config.last_updated || '',
   }, {
-    headers: { 'Cache-Control': 'public, max-age=60' },
+    headers: {
+      'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600',
+    },
   })
 }

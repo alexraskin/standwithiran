@@ -10,6 +10,7 @@ import {
   deleteLink,
   fetchConfig,
   updateConfig,
+  invalidateSiteCache,
   type Link,
 } from '@/composables/useApi'
 
@@ -90,6 +91,7 @@ async function handleAddLink() {
   saving.value = true
   try {
     await createLink(newLink.value)
+    invalidateSiteCache()
     newLink.value = { title: '', url: '', icon: 'globe', category: 'information', featured: false }
     await loadData()
     showMessage('Link added')
@@ -115,6 +117,7 @@ async function saveEdit() {
   saving.value = true
   try {
     await updateLink(editingId.value, editForm.value)
+    invalidateSiteCache()
     editingId.value = null
     editForm.value = {}
     await loadData()
@@ -131,6 +134,7 @@ async function handleDelete(id: number) {
   saving.value = true
   try {
     await deleteLink(id)
+    invalidateSiteCache()
     await loadData()
     showMessage('Link deleted')
   } catch (e: any) {
@@ -166,6 +170,7 @@ async function handleSaveConfig() {
   saving.value = true
   try {
     await updateConfig(config.value)
+    invalidateSiteCache()
     showMessage('Config saved')
   } catch (e: any) {
     showMessage('Error: ' + e.message)

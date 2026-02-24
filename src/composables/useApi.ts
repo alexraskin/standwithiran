@@ -1,4 +1,6 @@
 const API_BASE = '/api'
+const SITE_CACHE_KEY = 'site_data_cache'
+const SITE_CACHE_MAX_AGE = 5 * 60 * 1000 // 5 minutes
 
 function getToken(): string | null {
   return sessionStorage.getItem('admin_token')
@@ -65,9 +67,45 @@ export interface SiteData {
   lastUpdated: string
 }
 
-// Public
-export function fetchSiteData(): Promise<SiteData> {
-  return apiFetch('/site')
+function getCachedSiteData(): { data: SiteData; fresh: boolean } | null {
+  try {
+    const raw = localStorage.getItem(SITE_CACHE_KEY)
+    if (!raw) return null
+    const { data, timestamp } = JSON.parse(raw) as { data: SiteData; timestamp: number }
+    const age = Date.now() - timestamp
+    return { data, fresh: age < SITE_CACHE_MAX_AGE }
+  } catch {
+    return null
+  }
+}
+
+function setCachedSiteData(data: SiteData): void {
+  try {
+    localStorage.setItem(SITE_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }))
+  } catch { /* quota exceeded — ignore */ }
+}
+
+// Public — returns cached data immediately if available, revalidates in background
+export async function fetchSiteData(options?: {
+  onUpdate?: (data: SiteData) => void
+}): Promise<SiteData> {
+  const cached = getCachedSiteData()
+
+  if (cached) {
+    apiFetch<SiteData>('/site').then((fresh) => {
+      setCachedSiteData(fresh)
+      options?.onUpdate?.(fresh)
+    }).catch(() => {})
+    return cached.data
+  }
+
+  const data = await apiFetch<SiteData>('/site')
+  setCachedSiteData(data)
+  return data
+}
+
+export function invalidateSiteCache(): void {
+  localStorage.removeItem(SITE_CACHE_KEY)
 }
 
 // Admin - Auth
