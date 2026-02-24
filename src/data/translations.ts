@@ -1,5 +1,6 @@
 export const translations = {
   en: {
+    takeAction: 'TAKE ACTION',
     resources: 'RESOURCES',
     linksLabel: 'LINKS',
     shareTitle: 'SHARE THIS PAGE',
@@ -16,6 +17,7 @@ export const translations = {
       'This site is provided as-is with no warranties. We curate links to third-party resources and track publicly available protest data — we are not responsible for external content. By using this site, you agree to use it responsibly and solely in support of the Iranian people\u2019s struggle for freedom.',
   },
   fa: {
+    takeAction: 'اقدام کنید',
     resources: 'منابع',
     linksLabel: 'لینک',
     shareTitle: 'اشتراک‌گذاری این صفحه',
