@@ -10,6 +10,9 @@ defineProps<{
       <span>STAND WITH IRAN</span>
       <span class="badge badge-green">ACTIVE</span>
     </div>
+    <div class="hero-image">
+      <img src="/images/hero.png" alt="Stand with Iran — solidarity illustration" />
+    </div>
     <div class="panel-body profile-body">
       <div class="profile-desc">
         <p v-for="(para, i) in description.split('\n\n')" :key="i">{{ para }}</p>
