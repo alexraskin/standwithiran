@@ -17,6 +17,7 @@
 		"db:migrate:local": "wrangler d1 migrations apply standwithiran-db --local"
 	},
 	"dependencies": {
+		"he": "^1.2.0",
 		"vue": "^3.5.27",
 		"vue-router": "^5.0.2"
 	},

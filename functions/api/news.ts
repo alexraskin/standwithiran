@@ -1,3 +1,5 @@
+import he from 'he'
+
 const RSS_URL = 'https://azadiwire.org/feed.xml'
 const CACHE_MAX_AGE = 600 // 10 minutes
 
@@ -40,11 +42,11 @@ export const onRequestGet: PagesFunction = async () => {
 
       if (title && link) {
         items.push({
-          title: decodeEntities(title),
+          title: he.decode(stripHtml(title)),
           link,
           pubDate: pubDate || '',
-          description: decodeEntities(description || '').slice(0, 200),
-          category: decodeEntities(category || ''),
+          description: he.decode(stripHtml(description || '')).slice(0, 200),
+          category: he.decode(stripHtml(category || '')),
         })
       }
 
@@ -75,18 +77,6 @@ function extractTag(xml: string, tag: string): string {
   return match ? match[1].trim() : ''
 }
 
-function decodeEntities(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, '')
-    .replace(/&apos;/g, "'")
-    .replace(/&#039;/g, "'")
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&#034;/g, '"')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+function stripHtml(text: string): string {
+  return text.replace(/<[^>]*>/g, '')
 }
