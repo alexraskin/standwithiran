@@ -40,11 +40,11 @@ export const onRequestGet: PagesFunction = async () => {
 
       if (title && link) {
         items.push({
-          title,
+          title: decodeEntities(title),
           link,
           pubDate: pubDate || '',
-          description: stripHtml(description || '').slice(0, 200),
-          category: category || '',
+          description: decodeEntities(description || '').slice(0, 200),
+          category: decodeEntities(category || ''),
         })
       }
 
@@ -75,6 +75,18 @@ function extractTag(xml: string, tag: string): string {
   return match ? match[1].trim() : ''
 }
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+function decodeEntities(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, '')
+    .replace(/&apos;/g, "'")
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&#034;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
 }

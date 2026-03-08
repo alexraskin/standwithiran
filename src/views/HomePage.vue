@@ -40,8 +40,8 @@ onMounted(async () => {
     <main class="container" :dir="dir">
       <ProfilePanel :description="siteData.profile.description" />
       <StatsPanel />
-      <ResourcesPanel :links="siteData.links" />
       <NewsPanel />
+      <ResourcesPanel :links="siteData.links" />
       <SharePanel />
       <SiteFooter :contact-email="siteData.contactEmail" :last-updated="siteData.lastUpdated" />
     </main>
