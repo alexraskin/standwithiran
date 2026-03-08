@@ -8,6 +8,7 @@ import SiteBanner from '@/components/SiteBanner.vue'
 import ProfilePanel from '@/components/ProfilePanel.vue'
 import StatsPanel from '@/components/StatsPanel.vue'
 import ResourcesPanel from '@/components/ResourcesPanel.vue'
+import NewsPanel from '@/components/NewsPanel.vue'
 import SharePanel from '@/components/SharePanel.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
 
@@ -40,6 +41,7 @@ onMounted(async () => {
       <ProfilePanel :description="siteData.profile.description" />
       <StatsPanel />
       <ResourcesPanel :links="siteData.links" />
+      <NewsPanel />
       <SharePanel />
       <SiteFooter :contact-email="siteData.contactEmail" :last-updated="siteData.lastUpdated" />
     </main>

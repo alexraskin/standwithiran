@@ -740,6 +740,144 @@ body:has(.banner) .container {
   }
 }
 
+/* ── News ── */
+
+.header-news {
+  background: #1a1a1a;
+}
+
+.news-source-link {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #888;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.15s;
+}
+
+.news-source-link:hover {
+  color: var(--accent-green);
+}
+
+.news-body {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.news-loading {
+  font-size: 0.82rem;
+  color: #999;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.news-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.85rem 0.9rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--card-radius);
+  text-decoration: none;
+  color: var(--text-dark);
+  background: white;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+  gap: 0.65rem;
+}
+
+.news-card:hover {
+  border-color: #bbb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateX(2px);
+}
+
+.news-card:active {
+  transform: scale(0.995);
+}
+
+.news-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.news-headline {
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.news-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.news-date {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.news-category {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border: 1.5px solid #fbbf24;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--accent-yellow-light);
+  color: #a16207;
+}
+
+.news-arrow {
+  color: #bbb;
+  font-size: 1.05rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  transition: color 0.15s;
+}
+
+.news-card:hover .news-arrow {
+  color: var(--text-muted);
+}
+
+[dir='rtl'] .news-card {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .news-card:hover {
+  transform: translateX(-2px);
+}
+
+[dir='rtl'] .news-arrow {
+  transform: rotate(180deg);
+}
+
 /* ── Footer ── */
 
 .footer {

@@ -13,6 +13,12 @@ export const translations = {
     statDays: 'DAYS SINCE MAHSA JINA AMINI',
     statProtest: 'DAYS SINCE LATEST PROTEST',
     statBlackout: 'DAYS SINCE INTERNET BLACKOUT',
+    newsTitle: 'LATEST NEWS',
+    newsLoading: 'Loading news...',
+    newsError: 'Unable to load news at this time.',
+    newsJustNow: 'Just now',
+    newsHoursAgo: 'h ago',
+    newsDaysAgo: 'd ago',
     termsText:
       'This site is provided as-is with no warranties. We curate links to third-party resources and track publicly available protest data — we are not responsible for external content. By using this site, you agree to use it responsibly and solely in support of the Iranian people\u2019s struggle for freedom.',
   },
@@ -32,6 +38,12 @@ export const translations = {
     statDays: 'روز از مهسا ژینا امینی',
     statProtest: 'روز از آخرین اعتراضات',
     statBlackout: 'روز از قطع اینترنت',
+    newsTitle: 'آخرین اخبار',
+    newsLoading: 'در حال بارگذاری اخبار...',
+    newsError: 'در حال حاضر امکان بارگذاری اخبار نیست.',
+    newsJustNow: 'همین الان',
+    newsHoursAgo: ' ساعت پیش',
+    newsDaysAgo: ' روز پیش',
   },
 } as const
 
