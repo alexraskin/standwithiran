@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import '../styles/main.css';
 import { getDir, type Lang } from '../lib/i18n';
 
@@ -78,9 +79,7 @@ const canonical = lang === 'en'
       sameAs: [],
     })} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=block" rel="stylesheet" />
+    <Font cssVariable="--font-anton" preload />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/images/standwithiran.webp" type="image/webp" />
   </head>

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 
 import cloudflare from '@astrojs/cloudflare';
 
@@ -14,4 +14,22 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'Anton',
+      cssVariable: '--font-anton',
+      display: 'block',
+      fallbacks: ['Impact', 'Arial Black', 'sans-serif'],
+      options: {
+        variants: [
+          {
+            weight: 400,
+            style: 'normal',
+            src: ['./src/assets/fonts/anton/anton-latin.woff2'],
+          },
+        ],
+      },
+    },
+  ],
 });

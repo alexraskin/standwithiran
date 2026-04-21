@@ -17,7 +17,7 @@
   --accent-yellow-light: #fef9c3;
   --accent-red: #c8102e;
   --accent-red-light: #fecaca;
-  --font-heading: 'Anton', 'Impact', 'Arial Black', sans-serif;
+  --font-heading: var(--font-anton), 'Impact', 'Arial Black', sans-serif;
   --font-body:
     'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
 }
