@@ -1,0 +1,31 @@
+{
+	"name": "standwithiranv2",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro build && astro preview",
+		"astro": "astro",
+		"generate-types": "wrangler types",
+		"deploy": "astro build && wrangler deploy",
+		"cf-typegen": "wrangler types",
+		"db:migrate": "wrangler d1 migrations apply standwithiran-db --remote",
+		"db:migrate:local": "wrangler d1 migrations apply standwithiran-db --local"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^13.1.10",
+		"astro": "^6.1.8",
+		"he": "^1.2.0"
+	},
+	"devDependencies": {
+		"@types/he": "^1.2.3",
+		"wrangler": "^4.84.1"
+	},
+	"overrides": {
+		"vite": "^7"
+	}
+}

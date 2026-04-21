@@ -1,0 +1,14 @@
+---
+import { localePath, otherLocale, type Lang } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const target = localePath(otherLocale(lang));
+const label = lang === 'en' ? 'فارسی' : 'English';
+const aria = lang === 'en' ? 'Switch to Farsi' : 'Switch to English';
+---
+
+<a class="lang-toggle" href={target} aria-label={aria}>{label}</a>

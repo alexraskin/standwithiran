@@ -1,0 +1,25 @@
+---
+interface Props {
+  banner: {
+    enabled: boolean;
+    type: string;
+    text: string;
+    link: string;
+  };
+}
+
+const { banner } = Astro.props;
+---
+
+{banner.enabled && (
+  <div class={`banner banner-${banner.type}`} role="alert">
+    {banner.link ? (
+      <a href={banner.link} target="_blank" rel="noopener" class="banner-link">
+        <span class="banner-text">{banner.text}</span>
+        <span class="banner-arrow">&rarr;</span>
+      </a>
+    ) : (
+      <span class="banner-text">{banner.text}</span>
+    )}
+  </div>
+)}

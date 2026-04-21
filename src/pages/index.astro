@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FlagStripe from '../components/FlagStripe.astro';
+import LangToggle from '../components/LangToggle.astro';
+import SiteBanner from '../components/SiteBanner.astro';
+import ProfilePanel from '../components/ProfilePanel.astro';
+import StatsPanel from '../components/StatsPanel.astro';
+import NewsPanel from '../components/NewsPanel.astro';
+import ResourcesPanel from '../components/ResourcesPanel.astro';
+import SharePanel from '../components/SharePanel.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getSiteData } from '../lib/site-data';
+import { env } from 'cloudflare:workers';
+
+export const prerender = false;
+
+const lang = 'en' as const;
+const site = await getSiteData(env.DB);
+---
+
+<BaseLayout lang={lang}>
+  <FlagStripe />
+  <LangToggle lang={lang} />
+  <SiteBanner banner={site.banner} />
+
+  <main class="container" dir="ltr">
+    <ProfilePanel description={site.profile.description} />
+    <StatsPanel lang={lang} />
+    <NewsPanel lang={lang} />
+    <ResourcesPanel links={site.links} lang={lang} />
+    <SharePanel lang={lang} />
+    <SiteFooter contactEmail={site.contactEmail} lastUpdated={site.lastUpdated} lang={lang} />
+  </main>
+</BaseLayout>

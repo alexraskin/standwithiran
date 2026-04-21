@@ -1,0 +1,49 @@
+---
+import { t, type Lang } from '../lib/i18n';
+
+interface Props {
+  contactEmail: string;
+  lastUpdated: string;
+  lang: Lang;
+}
+
+const { contactEmail, lastUpdated, lang } = Astro.props;
+---
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-slogan">{t(lang, 'slogan')}</div>
+  <div class="footer-meta">{t(lang, 'lastUpdated')}: {lastUpdated}</div>
+  <div class="footer-links">
+    <span class="footer-trigger" data-popup="contact">
+      {t(lang, 'contact')}
+      <div class="footer-popup" data-popup-body="contact">
+        <p>{contactEmail}</p>
+      </div>
+    </span>
+    <span class="footer-sep">|</span>
+    <span class="footer-trigger" data-popup="terms">
+      {t(lang, 'terms')}
+      <div class="footer-popup" data-popup-body="terms">
+        <p>{t(lang, 'termsText')}</p>
+      </div>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .footer-popup {
+    display: none;
+  }
+  .footer-trigger[data-open='true'] > .footer-popup {
+    display: block;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.footer-trigger').forEach((el) => {
+    el.addEventListener('mouseenter', () => el.setAttribute('data-open', 'true'));
+    el.addEventListener('mouseleave', () => el.removeAttribute('data-open'));
+    el.addEventListener('focus', () => el.setAttribute('data-open', 'true'));
+    el.addEventListener('blur', () => el.removeAttribute('data-open'));
+  });
+</script>

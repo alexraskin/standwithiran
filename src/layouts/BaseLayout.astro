@@ -1,0 +1,97 @@
+---
+import '../styles/main.css';
+import { getDir, type Lang } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+}
+
+const {
+  lang,
+  title = 'Stand With Iran — Woman, Life, Freedom | زن، زندگی، آزادی',
+  description = 'Stand With Iran — supporting the people of Iran in their fight for freedom, human rights, and democracy. Woman, Life, Freedom. زن، زندگی، آزادی',
+} = Astro.props;
+
+const dir = getDir(lang);
+const canonical = lang === 'en'
+  ? 'https://standwithiran.org/'
+  : 'https://standwithiran.org/fa/';
+---
+
+<!DOCTYPE html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#111111" />
+
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href="https://standwithiran.org/" />
+    <link rel="alternate" hreflang="fa" href="https://standwithiran.org/fa/" />
+    <link rel="alternate" hreflang="x-default" href="https://standwithiran.org/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Stand With Iran" />
+    <meta property="og:title" content="Stand With Iran — Woman, Life, Freedom" />
+    <meta property="og:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
+    <meta property="og:image" content="https://standwithiran.org/images/swithumb.webp" />
+    <meta property="og:image:width" content="1536" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:image:alt" content="Stand With Iran — Woman, Life, Freedom" />
+    <meta property="og:locale" content={lang === 'fa' ? 'fa_IR' : 'en_US'} />
+    <meta property="og:locale:alternate" content={lang === 'fa' ? 'en_US' : 'fa_IR'} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content="Stand With Iran — Woman, Life, Freedom" />
+    <meta name="twitter:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
+    <meta name="twitter:image" content="https://standwithiran.org/images/swithumb.webp" />
+    <meta name="twitter:image:alt" content="Stand With Iran — Woman, Life, Freedom" />
+
+    <title>{title}</title>
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Stand With Iran',
+      alternateName: ['StandWithIran', 'زن، زندگی، آزادی'],
+      url: 'https://standwithiran.org/',
+      description: 'Supporting the people of Iran in their fight for freedom, human rights, and democracy.',
+      inLanguage: ['en', 'fa'],
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://standwithiran.org/',
+      },
+    })} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Stand With Iran',
+      url: 'https://standwithiran.org/',
+      logo: 'https://standwithiran.org/images/standwithiran.webp',
+      description: 'Supporting the people of Iran in their fight for freedom and human rights.',
+      sameAs: [],
+    })} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=block" rel="stylesheet" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/images/standwithiran.webp" type="image/webp" />
+  </head>
+  <body>
+    <slot />
+    <noscript>
+      <div style="max-width:580px;margin:2rem auto;padding:0 1rem;font-family:sans-serif;color:#fff">
+        <h1>Stand With Iran — Woman, Life, Freedom</h1>
+        <h2>زن، زندگی، آزادی</h2>
+        <p>Supporting the people of Iran in their fight for freedom, human rights, and democracy.</p>
+      </div>
+    </noscript>
+  </body>
+</html>

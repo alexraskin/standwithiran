@@ -1,0 +1,635 @@
+---
+import '../styles/main.css';
+
+export const prerender = false;
+
+const ICONS = ['heart', 'shield', 'book', 'megaphone', 'globe', 'money', 'people', 'fist', 'flame', 'star', 'rocket', 'lightning', 'hand', 'peace'];
+const CATEGORIES = ['information', 'organization', 'fundraiser', 'demonstration', 'news'];
+const BANNER_TYPES = ['info', 'urgent', 'success'];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin — Stand With Iran</title>
+  </head>
+  <body>
+    <div class="admin-wrap">
+      <div class="admin-container">
+        <div class="admin-header">
+          <h1>ADMIN PANEL</h1>
+          <button id="logout-btn" class="btn btn-small btn-logout" hidden>Logout</button>
+        </div>
+
+        <div id="toast" class="admin-toast" hidden></div>
+
+        <!-- Login -->
+        <section id="login-section" class="panel">
+          <div class="panel-header"><span>Login</span></div>
+          <div class="panel-body">
+            <form id="login-form" class="admin-form">
+              <div class="form-group">
+                <label for="login-password">Password</label>
+                <input id="login-password" type="password" placeholder="Enter admin password" required />
+              </div>
+              <p id="login-error" class="form-error" hidden></p>
+              <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- CMS -->
+        <div id="cms" hidden>
+          <!-- Banner -->
+          <section class="panel">
+            <div class="panel-header"><span>Banner</span></div>
+            <div class="panel-body">
+              <form class="admin-form" data-config-form>
+                <div class="form-row">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="banner_enabled" value="1" />
+                    Enabled
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Type</label>
+                  <select name="banner_type">
+                    {BANNER_TYPES.map((t) => <option value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Text</label>
+                  <input name="banner_text" type="text" />
+                </div>
+                <div class="form-group">
+                  <label>Link URL</label>
+                  <input name="banner_link" type="text" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save Banner</button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Profile EN -->
+          <section class="panel">
+            <div class="panel-header"><span>Profile Description (English)</span></div>
+            <div class="panel-body">
+              <form class="admin-form" data-config-form>
+                <div class="form-group">
+                  <label>About Text (separate paragraphs with blank lines)</label>
+                  <textarea name="profile_description" rows="10"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Profile (EN)</button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Profile FA -->
+          <section class="panel">
+            <div class="panel-header"><span>Profile Description (Farsi)</span></div>
+            <div class="panel-body">
+              <form class="admin-form" data-config-form>
+                <div class="form-group">
+                  <label>About Text (Farsi)</label>
+                  <textarea name="profile_description_fa" rows="10" dir="rtl"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Profile (FA)</button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Site Config -->
+          <section class="panel">
+            <div class="panel-header"><span>Site Config</span></div>
+            <div class="panel-body">
+              <form class="admin-form" data-config-form>
+                <div class="form-group">
+                  <label>Contact Email</label>
+                  <input name="contact_email" type="email" />
+                </div>
+                <div class="form-group">
+                  <label>Last Updated</label>
+                  <input name="last_updated" type="text" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save Config</button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Links -->
+          <section class="panel">
+            <div class="panel-header"><span>Links (<span id="links-count">0</span>)</span></div>
+            <div class="panel-body">
+              <div id="links-list" class="admin-links-list"></div>
+
+              <form id="add-link-form" class="admin-form add-link-form">
+                <h3>Add Link</h3>
+                <div class="form-group">
+                  <label>Title</label>
+                  <input name="title" type="text" required placeholder="Link title" />
+                </div>
+                <div class="form-group">
+                  <label>URL</label>
+                  <input name="url" type="text" required placeholder="https://..." />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Icon</label>
+                    <select name="icon">
+                      {ICONS.map((ic) => <option value={ic}>{ic}</option>)}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Category</label>
+                    <select name="category">
+                      {CATEGORIES.map((c) => <option value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <label class="checkbox-label">
+                  <input name="featured" type="checkbox" />
+                  Featured
+                </label>
+                <button type="submit" class="btn btn-primary">Add Link</button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <template id="link-row-tpl">
+      <div class="admin-link-item">
+        <div class="link-info">
+          <span class="link-title-admin" data-field="title"></span>
+          <span class="link-url-admin" data-field="url"></span>
+          <span class="link-meta-admin" data-field="meta"></span>
+        </div>
+        <div class="link-actions">
+          <button class="btn btn-small" data-action="up" title="Move up">↑</button>
+          <button class="btn btn-small" data-action="down" title="Move down">↓</button>
+          <button class="btn btn-small" data-action="edit">Edit</button>
+          <button class="btn btn-small btn-danger" data-action="del">Del</button>
+        </div>
+      </div>
+    </template>
+
+    <template id="link-edit-tpl">
+      <div class="admin-link-item">
+        <form class="admin-form edit-form">
+          <div class="form-group">
+            <label>Title</label>
+            <input name="title" type="text" />
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input name="url" type="text" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Icon</label>
+              <select name="icon"></select>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select name="category"></select>
+            </div>
+          </div>
+          <label class="checkbox-label">
+            <input name="featured" type="checkbox" />
+            Featured
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-small">Save</button>
+            <button type="button" class="btn btn-small" data-action="cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <script is:inline define:vars={{ ICONS, CATEGORIES }}>
+      const TOKEN_KEY = 'admin_token';
+
+      const $ = (sel) => document.querySelector(sel);
+      const byName = (form, name) => form.querySelector(`[name="${name}"]`);
+
+      const loginSection = $('#login-section');
+      const cms = $('#cms');
+      const loginForm = $('#login-form');
+      const loginError = $('#login-error');
+      const logoutBtn = $('#logout-btn');
+      const toast = $('#toast');
+      const linksList = $('#links-list');
+      const linksCount = $('#links-count');
+      const addLinkForm = $('#add-link-form');
+
+      let links = [];
+      let config = {};
+      let editingId = null;
+
+      function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
+      function setToken(t) { sessionStorage.setItem(TOKEN_KEY, t); }
+      function clearToken() { sessionStorage.removeItem(TOKEN_KEY); }
+
+      async function api(path, opts = {}) {
+        const token = getToken();
+        const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`/api${path}`, { ...opts, headers });
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          throw new Error('Unauthorized');
+        }
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${res.status}`);
+        }
+        return res.json();
+      }
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.hidden = false;
+        setTimeout(() => { toast.hidden = true; }, 3000);
+      }
+
+      function showLogin() {
+        loginSection.hidden = false;
+        cms.hidden = true;
+        logoutBtn.hidden = true;
+      }
+
+      function showCms() {
+        loginSection.hidden = true;
+        cms.hidden = false;
+        logoutBtn.hidden = false;
+      }
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.hidden = true;
+        const password = $('#login-password').value;
+        try {
+          const data = await api('/admin/login', {
+            method: 'POST',
+            body: JSON.stringify({ password }),
+          });
+          setToken(data.token);
+          showCms();
+          await loadAll();
+        } catch (err) {
+          loginError.textContent = err.message || 'Login failed';
+          loginError.hidden = false;
+        }
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        clearToken();
+        showLogin();
+      });
+
+      async function loadAll() {
+        const [linksRes, configRes] = await Promise.all([
+          api('/admin/links'),
+          api('/admin/config'),
+        ]);
+        links = linksRes.links || [];
+        config = configRes.config || {};
+        renderLinks();
+        fillConfigForms();
+      }
+
+      function fillConfigForms() {
+        document.querySelectorAll('form[data-config-form]').forEach((form) => {
+          form.querySelectorAll('[name]').forEach((el) => {
+            const key = el.name;
+            const val = config[key] ?? '';
+            if (el.type === 'checkbox') {
+              el.checked = val === '1';
+            } else {
+              el.value = val;
+            }
+          });
+        });
+      }
+
+      document.querySelectorAll('form[data-config-form]').forEach((form) => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const payload = {};
+          form.querySelectorAll('[name]').forEach((el) => {
+            if (el.type === 'checkbox') {
+              payload[el.name] = el.checked ? '1' : '0';
+            } else {
+              payload[el.name] = el.value;
+            }
+          });
+          try {
+            await api('/admin/config', { method: 'PUT', body: JSON.stringify(payload) });
+            Object.assign(config, payload);
+            showToast('Config saved');
+          } catch (err) {
+            showToast('Error: ' + err.message);
+          }
+        });
+      });
+
+      function renderLinks() {
+        linksList.innerHTML = '';
+        linksCount.textContent = links.length;
+        links.forEach((link, index) => {
+          if (editingId === link.id) {
+            linksList.appendChild(renderEditRow(link));
+          } else {
+            linksList.appendChild(renderViewRow(link, index));
+          }
+        });
+      }
+
+      function renderViewRow(link, index) {
+        const tpl = $('#link-row-tpl').content.cloneNode(true);
+        const root = tpl.querySelector('.admin-link-item');
+        root.querySelector('[data-field="title"]').textContent = link.title;
+        root.querySelector('[data-field="url"]').textContent = link.url;
+        const meta = `${link.icon} · ${link.category}` + (link.featured ? ' · featured' : '');
+        root.querySelector('[data-field="meta"]').textContent = meta;
+
+        const upBtn = root.querySelector('[data-action="up"]');
+        const downBtn = root.querySelector('[data-action="down"]');
+        upBtn.disabled = index === 0;
+        downBtn.disabled = index >= links.length - 1;
+        upBtn.addEventListener('click', () => moveLink(index, -1));
+        downBtn.addEventListener('click', () => moveLink(index, 1));
+        root.querySelector('[data-action="edit"]').addEventListener('click', () => {
+          editingId = link.id;
+          renderLinks();
+        });
+        root.querySelector('[data-action="del"]').addEventListener('click', () => deleteLink(link.id));
+        return root;
+      }
+
+      function renderEditRow(link) {
+        const tpl = $('#link-edit-tpl').content.cloneNode(true);
+        const root = tpl.querySelector('.admin-link-item');
+        const form = root.querySelector('form');
+
+        const iconSel = byName(form, 'icon');
+        ICONS.forEach((ic) => {
+          const opt = document.createElement('option');
+          opt.value = ic;
+          opt.textContent = ic;
+          if (ic === link.icon) opt.selected = true;
+          iconSel.appendChild(opt);
+        });
+        const catSel = byName(form, 'category');
+        CATEGORIES.forEach((c) => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          if (c === link.category) opt.selected = true;
+          catSel.appendChild(opt);
+        });
+        byName(form, 'title').value = link.title;
+        byName(form, 'url').value = link.url;
+        byName(form, 'featured').checked = !!link.featured;
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const payload = {
+            title: byName(form, 'title').value,
+            url: byName(form, 'url').value,
+            icon: iconSel.value,
+            category: catSel.value,
+            featured: byName(form, 'featured').checked,
+          };
+          try {
+            await api(`/admin/links/${link.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+            editingId = null;
+            await reloadLinks();
+            showToast('Link updated');
+          } catch (err) {
+            showToast('Error: ' + err.message);
+          }
+        });
+        root.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+          editingId = null;
+          renderLinks();
+        });
+        return root;
+      }
+
+      async function reloadLinks() {
+        const res = await api('/admin/links');
+        links = res.links || [];
+        renderLinks();
+      }
+
+      async function deleteLink(id) {
+        if (!confirm('Delete this link?')) return;
+        try {
+          await api(`/admin/links/${id}`, { method: 'DELETE' });
+          await reloadLinks();
+          showToast('Link deleted');
+        } catch (err) {
+          showToast('Error: ' + err.message);
+        }
+      }
+
+      async function moveLink(index, dir) {
+        const current = links[index];
+        const other = links[index + dir];
+        if (!current || !other) return;
+        try {
+          await Promise.all([
+            api(`/admin/links/${current.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: other.sort_order }) }),
+            api(`/admin/links/${other.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: current.sort_order }) }),
+          ]);
+          await reloadLinks();
+        } catch (err) {
+          showToast('Error: ' + err.message);
+        }
+      }
+
+      addLinkForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          title: byName(addLinkForm, 'title').value,
+          url: byName(addLinkForm, 'url').value,
+          icon: byName(addLinkForm, 'icon').value,
+          category: byName(addLinkForm, 'category').value,
+          featured: byName(addLinkForm, 'featured').checked,
+        };
+        if (!payload.title || !payload.url) return;
+        try {
+          await api('/admin/links', { method: 'POST', body: JSON.stringify(payload) });
+          addLinkForm.reset();
+          await reloadLinks();
+          showToast('Link added');
+        } catch (err) {
+          showToast('Error: ' + err.message);
+        }
+      });
+
+      if (getToken()) {
+        showCms();
+        loadAll().catch(() => {});
+      } else {
+        showLogin();
+      }
+    </script>
+
+    <style>
+      .admin-wrap {
+        min-height: 100vh;
+        background: var(--bg);
+        padding: 2.5rem 1rem 3rem;
+      }
+      .admin-container { max-width: 620px; margin: 0 auto; }
+      .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .admin-header h1 {
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-light);
+      }
+      .admin-toast {
+        background: var(--accent-green);
+        color: white;
+        padding: 0.6rem 1rem;
+        margin-bottom: 1.25rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-radius: var(--card-radius);
+      }
+      .admin-form { display: flex; flex-direction: column; gap: 0.85rem; }
+      .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+      .form-group label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 0.6rem 0.8rem;
+        border: 1.5px solid #d0d0d0;
+        border-radius: 5px;
+        background: white;
+        color: var(--text-dark);
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+      }
+      .form-group textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(51, 85, 255, 0.1);
+      }
+      .form-row { display: flex; align-items: center; gap: 0.5rem; }
+      .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.78rem;
+        color: var(--text-dark);
+        cursor: pointer;
+      }
+      .checkbox-label input { width: auto; }
+      .form-error { color: var(--accent-red); font-size: 0.78rem; font-weight: 700; }
+      .form-actions { display: flex; gap: 0.5rem; }
+      .btn {
+        padding: 0.55rem 1.15rem;
+        border: 1.5px solid #d0d0d0;
+        border-radius: 5px;
+        background: white;
+        color: var(--text-dark);
+        font-family: var(--font-body);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+      }
+      .btn:hover { background: #f0f0f0; border-color: #bbb; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .btn-primary {
+        background: var(--accent-green);
+        color: white;
+        border-color: var(--accent-green);
+      }
+      .btn-primary:hover { background: #007a2e; border-color: #007a2e; }
+      .btn-danger {
+        background: transparent;
+        color: var(--accent-red);
+        border-color: var(--accent-red);
+      }
+      .btn-danger:hover { background: var(--accent-red); color: white; }
+      .btn-logout {
+        background: transparent;
+        color: #999;
+        border-color: #444;
+      }
+      .btn-logout:hover { color: var(--text-light); border-color: #777; background: rgba(255, 255, 255, 0.06); }
+      .btn-small { padding: 0.35rem 0.6rem; font-size: 0.65rem; }
+      .admin-links-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem; }
+      .admin-link-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.8rem 0.85rem;
+        border: 1.5px solid #e8e8e8;
+        border-radius: var(--card-radius);
+        background: white;
+      }
+      .admin-link-item:hover { border-color: #ccc; }
+      .link-info { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; flex: 1; }
+      .link-title-admin {
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-dark);
+      }
+      .link-url-admin {
+        font-size: 0.68rem;
+        color: #999;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .link-meta-admin { font-size: 0.62rem; color: #bbb; text-transform: uppercase; margin-top: 0.1rem; }
+      .link-actions { display: flex; gap: 0.25rem; flex-shrink: 0; align-items: center; }
+      .edit-form { width: 100%; }
+      .add-link-form { padding-top: 1.25rem; border-top: 1px solid #e8e8e8; }
+      .add-link-form h3 {
+        font-family: var(--font-heading);
+        font-size: 0.95rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-dark);
+      }
+    </style>
+  </body>
+</html>

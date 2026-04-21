@@ -1,0 +1,23 @@
+---
+interface Props {
+  description: string;
+}
+
+const { description } = Astro.props;
+const paragraphs = description.split('\n\n');
+---
+
+<section class="panel" aria-labelledby="site-heading">
+  <div class="panel-header header-blue">
+    <h1 id="site-heading" class="panel-heading">STAND WITH IRAN</h1>
+    <span class="badge badge-green">ACTIVE</span>
+  </div>
+  <div class="hero-image">
+    <img src="/images/hero.png" alt="Stand with Iran — solidarity illustration" />
+  </div>
+  <div class="panel-body profile-body">
+    <div class="profile-desc">
+      {paragraphs.map((para) => <p>{para}</p>)}
+    </div>
+  </div>
+</section>

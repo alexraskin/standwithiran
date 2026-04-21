@@ -1,0 +1,37 @@
+---
+import { t, type Lang } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const MAHSA_AMINI = new Date('2022-09-16T00:00:00Z').getTime();
+const LATEST_PROTEST = new Date('2025-12-28T00:00:00Z').getTime();
+const INTERNET_BLACKOUT = new Date('2026-01-08T00:00:00Z').getTime();
+
+const now = Date.now();
+const daysSince = (ms: number) => Math.floor((now - ms) / 86_400_000);
+
+const daysAmini = daysSince(MAHSA_AMINI);
+const daysProtest = daysSince(LATEST_PROTEST);
+const daysBlackout = daysSince(INTERNET_BLACKOUT);
+---
+
+<section class="stats-strip">
+  <div class="stat-block stat-primary">
+    <span class="stat-number">{daysAmini.toLocaleString()}</span>
+    <span class="stat-label">{t(lang, 'statDays')}</span>
+  </div>
+  <div class="stat-divider" />
+  <div class="stat-block">
+    <span class="stat-number">{daysProtest.toLocaleString()}</span>
+    <span class="stat-label">{t(lang, 'statProtest')}</span>
+  </div>
+  <div class="stat-divider" />
+  <div class="stat-block">
+    <span class="stat-number">{daysBlackout.toLocaleString()}</span>
+    <span class="stat-label">{t(lang, 'statBlackout')}</span>
+  </div>
+</section>
