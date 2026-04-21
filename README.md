@@ -1,43 +1,105 @@
-# Astro Starter Kit: Minimal
+# Stand With Iran ✊
+
+Website supporting the people of Iran in their fight for freedom and human rights. Curates resources, organizations, fundraisers, and news.
+
+**Woman, Life, Freedom — زن، زندگی، آزادی**
+
+Built with [Astro](https://astro.build) on [Cloudflare Workers](https://developers.cloudflare.com/workers/), backed by [D1](https://developers.cloudflare.com/d1/).
+
+## Stack
+
+- **Astro 6** (SSR) with `@astrojs/cloudflare` adapter
+- **Cloudflare Workers** runtime, **D1** database, `ASSETS` static binding
+- **i18n** — English at `/`, Farsi (RTL) at `/fa/`, both server-rendered
+- **News** — AzadiWire RSS fetched and parsed at the edge
+- **Admin CMS** at `/admin` — vanilla JS, SHA-256 bearer token auth
+
+## Project Structure
+
+```
+src/
+├── pages/
+│   ├── index.astro          # English home (SSR)
+│   ├── fa/index.astro       # Farsi home (SSR, RTL)
+│   ├── admin.astro          # CMS (login + links/config editor)
+│   ├── sitemap.xml.ts       # SSR sitemap with hreflang
+│   ├── 404.astro, 500.astro # redirect to /
+│   └── api/
+│       ├── site.ts          # GET  — public site data
+│       ├── news.ts          # GET  — RSS items
+│       └── admin/
+│           ├── login.ts     # POST — returns bearer token
+│           ├── links/       # GET/POST/PUT/DELETE — CRUD
+│           └── config.ts    # GET/PUT — whitelisted config keys
+├── components/              # FlagStripe, LangToggle, ProfilePanel, etc.
+├── layouts/BaseLayout.astro # html/head/meta/JSON-LD/fonts
+├── lib/
+│   ├── i18n.ts              # translations + t(lang, key)
+│   ├── site-data.ts         # getSiteData(db) — shared by SSR + /api/site
+│   ├── news.ts              # getNewsItems() — RSS parser
+│   ├── auth.ts              # sha256Hex, verifyToken
+│   └── types.ts
+└── styles/main.css
+
+migrations/                  # D1 schema + seed data
+public/                      # favicon, robots.txt, _headers, images/
+```
+
+## Local Development
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+
+# First time: apply migrations to local D1 replica
+npm run db:migrate:local
+
+# Set admin password for local dev
+echo "ADMIN_PASSWORD=localdev" > .dev.vars
+
+npm run dev   # http://localhost:4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Visit `/` (English), `/fa/` (Farsi), or `/admin` (log in with the password from `.dev.vars`).
 
-## 🚀 Project Structure
+## Deploy
 
-Inside of your Astro project, you'll see the following folders and files:
+First deploy only — set the admin password as a Worker secret:
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```sh
+npx wrangler secret put ADMIN_PASSWORD
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Apply migrations to the production D1 database:
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```sh
+npm run db:migrate
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+Deploy:
 
-## 🧞 Commands
+```sh
+npm run deploy
+```
 
-All commands are run from the root of the project, from a terminal:
+## Editing Content
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Almost everything is edited through the admin UI at `/admin`:
 
-## 👀 Want to learn more?
+- **Banner** — enabled/disabled, type (info/urgent/success), text, link URL
+- **Profile description** — English and Farsi paragraphs (the About section)
+- **Site config** — contact email, last-updated date
+- **Links** — add/edit/reorder/delete; each has title, URL, icon, category, featured flag
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+UI strings (button labels, section titles, etc.) live in code at `src/lib/i18n.ts`.
+
+## Commands
+
+| Command                 | Action                                        |
+| :---------------------- | :-------------------------------------------- |
+| `npm run dev`           | Start dev server at `localhost:4321`          |
+| `npm run build`         | Build production bundle to `./dist/`          |
+| `npm run preview`       | Build and preview locally                     |
+| `npm run deploy`        | Build + `wrangler deploy`                     |
+| `npm run db:migrate`    | Apply migrations to the remote D1             |
+| `npm run db:migrate:local` | Apply migrations to the local D1 replica   |
+| `npm run cf-typegen`    | Regenerate `worker-configuration.d.ts`        |
