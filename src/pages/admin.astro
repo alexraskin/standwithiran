@@ -1,7 +1,12 @@
 ---
 import '../styles/main.css';
+import { isAuthenticated } from '../lib/auth';
 
 export const prerender = false;
+
+// Server-side gate: the CMS markup is only emitted to authenticated requests.
+// Unauthenticated visitors receive nothing but the login form.
+const authed = await isAuthenticated(Astro.request);
 
 const ICONS = ['heart', 'shield', 'book', 'megaphone', 'globe', 'money', 'people', 'fist', 'flame', 'star', 'rocket', 'lightning', 'hand', 'peace'];
 const CATEGORIES = ['information', 'organization', 'fundraiser', 'demonstration', 'news'];
@@ -21,28 +26,30 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       <div class="admin-container">
         <div class="admin-header">
           <h1>ADMIN PANEL</h1>
-          <button id="logout-btn" class="btn btn-small btn-logout" hidden>Logout</button>
+          {authed && <button id="logout-btn" class="btn btn-small btn-logout">Logout</button>}
         </div>
 
         <div id="toast" class="admin-toast" hidden></div>
 
-        <!-- Login -->
-        <section id="login-section" class="panel">
-          <div class="panel-header"><span>Login</span></div>
-          <div class="panel-body">
-            <form id="login-form" class="admin-form">
-              <div class="form-group">
-                <label for="login-password">Password</label>
-                <input id="login-password" type="password" placeholder="Enter admin password" required />
-              </div>
-              <p id="login-error" class="form-error" hidden></p>
-              <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-          </div>
-        </section>
+        {!authed && (
+          <!-- Login -->
+          <section id="login-section" class="panel">
+            <div class="panel-header"><span>Login</span></div>
+            <div class="panel-body">
+              <form id="login-form" class="admin-form">
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <input id="login-password" type="password" placeholder="Enter admin password" required />
+                </div>
+                <p id="login-error" class="form-error" hidden></p>
+                <button type="submit" class="btn btn-primary">Login</button>
+              </form>
+            </div>
+          </section>
+        )}
 
-        <!-- CMS -->
-        <div id="cms" hidden>
+        {authed && (
+          <div id="cms">
           <!-- Banner -->
           <section class="panel">
             <div class="panel-header"><span>Banner</span></div>
@@ -157,7 +164,8 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
               </form>
             </div>
           </section>
-        </div>
+          </div>
+        )}
       </div>
     </div>
 
@@ -211,12 +219,9 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
     </template>
 
     <script is:inline define:vars={{ ICONS, CATEGORIES }}>
-      const TOKEN_KEY = 'admin_token';
-
       const $ = (sel) => document.querySelector(sel);
       const byName = (form, name) => form.querySelector(`[name="${name}"]`);
 
-      const loginSection = $('#login-section');
       const cms = $('#cms');
       const loginForm = $('#login-form');
       const loginError = $('#login-error');
@@ -230,18 +235,12 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       let config = {};
       let editingId = null;
 
-      function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
-      function setToken(t) { sessionStorage.setItem(TOKEN_KEY, t); }
-      function clearToken() { sessionStorage.removeItem(TOKEN_KEY); }
-
       async function api(path, opts = {}) {
-        const token = getToken();
         const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(`/api${path}`, { ...opts, headers });
+        const res = await fetch(`/api${path}`, { ...opts, headers, credentials: 'same-origin' });
         if (res.status === 401) {
-          clearToken();
-          showLogin();
+          // session expired/invalid — reload so the server shows the login form
+          location.reload();
           throw new Error('Unauthorized');
         }
         if (!res.ok) {
@@ -257,40 +256,37 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
         setTimeout(() => { toast.hidden = true; }, 3000);
       }
 
-      function showLogin() {
-        loginSection.hidden = false;
-        cms.hidden = true;
-        logoutBtn.hidden = true;
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          loginError.hidden = true;
+          const password = $('#login-password').value;
+          try {
+            const res = await fetch('/api/admin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ password }),
+            });
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              throw new Error(body.error || `HTTP ${res.status}`);
+            }
+            // cookie is now set — reload so the server renders the CMS
+            location.reload();
+          } catch (err) {
+            loginError.textContent = err.message || 'Login failed';
+            loginError.hidden = false;
+          }
+        });
       }
 
-      function showCms() {
-        loginSection.hidden = true;
-        cms.hidden = false;
-        logoutBtn.hidden = false;
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+          location.reload();
+        });
       }
-
-      loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        loginError.hidden = true;
-        const password = $('#login-password').value;
-        try {
-          const data = await api('/admin/login', {
-            method: 'POST',
-            body: JSON.stringify({ password }),
-          });
-          setToken(data.token);
-          showCms();
-          await loadAll();
-        } catch (err) {
-          loginError.textContent = err.message || 'Login failed';
-          loginError.hidden = false;
-        }
-      });
-
-      logoutBtn.addEventListener('click', () => {
-        clearToken();
-        showLogin();
-      });
 
       async function loadAll() {
         const [linksRes, configRes] = await Promise.all([
@@ -459,7 +455,7 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
         }
       }
 
-      addLinkForm.addEventListener('submit', async (e) => {
+      addLinkForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
           title: byName(addLinkForm, 'title').value,
@@ -479,11 +475,9 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
         }
       });
 
-      if (getToken()) {
-        showCms();
+      // CMS markup is only present when the server authenticated the request
+      if (cms) {
         loadAll().catch(() => {});
-      } else {
-        showLogin();
       }
     </script>
 
