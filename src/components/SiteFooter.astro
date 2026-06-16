@@ -14,36 +14,57 @@ const { contactEmail, lastUpdated, lang } = Astro.props;
   <div class="footer-slogan">{t(lang, 'slogan')}</div>
   <div class="footer-meta">{t(lang, 'lastUpdated')}: {lastUpdated}</div>
   <div class="footer-links">
-    <span class="footer-trigger" data-popup="contact">
+    <button type="button" class="footer-trigger" data-popup="contact" aria-expanded="false">
       {t(lang, 'contact')}
       <div class="footer-popup" data-popup-body="contact">
         <p>{contactEmail}</p>
       </div>
-    </span>
+    </button>
     <span class="footer-sep">|</span>
-    <span class="footer-trigger" data-popup="terms">
+    <button type="button" class="footer-trigger" data-popup="terms" aria-expanded="false">
       {t(lang, 'terms')}
       <div class="footer-popup" data-popup-body="terms">
         <p>{t(lang, 'termsText')}</p>
       </div>
-    </span>
+    </button>
   </div>
 </footer>
 
 <style>
+  button.footer-trigger {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+  }
   .footer-popup {
     display: none;
   }
-  .footer-trigger[data-open='true'] > .footer-popup {
+  .footer-trigger[aria-expanded='true'] > .footer-popup {
     display: block;
   }
 </style>
 
 <script>
-  document.querySelectorAll<HTMLElement>('.footer-trigger').forEach((el) => {
-    el.addEventListener('mouseenter', () => el.setAttribute('data-open', 'true'));
-    el.addEventListener('mouseleave', () => el.removeAttribute('data-open'));
-    el.addEventListener('focus', () => el.setAttribute('data-open', 'true'));
-    el.addEventListener('blur', () => el.removeAttribute('data-open'));
+  const triggers = Array.from(document.querySelectorAll<HTMLButtonElement>('.footer-trigger'));
+
+  function closeAll(except?: HTMLElement) {
+    triggers.forEach((el) => {
+      if (el !== except) el.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  triggers.forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = el.getAttribute('aria-expanded') === 'true';
+      closeAll(el);
+      el.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+  });
+
+  document.addEventListener('click', () => closeAll());
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
   });
 </script>
