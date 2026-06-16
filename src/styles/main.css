@@ -936,10 +936,6 @@ body:has(.banner) .container {
   body:has(.banner) .container {
     padding-top: calc(4px + 2.2rem + 3.5rem);
   }
-
-  .profile-name {
-    font-size: 3.2rem;
-  }
 }
 
 @media (max-width: 360px) {
