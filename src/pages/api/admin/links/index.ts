@@ -18,13 +18,18 @@ export const POST: APIRoute = async ({ request }) => {
   const unauthorized = await verifyToken(request);
   if (unauthorized) return unauthorized;
 
-  const body = await request.json<{
+  let body: {
     title: string;
     url: string;
     icon?: string;
     category?: string;
     featured?: boolean;
-  }>();
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   if (!body.title || !body.url) {
     return Response.json({ error: 'title and url are required' }, { status: 400 });

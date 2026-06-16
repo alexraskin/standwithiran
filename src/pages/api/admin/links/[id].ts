@@ -9,14 +9,19 @@ export const PUT: APIRoute = async ({ request, params }) => {
   if (unauthorized) return unauthorized;
 
   const id = params.id;
-  const body = await request.json<{
+  let body: {
     title?: string;
     url?: string;
     icon?: string;
     category?: string;
     featured?: boolean;
     sort_order?: number;
-  }>();
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   const fields: string[] = [];
   const values: unknown[] = [];

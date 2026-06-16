@@ -34,7 +34,12 @@ export const PUT: APIRoute = async ({ request }) => {
   const unauthorized = await verifyToken(request);
   if (unauthorized) return unauthorized;
 
-  const body = await request.json<Record<string, string>>();
+  let body: Record<string, string>;
+  try {
+    body = await request.json<Record<string, string>>();
+  } catch {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const statements = [];
 
   for (const [key, value] of Object.entries(body)) {

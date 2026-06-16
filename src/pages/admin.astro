@@ -439,10 +439,13 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
         }
       }
 
+      let reordering = false;
       async function moveLink(index, dir) {
+        if (reordering) return;
         const current = links[index];
         const other = links[index + dir];
         if (!current || !other) return;
+        reordering = true;
         try {
           await Promise.all([
             api(`/admin/links/${current.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: other.sort_order }) }),
@@ -451,6 +454,8 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
           await reloadLinks();
         } catch (err) {
           showToast('Error: ' + err.message);
+        } finally {
+          reordering = false;
         }
       }
 
@@ -484,6 +489,10 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
 
     <style>
       .admin-wrap {
+        /* accent vars the admin UI relies on, mapped to the editorial palette */
+        --accent-green: var(--flag-green);
+        --accent-red: var(--accent);
+        --accent-blue: #2b5fff;
         min-height: 100vh;
         background: var(--bg);
         padding: 2.5rem 1rem 3rem;
@@ -495,15 +504,14 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
         align-items: center;
         margin-bottom: 1.75rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid #2a2a2a;
+        border-bottom: 1px solid var(--hairline-strong);
       }
       .admin-header h1 {
         font-family: var(--font-heading);
-        font-size: 1.4rem;
-        font-weight: 400;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--text-light);
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
       }
       .admin-toast {
         background: var(--accent-green);
@@ -586,10 +594,10 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       .btn-danger:hover { background: var(--accent-red); color: white; }
       .btn-logout {
         background: transparent;
-        color: #999;
-        border-color: #444;
+        color: var(--text-muted);
+        border-color: var(--hairline-strong);
       }
-      .btn-logout:hover { color: var(--text-light); border-color: #777; background: rgba(255, 255, 255, 0.06); }
+      .btn-logout:hover { color: var(--accent); border-color: var(--accent); background: transparent; }
       .btn-small { padding: 0.35rem 0.6rem; font-size: 0.65rem; }
       .admin-links-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem; }
       .admin-link-item {

@@ -5,7 +5,12 @@ import { sha256Hex } from '../../../lib/auth';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  const body = await request.json<{ password: string }>();
+  let body: { password: string };
+  try {
+    body = await request.json<{ password: string }>();
+  } catch {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const password = env.ADMIN_PASSWORD;
 
   if (!password) {
