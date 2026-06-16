@@ -6,6 +6,7 @@ const RSS_URL = 'https://azadiwire.org/feed.xml';
 export async function getNewsItems(): Promise<NewsItem[] | null> {
   try {
     const res = await fetch(RSS_URL, {
+      signal: AbortSignal.timeout(4000),
       headers: {
         Accept: 'application/rss+xml, application/xml, text/xml',
         'User-Agent': 'StandWithIran/1.0',

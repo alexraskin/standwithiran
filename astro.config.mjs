@@ -16,22 +16,6 @@ export default defineConfig({
   },
   fonts: [
     {
-      provider: fontProviders.local(),
-      name: 'Anton',
-      cssVariable: '--font-anton',
-      display: 'block',
-      fallbacks: ['Impact', 'Arial Black', 'sans-serif'],
-      options: {
-        variants: [
-          {
-            weight: 400,
-            style: 'normal',
-            src: ['./src/assets/fonts/anton/anton-latin.woff2'],
-          },
-        ],
-      },
-    },
-    {
       provider: fontProviders.google(),
       name: 'Newsreader',
       cssVariable: '--font-newsreader',
