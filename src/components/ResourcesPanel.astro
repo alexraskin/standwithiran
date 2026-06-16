@@ -33,9 +33,9 @@ const getIcon = (icon: string) => iconMap[icon] || '🔗';
 ---
 
 {actionLinks.length > 0 && (
-  <section class="action-section">
+  <section class="action-section" aria-labelledby="take-action-heading">
     <div class="action-header">
-      <span>{t(lang, 'takeAction')}</span>
+      <span id="take-action-heading">{t(lang, 'takeAction')}</span>
     </div>
     <div class="action-body">
       {actionLinks.map((link, i) => (

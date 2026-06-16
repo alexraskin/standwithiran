@@ -15,11 +15,11 @@ const { banner } = Astro.props;
   <div class={`banner banner-${banner.type}`} role="alert">
     {banner.link ? (
       <a href={banner.link} target="_blank" rel="noopener" class="banner-link">
-        <span class="banner-text">{banner.text}</span>
+        <span>{banner.text}</span>
         <span class="banner-arrow">&rarr;</span>
       </a>
     ) : (
-      <span class="banner-text">{banner.text}</span>
+      <span>{banner.text}</span>
     )}
   </div>
 )}
