@@ -27,7 +27,7 @@ const canonical = lang === 'en'
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#f4f2ec" />
 
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="en" href="https://standwithiran.org/" />
@@ -39,19 +39,13 @@ const canonical = lang === 'en'
     <meta property="og:site_name" content="Stand With Iran" />
     <meta property="og:title" content="Stand With Iran — Woman, Life, Freedom" />
     <meta property="og:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
-    <meta property="og:image" content="https://standwithiran.org/images/swithumb.webp" />
-    <meta property="og:image:width" content="1536" />
-    <meta property="og:image:height" content="1024" />
-    <meta property="og:image:alt" content="Stand With Iran — Woman, Life, Freedom" />
     <meta property="og:locale" content={lang === 'fa' ? 'fa_IR' : 'en_US'} />
     <meta property="og:locale:alternate" content={lang === 'fa' ? 'en_US' : 'fa_IR'} />
 
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content="Stand With Iran — Woman, Life, Freedom" />
     <meta name="twitter:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
-    <meta name="twitter:image" content="https://standwithiran.org/images/swithumb.webp" />
-    <meta name="twitter:image:alt" content="Stand With Iran — Woman, Life, Freedom" />
 
     <title>{title}</title>
 
@@ -79,7 +73,7 @@ const canonical = lang === 'en'
       sameAs: [],
     })} />
 
-    <Font cssVariable="--font-anton" preload />
+    <Font cssVariable="--font-newsreader" preload />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/images/standwithiran.webp" type="image/webp" />
   </head>

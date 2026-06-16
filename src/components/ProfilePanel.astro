@@ -10,11 +10,21 @@ const paragraphs = description.split('\n\n');
 <section class="panel" aria-labelledby="site-heading">
   <div class="panel-header header-blue">
     <h1 id="site-heading" class="panel-heading">STAND WITH IRAN</h1>
-    <span class="badge badge-green">ACTIVE</span>
   </div>
-  <div class="hero-image">
-    <img src="/images/hero.png" alt="Stand with Iran — solidarity illustration" />
-  </div>
+  <figure class="hero-image">
+    <img
+      src="/images/mahdi-karimi-XA3X-mKRu5Q-unsplash.jpg"
+      alt="Si-o-se-pol bridge illuminated at night over the Zayanderud, Isfahan, Iran"
+      width="4000"
+      height="2252"
+    />
+    <figcaption class="hero-credit">
+      Photo by
+      <a href="https://unsplash.com/@mahdi3953?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" target="_blank" rel="noopener nofollow">Mahdi Karimi</a>
+      on
+      <a href="https://unsplash.com/photos/illuminated-bridge-reflects-in-still-water-at-night-XA3X-mKRu5Q?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" target="_blank" rel="noopener nofollow">Unsplash</a>
+    </figcaption>
+  </figure>
   <div class="panel-body profile-body">
     <div class="profile-desc">
       {paragraphs.map((para) => <p>{para}</p>)}
