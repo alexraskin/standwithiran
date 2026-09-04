@@ -1,24 +1,67 @@
 ---
 import { Font } from 'astro:assets';
 import '../styles/main.css';
-import { getDir, type Lang } from '../lib/i18n';
+import { getDir, otherLocale, type Lang } from '../lib/i18n';
+import { canonicalFor, isoDate, OG_IMAGE, seo, SITE_NAME, SITE_URL } from '../lib/seo';
 
 interface Props {
   lang: Lang;
   title?: string;
   description?: string;
+  /** `last_updated` from D1 config; surfaced as schema.org dateModified. */
+  lastUpdated?: string;
+  /** Extra JSON-LD nodes appended to the page graph. */
+  jsonLd?: Record<string, unknown>[];
 }
 
-const {
-  lang,
-  title = 'Stand With Iran — Woman, Life, Freedom | زن، زندگی، آزادی',
-  description = 'Stand With Iran — supporting the people of Iran in their fight for freedom, human rights, and democracy. Woman, Life, Freedom. زن، زندگی، آزادی',
-} = Astro.props;
+const { lang, title, description, lastUpdated = '', jsonLd = [] } = Astro.props;
 
+const copy = seo[lang];
+const pageTitle = title ?? copy.title;
+const pageDescription = description ?? copy.description;
 const dir = getDir(lang);
-const canonical = lang === 'en'
-  ? 'https://standwithiran.org/'
-  : 'https://standwithiran.org/fa/';
+const canonical = canonicalFor(lang);
+const alternate = canonicalFor(otherLocale(lang));
+const dateModified = isoDate(lastUpdated);
+
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: SITE_NAME,
+    alternateName: ['StandWithIran', 'زن، زندگی، آزادی', 'Woman, Life, Freedom'],
+    url: `${SITE_URL}/`,
+    description: copy.ogDescription,
+    inLanguage: ['en', 'fa'],
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  },
+  {
+    '@type': 'Organization',
+    '@id': `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    url: `${SITE_URL}/`,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/images/standwithiran.png`,
+      width: 192,
+      height: 192,
+    },
+    description: copy.ogDescription,
+  },
+  {
+    '@type': 'WebPage',
+    '@id': `${canonical}#webpage`,
+    url: canonical,
+    name: copy.ogTitle,
+    description: pageDescription,
+    inLanguage: lang === 'fa' ? 'fa-IR' : 'en-US',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: { '@id': `${SITE_URL}/#organization` },
+    primaryImageOfPage: { '@type': 'ImageObject', url: OG_IMAGE.url },
+    ...(dateModified ? { dateModified } : {}),
+  },
+  ...jsonLd,
+];
 ---
 
 <!DOCTYPE html>
@@ -26,48 +69,45 @@ const canonical = lang === 'en'
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content={description} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
     <meta name="theme-color" content="#f4f2ec" />
 
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="en" href="https://standwithiran.org/" />
-    <link rel="alternate" hreflang="fa" href="https://standwithiran.org/fa/" />
-    <link rel="alternate" hreflang="x-default" href="https://standwithiran.org/" />
+    <link rel="alternate" hreflang="en" href={canonicalFor('en')} />
+    <link rel="alternate" hreflang="fa" href={canonicalFor('fa')} />
+    <link rel="alternate" hreflang="x-default" href={canonicalFor('en')} />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="Stand With Iran" />
-    <meta property="og:title" content="Stand With Iran — Woman, Life, Freedom" />
-    <meta property="og:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={copy.ogTitle} />
+    <meta property="og:description" content={copy.ogDescription} />
     <meta property="og:locale" content={lang === 'fa' ? 'fa_IR' : 'en_US'} />
     <meta property="og:locale:alternate" content={lang === 'fa' ? 'en_US' : 'fa_IR'} />
+    <meta property="og:image" content={OG_IMAGE.url} />
+    <meta property="og:image:secure_url" content={OG_IMAGE.url} />
+    <meta property="og:image:type" content={OG_IMAGE.type} />
+    <meta property="og:image:width" content={String(OG_IMAGE.width)} />
+    <meta property="og:image:height" content={String(OG_IMAGE.height)} />
+    <meta property="og:image:alt" content={OG_IMAGE.alt} />
 
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonical} />
-    <meta name="twitter:title" content="Stand With Iran — Woman, Life, Freedom" />
-    <meta name="twitter:description" content="Supporting the people of Iran in their fight for freedom, human rights, and democracy. Find resources, organizations, and ways to help." />
+    <meta name="twitter:title" content={copy.ogTitle} />
+    <meta name="twitter:description" content={copy.ogDescription} />
+    <meta name="twitter:image" content={OG_IMAGE.url} />
+    <meta name="twitter:image:alt" content={OG_IMAGE.alt} />
 
-    <title>{title}</title>
-
-    <script type="application/ld+json" set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'Stand With Iran',
-      alternateName: ['StandWithIran', 'زن، زندگی، آزادی'],
-      url: 'https://standwithiran.org/',
-      description: 'Supporting the people of Iran in their fight for freedom, human rights, and democracy.',
-      inLanguage: ['en', 'fa'],
-    })} />
-
-    <script type="application/ld+json" set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'Stand With Iran',
-      url: 'https://standwithiran.org/',
-      logo: 'https://standwithiran.org/images/standwithiran.webp',
-      description: 'Supporting the people of Iran in their fight for freedom and human rights.',
-      sameAs: [],
-    })} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}
+    />
 
     <Font cssVariable="--font-newsreader" preload />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -78,9 +118,9 @@ const canonical = lang === 'en'
     <slot />
     <noscript>
       <div style="max-width:580px;margin:2rem auto;padding:0 1rem;font-family:sans-serif;color:#1c1a16">
-        <h1>Stand With Iran — Woman, Life, Freedom</h1>
-        <h2>زن، زندگی، آزادی</h2>
-        <p>Supporting the people of Iran in their fight for freedom, human rights, and democracy.</p>
+        <h2>{copy.ogTitle}</h2>
+        <p>{pageDescription}</p>
+        <p><a href={alternate}>{lang === 'en' ? 'فارسی' : 'English'}</a></p>
       </div>
     </noscript>
   </body>

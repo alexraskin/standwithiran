@@ -7,8 +7,9 @@ interface Props {
 
 const { lang } = Astro.props;
 const target = localePath(otherLocale(lang));
+const other = otherLocale(lang);
 const label = lang === 'en' ? 'فارسی' : 'English';
 const aria = lang === 'en' ? 'Switch to Farsi' : 'Switch to English';
 ---
 
-<a class="lang-toggle" href={target} aria-label={aria}>{label}</a>
+<a class="lang-toggle" href={target} hreflang={other} lang={other} aria-label={aria}>{label}</a>

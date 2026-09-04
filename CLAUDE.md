@@ -55,9 +55,17 @@ Admin endpoints:
 
 `src/lib/news.ts` fetches `https://azadiwire.org/feed.xml` at request time and parses it with regex (no XML library). Returns up to 5 items. Served via `/api/news`. Failures return `null` — the component shows a fallback, the request does not 500.
 
+### SEO
+
+`src/lib/seo.ts` is the single source for canonical URLs, per-locale title/description/OG copy, the `<h1>` text, and the OG image constants. **Changing site-wide meta copy means editing `seo.ts`, not `BaseLayout.astro`.** `BaseLayout` builds a schema.org `@graph` (WebSite + Organization + WebPage) and accepts an optional `jsonLd` prop for extra nodes; the index pages pass an `ItemList` of the D1 links via `resourcesItemList`.
+
+`public/images/og-image.jpg` is a 1200x630 social card generated from the hero photo. Regenerate it if the hero art or wordmark changes, and keep the dimensions in `OG_IMAGE` in sync.
+
+`src/middleware.ts` 301-redirects `www.standwithiran.org` to the apex host (both are bound as custom domains in `wrangler.jsonc`) and sets `X-Robots-Tag: noindex` on `/api/*` and `/admin`. `public/_headers` only applies to static assets served by the `ASSETS` binding, so it does **not** cover those SSR routes.
+
 ### Sitemap & error pages
 
-`src/pages/sitemap.xml.ts` is a hand-rolled SSR endpoint emitting `hreflang` alternates for `/` and `/fa/`. `404.astro` and `500.astro` redirect to `/`.
+`src/pages/sitemap.xml.ts` is a hand-rolled SSR endpoint emitting `hreflang` alternates and an image entry for `/` and `/fa/`, with `<lastmod>` read from the `last_updated` config row. `404.astro` returns a real 404 and `500.astro` a real error page; neither redirects to `/`, which previously produced soft 404s.
 
 ## Conventions
 

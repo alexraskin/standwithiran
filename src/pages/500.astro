@@ -1,4 +1,32 @@
 ---
+// A real 500 rather than a redirect, so crawlers retry instead of indexing the
+// homepage under the failing URL.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FlagStripe from '../components/FlagStripe.astro';
+
 export const prerender = false;
-return Astro.redirect('/', 302);
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+Astro.response.headers.set('Cache-Control', 'no-store');
 ---
+
+<BaseLayout
+  lang="en"
+  title="Something went wrong — Stand With Iran"
+  description="An error occurred. Return to Stand With Iran for resources, organizations, and ways to help."
+>
+  <FlagStripe />
+  <main class="container" dir="ltr">
+    <section class="panel">
+      <div class="panel-header header-blue">
+        <h1 class="panel-heading">SOMETHING WENT WRONG</h1>
+      </div>
+      <div class="panel-body profile-body">
+        <div class="profile-desc">
+          <p>The page could not be loaded. Please try again shortly.</p>
+          <p><a href="/">Stand With Iran home</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

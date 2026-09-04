@@ -10,21 +10,23 @@ import ResourcesPanel from '../components/ResourcesPanel.astro';
 import SharePanel from '../components/SharePanel.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { getSiteData } from '../lib/site-data';
+import { resourcesItemList } from '../lib/seo';
 import { env } from 'cloudflare:workers';
 
 export const prerender = false;
 
 const lang = 'en' as const;
 const site = await getSiteData(env.DB);
+const itemList = resourcesItemList(site.links, lang);
 ---
 
-<BaseLayout lang={lang}>
+<BaseLayout lang={lang} lastUpdated={site.lastUpdated} jsonLd={[itemList]}>
   <FlagStripe />
   <LangToggle lang={lang} />
   <SiteBanner banner={site.banner} />
 
   <main class="container" dir="ltr">
-    <ProfilePanel description={site.profile.description} />
+    <ProfilePanel description={site.profile.description} lang={lang} />
     <StatsPanel lang={lang} />
     <NewsPanel lang={lang} />
     <ResourcesPanel links={site.links} lang={lang} />
