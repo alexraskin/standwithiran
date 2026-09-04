@@ -1,4 +1,36 @@
 ---
+// A real 404 rather than a redirect to `/`. Redirecting every unknown URL to the
+// homepage produced soft 404s: search engines index the bogus URLs as duplicates
+// of the homepage instead of dropping them.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FlagStripe from '../components/FlagStripe.astro';
+
 export const prerender = false;
-return Astro.redirect('/', 302);
+
+Astro.response.status = 404;
+Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');
 ---
+
+<BaseLayout
+  lang="en"
+  title="Page not found — Stand With Iran"
+  description="This page does not exist. Return to Stand With Iran for resources, organizations, and ways to help."
+>
+  <FlagStripe />
+  <main class="container" dir="ltr">
+    <section class="panel">
+      <div class="panel-header header-blue">
+        <h1 class="panel-heading">PAGE NOT FOUND</h1>
+      </div>
+      <div class="panel-body profile-body">
+        <div class="profile-desc">
+          <p>This page does not exist or has moved.</p>
+          <p>
+            <a href="/">Stand With Iran home</a> &nbsp;|&nbsp;
+            <a href="/fa/" hreflang="fa" lang="fa">فارسی</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

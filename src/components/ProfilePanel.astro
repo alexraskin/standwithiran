@@ -1,15 +1,20 @@
 ---
+import { type Lang } from '../lib/i18n';
+import { seo } from '../lib/seo';
+
 interface Props {
   description: string;
+  lang: Lang;
 }
 
-const { description } = Astro.props;
+const { description, lang } = Astro.props;
 const paragraphs = description.split('\n\n');
+const heading = seo[lang].heading;
 ---
 
 <section class="panel" aria-labelledby="site-heading">
   <div class="panel-header header-blue">
-    <h1 id="site-heading" class="panel-heading">STAND WITH IRAN</h1>
+    <h1 id="site-heading" class="panel-heading">{heading}</h1>
   </div>
   <figure class="hero-image">
     <img
