@@ -61,6 +61,8 @@ Admin endpoints:
 
 `public/images/og-image.jpg` is a 1200x630 social card generated from the hero photo. Regenerate it if the hero art or wordmark changes, and keep the dimensions in `OG_IMAGE` in sync.
 
+The favicon set (`public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) is generated from one source, `scripts/generate-icons.mjs`. Edit the mark there, then run `npm i --no-save sharp png-to-ico && node scripts/generate-icons.mjs` — do not hand-edit the committed SVG or PNGs. `public/site.webmanifest` and the `Organization.logo` node in `BaseLayout.astro` point at `icon-512.png`.
+
 `src/middleware.ts` 301-redirects `www.standwithiran.org` to the apex host (both are bound as custom domains in `wrangler.jsonc`) and sets `X-Robots-Tag: noindex` on `/api/*` and `/admin`. `public/_headers` only applies to static assets served by the `ASSETS` binding, so it does **not** cover those SSR routes.
 
 ### Sitemap & error pages

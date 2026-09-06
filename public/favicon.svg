@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Stand With Iran">
+  <rect width="32" height="32" rx="7.2" fill="#9b2230"/>
+  <g fill="#fff">
+    <rect x="8.00" y="8" width="2.95" height="7.00" rx="1.475"/>
+    <rect x="12.35" y="7.4" width="2.95" height="7.60" rx="1.475"/>
+    <rect x="16.70" y="7.6" width="2.95" height="7.40" rx="1.475"/>
+    <rect x="21.05" y="8.4" width="2.95" height="6.60" rx="1.475"/>
+    <path d="M8 10.4H24V20.1A4.5 4.5 0 0 1 19.5 24.6H12.5A4.5 4.5 0 0 1 8 20.1Z"/>
+  </g>
+  <g fill="#9b2230">
+    <rect x="10.95" y="4" width="1.4" height="7.4" rx="0.7"/>
+    <rect x="15.30" y="4" width="1.4" height="7.4" rx="0.7"/>
+    <rect x="19.65" y="4" width="1.4" height="7.4" rx="0.7"/>
+  </g>
+  <path d="M7.2 17.7H15.6A2.3 2.3 0 0 0 17.9 15.4" fill="none" stroke="#9b2230" stroke-width="1.55" stroke-linecap="round"/>
+</svg>
