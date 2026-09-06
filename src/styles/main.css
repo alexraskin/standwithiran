@@ -40,6 +40,26 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Keyboard focus. The stylesheet defined none, so every link, button and share
+   control on the page relied on whatever the browser drew by default. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Motion is decorative here, so honour the system preference outright. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   font-family: var(--font-body);
   background: var(--bg);

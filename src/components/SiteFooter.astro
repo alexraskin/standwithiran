@@ -14,54 +14,87 @@ const { contactEmail, lastUpdated, lang } = Astro.props;
   <div class="footer-slogan">{t(lang, 'slogan')}</div>
   <div class="footer-meta">{t(lang, 'lastUpdated')}: {lastUpdated}</div>
   <div class="footer-links">
-    <button type="button" class="footer-trigger" data-popup="contact" aria-expanded="false">
-      {t(lang, 'contact')}
-      <div class="footer-popup" data-popup-body="contact">
-        <p>{contactEmail}</p>
+    {/*
+      The popup is a sibling of the button, not a descendant. A <button> takes
+      phrasing content only, so the previous <div><p>…</p></div> inside it was
+      invalid, and once opened it folded the whole terms paragraph into the
+      button's accessible name.
+    */}
+    <div class="footer-disclosure">
+      <button
+        type="button"
+        class="footer-trigger"
+        data-popup="contact"
+        aria-expanded="false"
+        aria-controls="footer-popup-contact"
+      >
+        {t(lang, 'contact')}
+      </button>
+      <div class="footer-popup" id="footer-popup-contact" hidden>
+        {contactEmail && <a href={`mailto:${contactEmail}`}>{contactEmail}</a>}
       </div>
-    </button>
-    <span class="footer-sep">|</span>
-    <button type="button" class="footer-trigger" data-popup="terms" aria-expanded="false">
-      {t(lang, 'terms')}
-      <div class="footer-popup" data-popup-body="terms">
+    </div>
+    <span class="footer-sep" aria-hidden="true">|</span>
+    <div class="footer-disclosure">
+      <button
+        type="button"
+        class="footer-trigger"
+        data-popup="terms"
+        aria-expanded="false"
+        aria-controls="footer-popup-terms"
+      >
+        {t(lang, 'terms')}
+      </button>
+      <div class="footer-popup" id="footer-popup-terms" hidden>
         <p>{t(lang, 'termsText')}</p>
       </div>
-    </button>
+    </div>
   </div>
 </footer>
 
 <style>
+  .footer-disclosure {
+    position: relative;
+    display: inline-block;
+  }
   button.footer-trigger {
     background: none;
     border: none;
     padding: 0;
     font: inherit;
-  }
-  .footer-popup {
-    display: none;
-  }
-  .footer-trigger[aria-expanded='true'] > .footer-popup {
-    display: block;
+    color: inherit;
+    cursor: pointer;
   }
 </style>
 
 <script>
-  const triggers = Array.from(document.querySelectorAll<HTMLButtonElement>('.footer-trigger'));
+  const disclosures = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('.footer-trigger'),
+  ).map((trigger) => ({
+    trigger,
+    popup: document.getElementById(trigger.getAttribute('aria-controls') ?? ''),
+  }));
 
-  function closeAll(except?: HTMLElement) {
-    triggers.forEach((el) => {
-      if (el !== except) el.setAttribute('aria-expanded', 'false');
-    });
+  function close(entry: (typeof disclosures)[number]) {
+    entry.trigger.setAttribute('aria-expanded', 'false');
+    if (entry.popup) entry.popup.hidden = true;
   }
 
-  triggers.forEach((el) => {
-    el.addEventListener('click', (e) => {
+  function closeAll(except?: HTMLElement) {
+    for (const entry of disclosures) {
+      if (entry.trigger !== except) close(entry);
+    }
+  }
+
+  for (const entry of disclosures) {
+    entry.trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      const open = el.getAttribute('aria-expanded') === 'true';
-      closeAll(el);
-      el.setAttribute('aria-expanded', open ? 'false' : 'true');
+      const open = entry.trigger.getAttribute('aria-expanded') === 'true';
+      closeAll(entry.trigger);
+      entry.trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+      if (entry.popup) entry.popup.hidden = open;
     });
-  });
+  }
 
   document.addEventListener('click', () => closeAll());
   document.addEventListener('keydown', (e) => {

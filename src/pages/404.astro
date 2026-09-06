@@ -5,7 +5,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FlagStripe from '../components/FlagStripe.astro';
 
-export const prerender = false;
 
 Astro.response.status = 404;
 Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');

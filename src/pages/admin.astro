@@ -1,16 +1,11 @@
 ---
 import '../styles/main.css';
 import { isAuthenticated } from '../lib/auth';
-
-export const prerender = false;
+import { BANNER_TYPES, CATEGORIES, ICONS } from '../lib/content-schema';
 
 // Server-side gate: the CMS markup is only emitted to authenticated requests.
 // Unauthenticated visitors receive nothing but the login form.
 const authed = await isAuthenticated(Astro.request);
-
-const ICONS = ['heart', 'shield', 'book', 'megaphone', 'globe', 'money', 'people', 'fist', 'flame', 'star', 'rocket', 'lightning', 'hand', 'peace'];
-const CATEGORIES = ['information', 'organization', 'fundraiser', 'demonstration', 'news'];
-const BANNER_TYPES = ['info', 'urgent', 'success'];
 ---
 
 <!DOCTYPE html>
@@ -118,10 +113,32 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
                   <input name="contact_email" type="email" />
                 </div>
                 <div class="form-group">
-                  <label>Last Updated</label>
-                  <input name="last_updated" type="text" />
+                  <label for="cfg-last-updated">Last Updated</label>
+                  <input id="cfg-last-updated" name="last_updated" type="text" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save Config</button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Stat counters -->
+          <section class="panel">
+            <div class="panel-header"><span>Stat Counters</span></div>
+            <div class="panel-body">
+              <form class="admin-form" data-config-form>
+                <div class="form-group">
+                  <label for="cfg-amini">Mahsa Jina Amini (YYYY-MM-DD)</label>
+                  <input id="cfg-amini" name="stat_amini_date" type="date" required />
+                </div>
+                <div class="form-group">
+                  <label for="cfg-protest">Latest protest (YYYY-MM-DD)</label>
+                  <input id="cfg-protest" name="stat_protest_date" type="date" required />
+                </div>
+                <div class="form-group">
+                  <label for="cfg-blackout">Internet blackout (YYYY-MM-DD)</label>
+                  <input id="cfg-blackout" name="stat_blackout_date" type="date" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Save Counters</button>
               </form>
             </div>
           </section>
@@ -199,11 +216,15 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
           <div class="form-row-2">
             <div class="form-group">
               <label>Icon</label>
-              <select name="icon"></select>
+              <select name="icon">
+                {ICONS.map((ic) => <option value={ic}>{ic}</option>)}
+              </select>
             </div>
             <div class="form-group">
               <label>Category</label>
-              <select name="category"></select>
+              <select name="category">
+                {CATEGORIES.map((c) => <option value={c}>{c}</option>)}
+              </select>
             </div>
           </div>
           <label class="checkbox-label">
@@ -218,25 +239,42 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       </div>
     </template>
 
-    <script is:inline define:vars={{ ICONS, CATEGORIES }}>
-      const $ = (sel) => document.querySelector(sel);
-      const byName = (form, name) => form.querySelector(`[name="${name}"]`);
+    <script>
+      import type { LinkRow } from '../lib/types';
+
+      type ConfigMap = Record<string, string>;
+
+      // worker-configuration.d.ts declares a global `interface Element` for
+      // HTMLRewriter, which merges with the DOM `Element` and leaves `remove()`
+      // ambiguous. Any generic constrained by `Element` (querySelector<T>)
+      // therefore fails to compile, so these helpers cast instead.
+      type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+      const $ = <T extends HTMLElement>(sel: string) =>
+        document.querySelector(sel) as T | null;
+
+      const byName = <T extends Field>(form: HTMLElement, name: string) =>
+        form.querySelector(`[name="${name}"]`) as T;
+
+      const fieldsOf = (form: HTMLElement) =>
+        Array.from(form.querySelectorAll('[name]')) as Field[];
 
       const cms = $('#cms');
-      const loginForm = $('#login-form');
+      const loginForm = $<HTMLFormElement>('#login-form');
       const loginError = $('#login-error');
-      const logoutBtn = $('#logout-btn');
-      const toast = $('#toast');
-      const linksList = $('#links-list');
-      const linksCount = $('#links-count');
-      const addLinkForm = $('#add-link-form');
+      const logoutBtn = $<HTMLButtonElement>('#logout-btn');
+      const toast = $('#toast')!;
+      const linksList = $('#links-list')!;
+      const linksCount = $('#links-count')!;
+      const addLinkForm = $<HTMLFormElement>('#add-link-form');
 
-      let links = [];
-      let config = {};
-      let editingId = null;
+      let links: LinkRow[] = [];
+      let config: ConfigMap = {};
+      let editingId: number | null = null;
+      let toastTimer: number | undefined;
 
-      async function api(path, opts = {}) {
-        const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
+        const headers = { 'Content-Type': 'application/json', ...(opts.headers ?? {}) };
         const res = await fetch(`/api${path}`, { ...opts, headers, credentials: 'same-origin' });
         if (res.status === 401) {
           // session expired/invalid — reload so the server shows the login form
@@ -244,174 +282,185 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
           throw new Error('Unauthorized');
         }
         if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error || `HTTP ${res.status}`);
+          const body = await res.json().catch(() => ({}) as { error?: string });
+          throw new Error((body as { error?: string }).error || `HTTP ${res.status}`);
         }
-        return res.json();
+        return res.json() as Promise<T>;
       }
 
-      function showToast(msg) {
+      function message(err: unknown): string {
+        return err instanceof Error ? err.message : String(err);
+      }
+
+      function showToast(msg: string) {
         toast.textContent = msg;
         toast.hidden = false;
-        setTimeout(() => { toast.hidden = true; }, 3000);
+        // Without clearing, overlapping saves hid the newest message early.
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => {
+          toast.hidden = true;
+        }, 3000);
       }
 
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          loginError.hidden = true;
-          const password = $('#login-password').value;
-          try {
-            const res = await fetch('/api/admin/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'same-origin',
-              body: JSON.stringify({ password }),
-            });
-            if (!res.ok) {
-              const body = await res.json().catch(() => ({}));
-              throw new Error(body.error || `HTTP ${res.status}`);
-            }
-            // cookie is now set — reload so the server renders the CMS
-            location.reload();
-          } catch (err) {
-            loginError.textContent = err.message || 'Login failed';
+      loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (loginError) loginError.hidden = true;
+        const password = $<HTMLInputElement>('#login-password')!.value;
+        try {
+          const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ password }),
+          });
+          if (!res.ok) {
+            const body = (await res.json().catch(() => ({}))) as { error?: string };
+            throw new Error(body.error || `HTTP ${res.status}`);
+          }
+          // cookie is now set — reload so the server renders the CMS
+          location.reload();
+        } catch (err) {
+          if (loginError) {
+            loginError.textContent = message(err) || 'Login failed';
             loginError.hidden = false;
           }
-        });
-      }
+        }
+      });
 
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-          await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
-          location.reload();
-        });
-      }
+      logoutBtn?.addEventListener('click', async () => {
+        await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }).catch(
+          () => {},
+        );
+        location.reload();
+      });
 
       async function loadAll() {
         const [linksRes, configRes] = await Promise.all([
-          api('/admin/links'),
-          api('/admin/config'),
+          api<{ links: LinkRow[] }>('/admin/links'),
+          api<{ config: ConfigMap }>('/admin/config'),
         ]);
-        links = linksRes.links || [];
-        config = configRes.config || {};
+        links = linksRes.links ?? [];
+        config = configRes.config ?? {};
         renderLinks();
         fillConfigForms();
       }
 
+      function configForms(): HTMLFormElement[] {
+        return Array.from(document.querySelectorAll('form[data-config-form]')) as HTMLFormElement[];
+      }
+
       function fillConfigForms() {
-        document.querySelectorAll('form[data-config-form]').forEach((form) => {
-          form.querySelectorAll('[name]').forEach((el) => {
-            const key = el.name;
-            const val = config[key] ?? '';
-            if (el.type === 'checkbox') {
+        for (const form of configForms()) {
+          for (const el of fieldsOf(form)) {
+            const val = config[el.name] ?? '';
+            if (el instanceof HTMLInputElement && el.type === 'checkbox') {
               el.checked = val === '1';
             } else {
               el.value = val;
             }
-          });
-        });
+          }
+        }
       }
 
-      document.querySelectorAll('form[data-config-form]').forEach((form) => {
+      for (const form of configForms()) {
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const payload = {};
-          form.querySelectorAll('[name]').forEach((el) => {
-            if (el.type === 'checkbox') {
-              payload[el.name] = el.checked ? '1' : '0';
-            } else {
-              payload[el.name] = el.value;
-            }
-          });
+          const payload: ConfigMap = {};
+          for (const el of fieldsOf(form)) {
+            payload[el.name] =
+              el instanceof HTMLInputElement && el.type === 'checkbox'
+                ? el.checked
+                  ? '1'
+                  : '0'
+                : el.value;
+          }
           try {
             await api('/admin/config', { method: 'PUT', body: JSON.stringify(payload) });
             Object.assign(config, payload);
             showToast('Config saved');
           } catch (err) {
-            showToast('Error: ' + err.message);
-          }
-        });
-      });
-
-      function renderLinks() {
-        linksList.innerHTML = '';
-        linksCount.textContent = links.length;
-        links.forEach((link, index) => {
-          if (editingId === link.id) {
-            linksList.appendChild(renderEditRow(link));
-          } else {
-            linksList.appendChild(renderViewRow(link, index));
+            showToast('Error: ' + message(err));
           }
         });
       }
 
-      function renderViewRow(link, index) {
-        const tpl = $('#link-row-tpl').content.cloneNode(true);
-        const root = tpl.querySelector('.admin-link-item');
-        root.querySelector('[data-field="title"]').textContent = link.title;
-        root.querySelector('[data-field="url"]').textContent = link.url;
-        const meta = `${link.icon} · ${link.category}` + (link.featured ? ' · featured' : '');
-        root.querySelector('[data-field="meta"]').textContent = meta;
+      function template(id: string): HTMLElement {
+        const tpl = $<HTMLTemplateElement>(id)!;
+        const fragment = tpl.content.cloneNode(true) as DocumentFragment;
+        return fragment.querySelector('.admin-link-item') as HTMLElement;
+      }
 
-        const upBtn = root.querySelector('[data-action="up"]');
-        const downBtn = root.querySelector('[data-action="down"]');
+      function renderLinks() {
+        linksList.replaceChildren();
+        linksCount.textContent = String(links.length);
+        links.forEach((link, index) => {
+          linksList.appendChild(
+            editingId === link.id ? renderEditRow(link) : renderViewRow(link, index),
+          );
+        });
+      }
+
+      function renderViewRow(link: LinkRow, index: number): HTMLElement {
+        const root = template('#link-row-tpl');
+        (root.querySelector('[data-field="title"]') as HTMLElement).textContent = link.title;
+        (root.querySelector('[data-field="url"]') as HTMLElement).textContent = link.url;
+        (root.querySelector('[data-field="meta"]') as HTMLElement).textContent =
+          `${link.icon} · ${link.category}` + (link.featured ? ' · featured' : '');
+
+        const upBtn = root.querySelector('[data-action="up"]') as HTMLButtonElement;
+        const downBtn = root.querySelector('[data-action="down"]') as HTMLButtonElement;
         upBtn.disabled = index === 0;
         downBtn.disabled = index >= links.length - 1;
         upBtn.addEventListener('click', () => moveLink(index, -1));
         downBtn.addEventListener('click', () => moveLink(index, 1));
-        root.querySelector('[data-action="edit"]').addEventListener('click', () => {
+
+        root.querySelector('[data-action="edit"]')!.addEventListener('click', () => {
           editingId = link.id;
           renderLinks();
         });
-        root.querySelector('[data-action="del"]').addEventListener('click', () => deleteLink(link.id));
+        root
+          .querySelector('[data-action="del"]')!
+          .addEventListener('click', () => deleteLink(link.id));
         return root;
       }
 
-      function renderEditRow(link) {
-        const tpl = $('#link-edit-tpl').content.cloneNode(true);
-        const root = tpl.querySelector('.admin-link-item');
-        const form = root.querySelector('form');
+      function renderEditRow(link: LinkRow): HTMLElement {
+        const root = template('#link-edit-tpl');
+        const form = root.querySelector('form') as HTMLFormElement;
 
-        const iconSel = byName(form, 'icon');
-        ICONS.forEach((ic) => {
-          const opt = document.createElement('option');
-          opt.value = ic;
-          opt.textContent = ic;
-          if (ic === link.icon) opt.selected = true;
-          iconSel.appendChild(opt);
-        });
-        const catSel = byName(form, 'category');
-        CATEGORIES.forEach((c) => {
-          const opt = document.createElement('option');
-          opt.value = c;
-          opt.textContent = c;
-          if (c === link.category) opt.selected = true;
-          catSel.appendChild(opt);
-        });
-        byName(form, 'title').value = link.title;
-        byName(form, 'url').value = link.url;
-        byName(form, 'featured').checked = !!link.featured;
+        // The option lists are rendered into the template server side, from the
+        // same vocabulary the API validates against.
+        const iconSel = byName<HTMLSelectElement>(form, 'icon');
+        const catSel = byName<HTMLSelectElement>(form, 'category');
+        iconSel.value = link.icon;
+        catSel.value = link.category;
+        byName<HTMLInputElement>(form, 'title').value = link.title;
+        byName<HTMLInputElement>(form, 'url').value = link.url;
+        byName<HTMLInputElement>(form, 'featured').checked = Boolean(link.featured);
 
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const payload = {
-            title: byName(form, 'title').value,
-            url: byName(form, 'url').value,
+            title: byName<HTMLInputElement>(form, 'title').value,
+            url: byName<HTMLInputElement>(form, 'url').value,
             icon: iconSel.value,
             category: catSel.value,
-            featured: byName(form, 'featured').checked,
+            featured: byName<HTMLInputElement>(form, 'featured').checked,
           };
           try {
-            await api(`/admin/links/${link.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+            await api(`/admin/links/${link.id}`, {
+              method: 'PUT',
+              body: JSON.stringify(payload),
+            });
             editingId = null;
             await reloadLinks();
             showToast('Link updated');
           } catch (err) {
-            showToast('Error: ' + err.message);
+            showToast('Error: ' + message(err));
           }
         });
-        root.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+
+        root.querySelector('[data-action="cancel"]')!.addEventListener('click', () => {
           editingId = null;
           renderLinks();
         });
@@ -419,37 +468,40 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       }
 
       async function reloadLinks() {
-        const res = await api('/admin/links');
-        links = res.links || [];
+        const res = await api<{ links: LinkRow[] }>('/admin/links');
+        links = res.links ?? [];
         renderLinks();
       }
 
-      async function deleteLink(id) {
+      async function deleteLink(id: number) {
         if (!confirm('Delete this link?')) return;
         try {
           await api(`/admin/links/${id}`, { method: 'DELETE' });
+          if (editingId === id) editingId = null;
           await reloadLinks();
           showToast('Link deleted');
         } catch (err) {
-          showToast('Error: ' + err.message);
+          showToast('Error: ' + message(err));
         }
       }
 
       let reordering = false;
-      async function moveLink(index, dir) {
+      async function moveLink(index: number, dir: number) {
         if (reordering) return;
-        const current = links[index];
-        const other = links[index + dir];
-        if (!current || !other) return;
+        const target = index + dir;
+        if (!links[index] || !links[target]) return;
+
+        // One batched write for the whole list. Two independent PUTs could
+        // half-apply and leave the ordering corrupted with no rollback.
+        const ids = links.map((link) => link.id);
+        [ids[index], ids[target]] = [ids[target], ids[index]];
+
         reordering = true;
         try {
-          await Promise.all([
-            api(`/admin/links/${current.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: other.sort_order }) }),
-            api(`/admin/links/${other.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: current.sort_order }) }),
-          ]);
+          await api('/admin/links/reorder', { method: 'POST', body: JSON.stringify({ ids }) });
           await reloadLinks();
         } catch (err) {
-          showToast('Error: ' + err.message);
+          showToast('Error: ' + message(err));
         } finally {
           reordering = false;
         }
@@ -458,11 +510,11 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
       addLinkForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-          title: byName(addLinkForm, 'title').value,
-          url: byName(addLinkForm, 'url').value,
-          icon: byName(addLinkForm, 'icon').value,
-          category: byName(addLinkForm, 'category').value,
-          featured: byName(addLinkForm, 'featured').checked,
+          title: byName<HTMLInputElement>(addLinkForm, 'title').value,
+          url: byName<HTMLInputElement>(addLinkForm, 'url').value,
+          icon: byName<HTMLSelectElement>(addLinkForm, 'icon').value,
+          category: byName<HTMLSelectElement>(addLinkForm, 'category').value,
+          featured: byName<HTMLInputElement>(addLinkForm, 'featured').checked,
         };
         if (!payload.title || !payload.url) return;
         try {
@@ -471,13 +523,13 @@ const BANNER_TYPES = ['info', 'urgent', 'success'];
           await reloadLinks();
           showToast('Link added');
         } catch (err) {
-          showToast('Error: ' + err.message);
+          showToast('Error: ' + message(err));
         }
       });
 
       // CMS markup is only present when the server authenticated the request
       if (cms) {
-        loadAll().catch(() => {});
+        loadAll().catch((err) => showToast('Error: ' + message(err)));
       }
     </script>
 

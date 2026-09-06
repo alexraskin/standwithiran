@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getNewsItems } from '../../lib/news';
 
-export const prerender = false;
 
 const CACHE_MAX_AGE = 600;
 

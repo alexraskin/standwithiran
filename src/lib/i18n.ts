@@ -47,9 +47,6 @@ export const translations = {
   },
 } as const;
 
-export const LOCALES = ['en', 'fa'] as const;
-export const DEFAULT_LOCALE = 'en';
-
 export type Lang = keyof typeof translations;
 export type TranslationKey = keyof (typeof translations)['en'];
 
