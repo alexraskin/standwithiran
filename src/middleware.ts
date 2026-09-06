@@ -18,6 +18,18 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Cross-Origin-Opener-Policy': 'same-origin',
 };
 
+/**
+ * Content is edited through the CMS, so the window is short. Shared caches keep
+ * serving the previous render while the next one is fetched, taking D1 off the
+ * critical path for repeat visitors.
+ *
+ * This lives here rather than in the page: `Astro.response.headers` only
+ * applies before the response starts streaming, so a write from inside a child
+ * component is silently dropped.
+ */
+const CACHED_PATHS = new Set(['/', '/fa', '/fa/']);
+const PAGE_CACHE_CONTROL = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
+
 /** The Host header is authoritative; `request.url` is rebuilt by the adapter and
  *  does not always carry the hostname the client asked for. */
 function requestHost(request: Request, url: URL): string {
@@ -41,6 +53,10 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(name, value);
+  }
+
+  if (response.status === 200 && CACHED_PATHS.has(url.pathname)) {
+    response.headers.set('Cache-Control', PAGE_CACHE_CONTROL);
   }
 
   if (NOINDEX_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))) {
