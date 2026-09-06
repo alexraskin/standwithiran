@@ -42,9 +42,9 @@ const graph: Record<string, unknown>[] = [
     url: `${SITE_URL}/`,
     logo: {
       '@type': 'ImageObject',
-      url: `${SITE_URL}/images/standwithiran.png`,
-      width: 192,
-      height: 192,
+      url: `${SITE_URL}/icon-512.png`,
+      width: 512,
+      height: 512,
     },
     description: copy.ogDescription,
   },
@@ -110,9 +110,10 @@ const graph: Record<string, unknown>[] = [
     />
 
     <Font cssVariable="--font-newsreader" preload />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" href="/images/standwithiran.png" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="/images/standwithiran.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
     <slot />
