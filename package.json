@@ -10,7 +10,7 @@
 		"build": "astro build",
 		"preview": "astro build && astro preview",
 		"astro": "astro",
-		"generate-types": "wrangler types",
+		"check": "astro check",
 		"deploy": "astro build && wrangler deploy",
 		"cf-typegen": "wrangler types",
 		"db:migrate": "wrangler d1 migrations apply standwithiran-db --remote",
@@ -18,11 +18,11 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.1.10",
-		"astro": "^6.1.8",
-		"he": "^1.2.0"
+		"astro": "^6.1.8"
 	},
 	"devDependencies": {
-		"@types/he": "^1.2.3",
+		"@astrojs/check": "^0.9.5",
+		"typescript": "^5.9.3",
 		"wrangler": "^4.84.1"
 	},
 	"overrides": {

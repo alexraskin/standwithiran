@@ -2,7 +2,6 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { canonicalFor, isoDate, OG_IMAGE } from '../lib/seo';
 
-export const prerender = false;
 
 const ALTERNATES = `
     <xhtml:link rel="alternate" hreflang="en" href="${canonicalFor('en')}" />

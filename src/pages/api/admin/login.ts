@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { expectedToken, SESSION_COOKIE } from '../../../lib/auth';
-
-export const prerender = false;
-
-const SESSION_MAX_AGE = 60 * 60 * 12; // 12 hours
+import {
+  constantTimeEqual,
+  createSession,
+  SESSION_COOKIE,
+  SESSION_MAX_AGE,
+} from '../../../lib/auth';
 
 // Best-effort, per-isolate brute-force throttle. Not a hard guarantee (Workers
 // isolates are ephemeral and an attacker may hit several), but it meaningfully
@@ -13,8 +14,17 @@ const WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 8;
 const attempts = new Map<string, { count: number; first: number }>();
 
-function rateState(ip: string) {
-  const now = Date.now();
+/**
+ * Drops entries whose window has closed. Without this the map only ever shrank
+ * on a successful login, so it grew for the life of the isolate.
+ */
+function sweep(now: number): void {
+  for (const [ip, entry] of attempts) {
+    if (now - entry.first > WINDOW_MS) attempts.delete(ip);
+  }
+}
+
+function rateState(ip: string, now: number) {
   const entry = attempts.get(ip);
   if (!entry || now - entry.first > WINDOW_MS) {
     return { count: 0, first: now };
@@ -23,20 +33,23 @@ function rateState(ip: string) {
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  const now = Date.now();
+  sweep(now);
+
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const state = rateState(ip);
+  const state = rateState(ip, now);
 
   if (state.count >= MAX_FAILURES) {
-    const retryAfter = Math.ceil((state.first + WINDOW_MS - Date.now()) / 1000);
+    const retryAfter = Math.ceil((state.first + WINDOW_MS - now) / 1000);
     return Response.json(
       { error: 'Too many attempts. Try again later.' },
       { status: 429, headers: { 'Retry-After': String(Math.max(retryAfter, 1)) } },
     );
   }
 
-  let body: { password: string };
+  let body: { password?: unknown };
   try {
-    body = await request.json<{ password: string }>();
+    body = await request.json<{ password?: unknown }>();
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
@@ -46,7 +59,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return Response.json({ error: 'Admin not configured' }, { status: 500 });
   }
 
-  if (body.password !== password) {
+  const submitted = typeof body.password === 'string' ? body.password : '';
+  if (!constantTimeEqual(submitted, password)) {
     attempts.set(ip, { count: state.count + 1, first: state.first });
     // small delay to slow automated guessing
     await new Promise((r) => setTimeout(r, 500));
@@ -55,8 +69,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   attempts.delete(ip);
 
-  const token = await expectedToken();
-  cookies.set(SESSION_COOKIE, token!, {
+  cookies.set(SESSION_COOKIE, await createSession(), {
     httpOnly: true,
     secure: import.meta.env.PROD,
     sameSite: 'strict',

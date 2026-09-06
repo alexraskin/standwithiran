@@ -1,0 +1,60 @@
+---
+import { env } from 'cloudflare:workers';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FlagStripe from './FlagStripe.astro';
+import LangToggle from './LangToggle.astro';
+import SiteBanner from './SiteBanner.astro';
+import ProfilePanel from './ProfilePanel.astro';
+import StatsPanel from './StatsPanel.astro';
+import NewsPanel from './NewsPanel.astro';
+import ResourcesPanel from './ResourcesPanel.astro';
+import SharePanel from './SharePanel.astro';
+import SiteFooter from './SiteFooter.astro';
+import { getDir, type Lang } from '../lib/i18n';
+import { getSiteData } from '../lib/site-data';
+import { resourcesItemList } from '../lib/seo';
+
+/**
+ * The whole home page for one locale. `index.astro` and `fa/index.astro`
+ * previously duplicated this markup and differed in three lines, so every new
+ * panel had to be added twice.
+ */
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const site = await getSiteData(env.DB);
+const description =
+  lang === 'fa'
+    ? site.profile.description_fa || site.profile.description
+    : site.profile.description;
+
+// Content is edited through the CMS, so the window is short. Shared caches keep
+// serving the previous render while the next one is fetched, which takes D1 off
+// the critical path for repeat visitors.
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=60, stale-while-revalidate=600',
+);
+---
+
+<BaseLayout
+  lang={lang}
+  lastUpdated={site.lastUpdated}
+  jsonLd={[resourcesItemList(site.links, lang)]}
+>
+  <FlagStripe />
+  <LangToggle lang={lang} />
+  <SiteBanner banner={site.banner} />
+
+  <main class="container" dir={getDir(lang)}>
+    <ProfilePanel description={description} lang={lang} />
+    <StatsPanel lang={lang} stats={site.stats} />
+    <NewsPanel lang={lang} />
+    <ResourcesPanel links={site.links} lang={lang} />
+    <SharePanel lang={lang} />
+    <SiteFooter contactEmail={site.contactEmail} lastUpdated={site.lastUpdated} lang={lang} />
+  </main>
+</BaseLayout>

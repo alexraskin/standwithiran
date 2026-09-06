@@ -8,6 +8,17 @@ export interface Link {
   sort_order: number;
 }
 
+/** Raw `links` row shape as D1 returns it, before `featured` is narrowed. */
+export interface LinkRow extends Omit<Link, 'featured'> {
+  featured: number;
+}
+
+export interface StatDates {
+  amini: string;
+  protest: string;
+  blackout: string;
+}
+
 export interface SiteData {
   links: Link[];
   banner: {
@@ -20,6 +31,7 @@ export interface SiteData {
     description: string;
     description_fa: string;
   };
+  stats: StatDates;
   contactEmail: string;
   lastUpdated: string;
 }

@@ -1,25 +1,28 @@
-import type { SiteData } from './types';
+import type { LinkRow, SiteData } from './types';
+
+/** Columns are named rather than selected with `*` so a schema change surfaces
+ *  as a type error instead of an undefined field at render time. */
+const LINK_COLUMNS = 'id, title, url, icon, category, featured, sort_order';
+
+/** Fallbacks for stat dates, used when the config row is missing or unparseable. */
+export const DEFAULT_STAT_DATES = {
+  amini: '2022-09-16',
+  protest: '2025-12-28',
+  blackout: '2026-01-08',
+} as const;
 
 export async function getSiteData(db: D1Database): Promise<SiteData> {
   const [linksResult, configResult] = await Promise.all([
-    db.prepare('SELECT * FROM links ORDER BY sort_order ASC').all(),
-    db.prepare('SELECT key, value FROM config').all(),
+    db.prepare(`SELECT ${LINK_COLUMNS} FROM links ORDER BY sort_order ASC`).all<LinkRow>(),
+    db.prepare('SELECT key, value FROM config').all<{ key: string; value: string }>(),
   ]);
 
   const config: Record<string, string> = {};
-  for (const row of configResult.results as { key: string; value: string }[]) {
+  for (const row of configResult.results) {
     config[row.key] = row.value;
   }
 
-  const links = (linksResult.results as Array<Record<string, unknown>>).map((row) => ({
-    id: row.id as number,
-    title: row.title as string,
-    url: row.url as string,
-    icon: row.icon as string,
-    category: row.category as string,
-    featured: row.featured === 1,
-    sort_order: row.sort_order as number,
-  }));
+  const links = linksResult.results.map((row) => ({ ...row, featured: row.featured === 1 }));
 
   return {
     links,
@@ -32,6 +35,11 @@ export async function getSiteData(db: D1Database): Promise<SiteData> {
     profile: {
       description: config.profile_description || '',
       description_fa: config.profile_description_fa || '',
+    },
+    stats: {
+      amini: config.stat_amini_date || DEFAULT_STAT_DATES.amini,
+      protest: config.stat_protest_date || DEFAULT_STAT_DATES.protest,
+      blackout: config.stat_blackout_date || DEFAULT_STAT_DATES.blackout,
     },
     contactEmail: config.contact_email || '',
     lastUpdated: config.last_updated || '',

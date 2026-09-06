@@ -1,7 +1,9 @@
-import he from 'he';
+import { decodeEntities } from './entities';
 import type { NewsItem } from './types';
 
 const RSS_URL = 'https://azadiwire.org/feed.xml';
+const MAX_ITEMS = 5;
+const DESCRIPTION_CHARS = 200;
 
 export async function getNewsItems(): Promise<NewsItem[] | null> {
   try {
@@ -17,28 +19,28 @@ export async function getNewsItems(): Promise<NewsItem[] | null> {
 
     const xml = await res.text();
     const items: NewsItem[] = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    const itemRegex = /<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi;
     let match: RegExpExecArray | null;
 
     while ((match = itemRegex.exec(xml)) !== null) {
       const itemXml = match[1];
-      const title = extractTag(itemXml, 'title');
-      const link = extractTag(itemXml, 'link');
-      const pubDate = extractTag(itemXml, 'pubDate');
-      const description = extractTag(itemXml, 'description');
-      const category = extractTag(itemXml, 'category');
+      const title = clean(extractTag(itemXml, 'title'));
+      // The link is decoded like every other field. Left raw it kept the
+      // `&amp;` escaping the feed is required to use, producing broken hrefs
+      // for any item whose URL carries query parameters.
+      const link = decodeEntities(extractTag(itemXml, 'link')).trim();
 
-      if (title && link) {
-        items.push({
-          title: he.decode(stripHtml(title)),
-          link,
-          pubDate: pubDate || '',
-          description: he.decode(stripHtml(description || '')).slice(0, 200),
-          category: he.decode(stripHtml(category || '')),
-        });
-      }
+      if (!title || !link) continue;
 
-      if (items.length >= 5) break;
+      items.push({
+        title,
+        link,
+        pubDate: extractTag(itemXml, 'pubDate'),
+        description: clean(extractTag(itemXml, 'description')).slice(0, DESCRIPTION_CHARS),
+        category: clean(extractTag(itemXml, 'category')),
+      });
+
+      if (items.length >= MAX_ITEMS) break;
     }
 
     return items;
@@ -48,12 +50,23 @@ export async function getNewsItems(): Promise<NewsItem[] | null> {
 }
 
 function extractTag(xml: string, tag: string): string {
-  const cdataMatch = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`).exec(xml);
-  if (cdataMatch) return cdataMatch[1].trim();
-  const match = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`).exec(xml);
-  return match ? match[1].trim() : '';
+  const cdata = new RegExp(
+    `<${tag}(?:\\s[^>]*)?>\\s*<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>\\s*<\\/${tag}>`,
+    'i',
+  ).exec(xml);
+  if (cdata) return cdata[1].trim();
+
+  const plain = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i').exec(xml);
+  return plain ? plain[1].trim() : '';
 }
 
-function stripHtml(text: string): string {
-  return text.replace(/<[^>]*>/g, '');
+/**
+ * Decode first, then strip. The previous order stripped literal tags but left
+ * entity-encoded ones (`&lt;b&gt;`) to decode into visible markup afterwards.
+ */
+function clean(text: string): string {
+  return decodeEntities(text)
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }

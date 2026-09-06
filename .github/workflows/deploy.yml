@@ -24,15 +24,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run check
+
+      # Build before migrating. Applying migrations first meant a failed build
+      # left the database ahead of the deployed code.
+      - name: Build
+        run: npm run build
+
       - name: Apply D1 migrations
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply standwithiran-db --remote
-
-      - name: Build
-        run: npm run build
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3

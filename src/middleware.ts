@@ -7,6 +7,17 @@ const WWW_HOST = `www.${CANONICAL_HOST}`;
  *  assets, so SSR routes have to set the header themselves. */
 const NOINDEX_PREFIXES = ['/api/', '/admin'];
 
+/** Applied to every SSR response. `public/_headers` covers only what the ASSETS
+ *  binding serves, so without this every page and API route shipped bare. */
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  // Legacy backstop for the CSP's frame-ancestors directive.
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+};
+
 /** The Host header is authoritative; `request.url` is rebuilt by the adapter and
  *  does not always carry the hostname the client asked for. */
 function requestHost(request: Request, url: URL): string {
@@ -27,6 +38,10 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   }
 
   const response = await next();
+
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    response.headers.set(name, value);
+  }
 
   if (NOINDEX_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
