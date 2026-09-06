@@ -30,14 +30,6 @@ const description =
   lang === 'fa'
     ? site.profile.description_fa || site.profile.description
     : site.profile.description;
-
-// Content is edited through the CMS, so the window is short. Shared caches keep
-// serving the previous render while the next one is fetched, which takes D1 off
-// the critical path for repeat visitors.
-Astro.response.headers.set(
-  'Cache-Control',
-  'public, max-age=0, s-maxage=60, stale-while-revalidate=600',
-);
 ---
 
 <BaseLayout
