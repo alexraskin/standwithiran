@@ -25,6 +25,7 @@ const VALIDATORS: Record<string, (value: string) => boolean> = {
   stat_amini_date: isIsoDateOrEmpty,
   stat_protest_date: isIsoDateOrEmpty,
   stat_blackout_date: isIsoDateOrEmpty,
+  stat_war_date: isIsoDateOrEmpty,
 };
 
 export const GET: APIRoute = async ({ request }) => {

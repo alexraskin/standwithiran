@@ -15,25 +15,47 @@ const { lang, stats } = Astro.props;
 
 const now = Date.now();
 
-/** Falls back to the seeded date when a config row is missing or unparseable,
- *  and never reports a negative count for a date in the future. */
+const parseIso = (value: string) => Date.parse(`${value}T00:00:00Z`);
+
+/** Never reports a negative count for a date in the future. */
+const daysBetween = (startMs: number) => Math.max(0, Math.floor((now - startMs) / 86_400_000));
+
+/** Falls back to the seeded date when a config row is missing or unparseable. */
 function daysSince(value: string, fallback: string): number {
-  const parsed = Date.parse(`${value}T00:00:00Z`);
-  const start = Number.isNaN(parsed) ? Date.parse(`${fallback}T00:00:00Z`) : parsed;
-  return Math.max(0, Math.floor((now - start) / 86_400_000));
+  const parsed = parseIso(value);
+  return daysBetween(Number.isNaN(parsed) ? parseIso(fallback) : parsed);
+}
+
+/** For counters with no seeded fallback. Returns null so the caller can drop
+ *  the block rather than render a count from a date nobody set. */
+function daysSinceOptional(value: string): number | null {
+  const parsed = parseIso(value);
+  return Number.isNaN(parsed) ? null : daysBetween(parsed);
 }
 
 const numLocale = lang === 'fa' ? 'fa-IR' : 'en-US';
 const fmt = (n: number) => n.toLocaleString(numLocale);
 
+// The war counter is optional. While `stat_war_date` is unset the strip is
+// exactly the three counters it has always been; once set, the war count takes
+// the primary slot and Amini drops to secondary.
+const warDays = daysSinceOptional(stats.war);
+
 const blocks = [
-  { value: daysSince(stats.amini, DEFAULT_STAT_DATES.amini), label: t(lang, 'statDays'), primary: true },
+  ...(warDays === null
+    ? []
+    : [{ value: warDays, label: t(lang, 'statWar'), primary: true }]),
+  {
+    value: daysSince(stats.amini, DEFAULT_STAT_DATES.amini),
+    label: t(lang, 'statDays'),
+    primary: warDays === null,
+  },
   { value: daysSince(stats.protest, DEFAULT_STAT_DATES.protest), label: t(lang, 'statProtest'), primary: false },
   { value: daysSince(stats.blackout, DEFAULT_STAT_DATES.blackout), label: t(lang, 'statBlackout'), primary: false },
 ];
 ---
 
-<section class="stats-strip">
+<section class:list={['stats-strip', { 'stats-strip-wrap': blocks.length > 3 }]}>
   {blocks.map((block, i) => (
     <>
       {i > 0 && <div class="stat-divider" />}

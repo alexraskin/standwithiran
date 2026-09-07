@@ -17,6 +17,9 @@ export interface StatDates {
   amini: string;
   protest: string;
   blackout: string;
+  /** Optional. Empty until an admin sets it; the counter is hidden while empty
+   *  rather than falling back to an invented date. */
+  war: string;
 }
 
 export interface SiteData {

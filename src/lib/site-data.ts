@@ -4,7 +4,9 @@ import type { LinkRow, SiteData } from './types';
  *  as a type error instead of an undefined field at render time. */
 const LINK_COLUMNS = 'id, title, url, icon, category, featured, sort_order';
 
-/** Fallbacks for stat dates, used when the config row is missing or unparseable. */
+/** Fallbacks for stat dates, used when the config row is missing or unparseable.
+ *  `war` has no entry on purpose: there is no defensible default start date, so
+ *  the counter stays hidden until an admin sets one. */
 export const DEFAULT_STAT_DATES = {
   amini: '2022-09-16',
   protest: '2025-12-28',
@@ -40,6 +42,7 @@ export async function getSiteData(db: D1Database): Promise<SiteData> {
       amini: config.stat_amini_date || DEFAULT_STAT_DATES.amini,
       protest: config.stat_protest_date || DEFAULT_STAT_DATES.protest,
       blackout: config.stat_blackout_date || DEFAULT_STAT_DATES.blackout,
+      war: config.stat_war_date || '',
     },
     contactEmail: config.contact_email || '',
     lastUpdated: config.last_updated || '',

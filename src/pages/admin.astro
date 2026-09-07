@@ -143,6 +143,11 @@ const configured = isAccessConfigured() || import.meta.env.DEV;
                   <label for="cfg-blackout">Internet blackout (YYYY-MM-DD)</label>
                   <input id="cfg-blackout" name="stat_blackout_date" type="date" required />
                 </div>
+                <div class="form-group">
+                  <label for="cfg-war">War began (YYYY-MM-DD)</label>
+                  <input id="cfg-war" name="stat_war_date" type="date" />
+                  <p class="form-hint">Leave empty to hide this counter.</p>
+                </div>
                 <button type="submit" class="btn btn-primary">Save Counters</button>
               </form>
             </div>
@@ -608,6 +613,12 @@ const configured = isAccessConfigured() || import.meta.env.DEV;
         border-color: var(--accent-red);
       }
       .btn-danger:hover { background: var(--accent-red); color: white; }
+      .form-hint {
+        margin: 0.35rem 0 0;
+        font-size: 0.7rem;
+        opacity: 0.6;
+      }
+
       .admin-identity {
         display: flex;
         align-items: center;

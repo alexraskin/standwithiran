@@ -39,11 +39,13 @@ The two `CF_ACCESS_*` vars are account-specific and do not exist until the Acces
 
 Two tables:
 - `links` — ordered resource list (`sort_order ASC`), with `featured` flag and `category`/`icon` strings.
-- `config` — generic key/value store. All site-wide editable content (banner, profile description EN + FA, contact email, last-updated date, the three stat-counter dates) lives here.
+- `config` — generic key/value store. All site-wide editable content (banner, profile description EN + FA, contact email, last-updated date, the four stat-counter dates) lives here.
 
 `sessions` was dropped in `migrations/004` when admin auth moved to Cloudflare Access; the Worker no longer mints or stores sessions.
 
-Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. All four date keys (`last_updated` and the three `stat_*_date` rows) are ISO `YYYY-MM-DD`, entered through `<input type="date">` and validated with `isIsoDateOrEmpty`. `last_updated` is rendered through `formatDate` in `src/lib/i18n.ts`, which localises it for the footer while the stored ISO value feeds the sitemap's `<lastmod>` and schema.org `dateModified`. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
+Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. All five date keys (`last_updated` and the four `stat_*_date` rows) are ISO `YYYY-MM-DD`, entered through `<input type="date">` and validated with `isIsoDateOrEmpty`. `last_updated` is rendered through `formatDate` in `src/lib/i18n.ts`, which localises it for the footer while the stored ISO value feeds the sitemap's `<lastmod>` and schema.org `dateModified`. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
+
+`stat_war_date` is the one counter with no entry in `DEFAULT_STAT_DATES`: there is no defensible default start date, so `StatsPanel` omits the block entirely while the value is empty and the strip keeps its original three counters. Setting it promotes the war count to the primary slot, drops Amini to secondary, and switches the strip to the wrapping four-block layout (`.stats-strip-wrap`).
 
 `src/lib/content-schema.ts` is the single source for the icon and category vocabularies, the icon-to-emoji map, and the URL/date validators. The admin form options, the public rendering, and the API validation all read from it.
 

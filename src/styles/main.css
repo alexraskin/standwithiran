@@ -705,6 +705,36 @@ body:has(.banner) .container {
   flex-shrink: 0;
 }
 
+/* Four counters in one no-wrap row leaves each block ~70px on a small phone,
+   which crushes the labels. Only the four-block strip wraps; the three-block
+   layout is untouched. */
+.stats-strip-wrap {
+  flex-wrap: wrap;
+  row-gap: 1.5rem;
+}
+
+.stats-strip-wrap .stat-block {
+  flex-basis: 38%;
+}
+
+@media (max-width: 599px) {
+  /* Dividers between wrapped rows read as stray marks, and the row gap already
+     separates the blocks. */
+  .stats-strip-wrap .stat-divider {
+    display: none;
+  }
+}
+
+@media (min-width: 600px) {
+  .stats-strip-wrap {
+    flex-wrap: nowrap;
+  }
+
+  .stats-strip-wrap .stat-block {
+    flex-basis: 0;
+  }
+}
+
 @media (min-width: 480px) {
   .stat-number {
     font-size: 3rem;
