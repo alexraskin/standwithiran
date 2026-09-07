@@ -1,91 +1,221 @@
 import { env } from 'cloudflare:workers';
 
-export const SESSION_COOKIE = 'admin_session';
-
-/** Session lifetime, in seconds. Enforced server side, not just by the cookie. */
-export const SESSION_MAX_AGE = 60 * 60 * 12;
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return toHex(new Uint8Array(hashBuffer));
-}
-
-function toHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-/** 256 bits of CSPRNG output. Never derived from the admin password. */
-function randomToken(): string {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return toHex(bytes);
-}
-
 /**
- * Length-independent comparison over equal-length strings. The early return on
- * differing lengths leaks only the length, which is not secret here.
+ * Admin auth is delegated to Cloudflare Access (Zero Trust). Access sits in
+ * front of `/admin` and `/api/admin/*`, authenticates the visitor against the
+ * policy configured in the dashboard, and forwards the request with a signed
+ * JWT. This module does the other half of the contract: it verifies that JWT,
+ * so a request that reaches the Worker without going through Access — a
+ * preview deployment URL, a misconfigured route — is rejected rather than
+ * trusted.
+ *
+ * Verifying is not optional. The header is attacker-controlled on any path
+ * Access does not cover, so an unverified read of it would be no auth at all.
  */
-export function constantTimeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+
+/** Header Access adds to the origin request. Also mirrored in a cookie. */
+const JWT_HEADER = 'Cf-Access-Jwt-Assertion';
+const JWT_COOKIE = 'CF_Authorization';
+
+/** Clock skew tolerance, in seconds, for `exp`/`nbf`/`iat`. */
+const SKEW = 60;
+
+/** JWKS cache lifetime per isolate. Access rotates signing keys periodically. */
+const JWKS_TTL_MS = 60 * 60 * 1000;
+
+interface AccessClaims {
+  aud?: string | string[];
+  email?: string;
+  exp?: number;
+  iat?: number;
+  iss?: string;
+  nbf?: number;
+  sub?: string;
+}
+
+export interface AccessIdentity {
+  email: string;
+  sub: string;
+}
+
+interface JwksCache {
+  keys: JsonWebKey[];
+  fetchedAt: number;
+}
+
+let jwksCache: JwksCache | null = null;
+
+function teamDomain(): string {
+  return (env.CF_ACCESS_TEAM_DOMAIN ?? '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
+function audienceTag(): string {
+  return (env.CF_ACCESS_AUD ?? '').trim();
+}
+
+/** True only when both Access settings are present. Missing config fails closed. */
+export function isAccessConfigured(): boolean {
+  return teamDomain() !== '' && audienceTag() !== '';
+}
+
+function base64UrlToBytes(input: string): Uint8Array<ArrayBuffer> {
+  const padded = input.replace(/-/g, '+').replace(/_/g, '/');
+  const binary = atob(padded + '='.repeat((4 - (padded.length % 4)) % 4));
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function decodeJsonSegment<T>(segment: string): T | null {
+  try {
+    return JSON.parse(new TextDecoder().decode(base64UrlToBytes(segment))) as T;
+  } catch {
+    return null;
   }
-  return diff === 0;
 }
 
 /**
- * Mints a session and returns the raw token for the cookie. Only its hash is
- * persisted. Expired rows are swept on the same round trip.
+ * Access publishes its signing keys at a well-known path on the team domain.
+ * Cached per isolate; a `kid` miss forces one refetch so key rotation does not
+ * lock the admin out until the isolate recycles.
  */
-export async function createSession(): Promise<string> {
-  const token = randomToken();
-  const now = Date.now();
-  await env.DB.batch([
-    env.DB.prepare('DELETE FROM sessions WHERE expires_at <= ?').bind(now),
-    env.DB
-      .prepare('INSERT INTO sessions (token_hash, created_at, expires_at) VALUES (?, ?, ?)')
-      .bind(await sha256Hex(token), now, now + SESSION_MAX_AGE * 1000),
-  ]);
-  return token;
+async function jwks(force: boolean): Promise<JsonWebKey[]> {
+  const fresh = jwksCache && Date.now() - jwksCache.fetchedAt < JWKS_TTL_MS;
+  if (!force && fresh) return jwksCache!.keys;
+
+  const res = await fetch(`https://${teamDomain()}/cdn-cgi/access/certs`);
+  if (!res.ok) throw new Error(`Access certs fetch failed: ${res.status}`);
+
+  const body = (await res.json()) as { keys?: JsonWebKey[] };
+  const keys = Array.isArray(body.keys) ? body.keys : [];
+  jwksCache = { keys, fetchedAt: Date.now() };
+  return keys;
 }
 
-/** Revokes a session server side so a captured cookie stops working. */
-export async function destroySession(token: string | null): Promise<void> {
-  if (!token) return;
-  await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?')
-    .bind(await sha256Hex(token))
-    .run();
+async function verifySignature(
+  kid: string,
+  signingInput: string,
+  signature: Uint8Array<ArrayBuffer>,
+): Promise<boolean> {
+  for (const force of [false, true]) {
+    const keys = await jwks(force);
+    const jwk = keys.find((k) => (k as { kid?: string }).kid === kid);
+    if (!jwk) {
+      // Unknown kid on the cached set: refetch once, then give up.
+      if (!force) continue;
+      return false;
+    }
+
+    const key = await crypto.subtle.importKey(
+      'jwk',
+      jwk,
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
+
+    return crypto.subtle.verify(
+      'RSASSA-PKCS1-v1_5',
+      key,
+      signature,
+      new TextEncoder().encode(signingInput),
+    );
+  }
+  return false;
 }
 
-/** Reads the admin_session cookie value off a raw request. */
-export function readSessionCookie(request: Request): string | null {
-  const header = request.headers.get('Cookie');
-  if (!header) return null;
-  for (const part of header.split(';')) {
+/** Reads the Access JWT from the header, falling back to the cookie. */
+function readAssertion(request: Request): string | null {
+  const header = request.headers.get(JWT_HEADER);
+  if (header) return header;
+
+  const cookies = request.headers.get('Cookie');
+  if (!cookies) return null;
+  for (const part of cookies.split(';')) {
     const [name, ...rest] = part.trim().split('=');
-    if (name === SESSION_COOKIE) return rest.join('=');
+    if (name === JWT_COOKIE) return rest.join('=');
   }
   return null;
 }
 
-/** True when the request carries a session that exists and has not expired. */
-export async function isAuthenticated(request: Request): Promise<boolean> {
-  const token = readSessionCookie(request);
-  if (!token) return false;
+/**
+ * Verifies the Access assertion and returns the identity it carries, or null.
+ *
+ * Checks, in order: the token is a well-formed RS256 JWT, the signature matches
+ * a current Access signing key, the issuer is this team, the audience contains
+ * this application's tag, and the token is inside its validity window. The
+ * audience check is what stops a valid token minted for a *different* Access
+ * application on the same team from being replayed here.
+ */
+export async function getAccessIdentity(request: Request): Promise<AccessIdentity | null> {
+  if (!isAccessConfigured()) return null;
 
-  const row = await env.DB
-    .prepare('SELECT expires_at FROM sessions WHERE token_hash = ?')
-    .bind(await sha256Hex(token))
-    .first<{ expires_at: number }>();
+  const token = readAssertion(request);
+  if (!token) return null;
 
-  return row !== null && row.expires_at > Date.now();
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [rawHeader, rawPayload, rawSignature] = parts;
+
+  const header = decodeJsonSegment<{ alg?: string; kid?: string }>(rawHeader);
+  // Pin the algorithm. Accepting whatever the token names would allow "none"
+  // and HS256-signed-with-the-public-key forgeries.
+  if (!header || header.alg !== 'RS256' || !header.kid) return null;
+
+  const claims = decodeJsonSegment<AccessClaims>(rawPayload);
+  if (!claims) return null;
+
+  let signature: Uint8Array<ArrayBuffer>;
+  try {
+    signature = base64UrlToBytes(rawSignature);
+  } catch {
+    return null;
+  }
+
+  let ok = false;
+  try {
+    ok = await verifySignature(header.kid, `${rawHeader}.${rawPayload}`, signature);
+  } catch {
+    return null;
+  }
+  if (!ok) return null;
+
+  if (claims.iss !== `https://${teamDomain()}`) return null;
+
+  const aud = Array.isArray(claims.aud) ? claims.aud : claims.aud ? [claims.aud] : [];
+  if (!aud.includes(audienceTag())) return null;
+
+  const now = Math.floor(Date.now() / 1000);
+  if (typeof claims.exp !== 'number' || claims.exp + SKEW <= now) return null;
+  if (typeof claims.nbf === 'number' && claims.nbf - SKEW > now) return null;
+  if (typeof claims.iat === 'number' && claims.iat - SKEW > now) return null;
+
+  return { email: claims.email ?? '', sub: claims.sub ?? '' };
 }
 
-/** Returns a 401 Response when unauthenticated, or null when the request is allowed. */
+/**
+ * True when the request carries a valid Access assertion.
+ *
+ * `import.meta.env.DEV` is substituted at build time and is always false in a
+ * production bundle, so the local bypass cannot ship. Without it `npm run dev`
+ * would be unusable: Access only exists in front of the deployed hostname.
+ */
+export async function isAuthenticated(request: Request): Promise<boolean> {
+  if (import.meta.env.DEV) return true;
+  return (await getAccessIdentity(request)) !== null;
+}
+
+/** Best-effort display name for the signed-in admin. */
+export async function currentAdminEmail(request: Request): Promise<string> {
+  if (import.meta.env.DEV) return 'local dev (Access bypassed)';
+  return (await getAccessIdentity(request))?.email ?? '';
+}
+
+/** Returns a 401/500 Response when the request may not proceed, else null. */
 export async function verifyToken(request: Request): Promise<Response | null> {
-  if (!env.ADMIN_PASSWORD) {
+  if (import.meta.env.DEV) return null;
+
+  if (!isAccessConfigured()) {
     return Response.json({ error: 'Admin not configured' }, { status: 500 });
   }
   if (!(await isAuthenticated(request))) {

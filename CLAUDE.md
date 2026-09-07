@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 build. There is no unit test suite and no linter configured. Node >= 22.12 is
 required.
 
-Local dev requires `.dev.vars` with `ADMIN_PASSWORD=<something>` so `/admin` login works. Production uses a Worker secret: `npx wrangler secret put ADMIN_PASSWORD`.
+Local dev needs no admin credentials: Cloudflare Access does not exist in front of `localhost`, so `src/lib/auth.ts` bypasses the check under `import.meta.env.DEV`. That flag is substituted at build time and is always false in a production bundle, so the bypass cannot ship. Production needs two Worker vars, set with `npx wrangler secret put CF_ACCESS_TEAM_DOMAIN` and `npx wrangler secret put CF_ACCESS_AUD`.
 
 ## Architecture
 
@@ -27,20 +27,21 @@ Astro 6 SSR app deployed as a single Cloudflare Worker via `@astrojs/cloudflare`
 **Runtime bindings** (see `wrangler.jsonc`, typed in `worker-configuration.d.ts`):
 - `env.DB` — D1 database `standwithiran-db`
 - `env.ASSETS` — static asset fetcher
-- `env.ADMIN_PASSWORD` — secret; read by `src/lib/auth.ts`
+- `env.CF_ACCESS_TEAM_DOMAIN`, `env.CF_ACCESS_AUD` — Access application identity; read by `src/lib/auth.ts`
 
 Access bindings via `import { env } from 'cloudflare:workers'` (not via `Astro.locals`). This pattern is consistent across pages and API routes.
 
-`ADMIN_PASSWORD` is a secret, so it is absent from `wrangler.jsonc` and `wrangler types` cannot discover it. It is declared by hand on `Cloudflare.Env` in `src/env.d.ts`, which survives regeneration of `worker-configuration.d.ts`.
+The two `CF_ACCESS_*` vars are account-specific and do not exist until the Access application is created, so they are absent from `wrangler.jsonc` and `wrangler types` cannot discover them. They are declared by hand on `Cloudflare.Env` in `src/env.d.ts`, which survives regeneration of `worker-configuration.d.ts`. Putting them in `wrangler.jsonc` `vars` instead would make `wrangler types` narrow them to literal string types.
 
 **Type environment caveat:** `worker-configuration.d.ts` declares a global `interface Element` for HTMLRewriter that merges with the DOM `Element` and leaves `remove()` ambiguous. Any generic constrained by `Element` (`querySelector<T>`, `querySelectorAll<T>`) therefore fails to compile in client-side scripts. The CMS script in `admin.astro` casts instead; do the same in new client code.
 
 ### Data model (D1)
 
-Three tables:
+Two tables:
 - `links` — ordered resource list (`sort_order ASC`), with `featured` flag and `category`/`icon` strings.
 - `config` — generic key/value store. All site-wide editable content (banner, profile description EN + FA, contact email, last-updated date, the three stat-counter dates) lives here.
-- `sessions` — admin sessions (`migrations/003`), holding `sha256(token)` and an expiry.
+
+`sessions` was dropped in `migrations/004` when admin auth moved to Cloudflare Access; the Worker no longer mints or stores sessions.
 
 Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
 
@@ -52,13 +53,16 @@ Astro `i18n` config declares `en` (default, no prefix) and `fa` (`/fa/`). Transl
 
 ### Admin CMS
 
-`/admin` (`src/pages/admin.astro`) is a single-page CMS. Its script is a normal processed Astro `<script>` (typed and bundled), not `is:inline`. The page is gated server side: an unauthenticated request receives only the login form, never the CMS markup.
+`/admin` (`src/pages/admin.astro`) is a single-page CMS. Its script is a normal processed Astro `<script>` (typed and bundled), not `is:inline`. The page is gated server side: an unauthenticated request receives only a notice, never the CMS markup.
 
-1. `POST /api/admin/login` with `{ password }` — compares against `env.ADMIN_PASSWORD` in constant time, mints a 256-bit random token, stores `sha256(token)` in `sessions` with a 12 hour expiry, and sets it as an `httpOnly`, `SameSite=Strict` cookie. Requests are throttled by the Workers rate limiting binding `LOGIN_RATE_LIMITER` (8 per 60s per IP; `simple.period` accepts only 10 or 60).
-2. Admin endpoints call `verifyToken(request)`, which looks the hashed cookie up in `sessions` and checks the expiry.
-3. `POST /api/admin/logout` deletes the row, so a captured cookie stops working.
+Authentication is **Cloudflare Access** (Zero Trust). There is no login form, no password, and no session table. The Access application must cover both `standwithiran.org/admin*` and `standwithiran.org/api/admin/*`, with a policy naming the allowed identities.
 
-The cookie carries no password material, so a leak does not expose a crackable hash of `ADMIN_PASSWORD`.
+1. Access authenticates the visitor at the edge and forwards the request with a signed RS256 JWT in the `Cf-Access-Jwt-Assertion` header (mirrored in the `CF_Authorization` cookie).
+2. `src/lib/auth.ts` verifies that assertion: RS256 pinned (so `alg: none` and HS256-with-the-public-key forgeries are rejected), signature checked against the JWKS at `https://<team>/cdn-cgi/access/certs` (cached one hour per isolate, refetched once on an unknown `kid` so key rotation does not lock the admin out), `iss` equal to the team domain, `aud` containing `CF_ACCESS_AUD`, and `exp`/`nbf`/`iat` inside a 60 second skew.
+3. Admin endpoints keep calling `verifyToken(request)`; `admin.astro` calls `isAuthenticated`. Missing config fails closed with a 500.
+4. Logout is a link to `/cdn-cgi/access/logout`, handled by Cloudflare, not by the Worker.
+
+**Verifying is not optional.** The header is attacker-controlled on any path Access does not cover — a preview deployment URL, a route added later — so trusting it unverified would be no auth at all. The `aud` check is what stops a valid token minted for a different Access application on the same team from being replayed here.
 
 Admin endpoints:
 - `GET/POST /api/admin/links`, `PUT/DELETE /api/admin/links/[id]` — CRUD on `links`. Ids are validated and a write matching no row returns 404. URLs must be `http`/`https`.
