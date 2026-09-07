@@ -54,7 +54,7 @@ Astro `i18n` config declares `en` (default, no prefix) and `fa` (`/fa/`). Transl
 
 `/admin` (`src/pages/admin.astro`) is a single-page CMS. Its script is a normal processed Astro `<script>` (typed and bundled), not `is:inline`. The page is gated server side: an unauthenticated request receives only the login form, never the CMS markup.
 
-1. `POST /api/admin/login` with `{ password }` — compares against `env.ADMIN_PASSWORD` in constant time, mints a 256-bit random token, stores `sha256(token)` in `sessions` with a 12 hour expiry, and sets it as an `httpOnly`, `SameSite=Strict` cookie. Failed attempts are throttled per isolate (8 per 15 minutes per IP).
+1. `POST /api/admin/login` with `{ password }` — compares against `env.ADMIN_PASSWORD` in constant time, mints a 256-bit random token, stores `sha256(token)` in `sessions` with a 12 hour expiry, and sets it as an `httpOnly`, `SameSite=Strict` cookie. Requests are throttled by the Workers rate limiting binding `LOGIN_RATE_LIMITER` (8 per 60s per IP; `simple.period` accepts only 10 or 60).
 2. Admin endpoints call `verifyToken(request)`, which looks the hashed cookie up in `sessions` and checks the expiry.
 3. `POST /api/admin/logout` deletes the row, so a captured cookie stops working.
 
