@@ -21,7 +21,7 @@ const VALIDATORS: Record<string, (value: string) => boolean> = {
   profile_description: () => true,
   profile_description_fa: () => true,
   contact_email: (v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-  last_updated: () => true,
+  last_updated: isIsoDateOrEmpty,
   stat_amini_date: isIsoDateOrEmpty,
   stat_protest_date: isIsoDateOrEmpty,
   stat_blackout_date: isIsoDateOrEmpty,

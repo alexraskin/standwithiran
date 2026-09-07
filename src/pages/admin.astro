@@ -118,8 +118,8 @@ const configured = isAccessConfigured() || import.meta.env.DEV;
                   <input name="contact_email" type="email" />
                 </div>
                 <div class="form-group">
-                  <label for="cfg-last-updated">Last Updated</label>
-                  <input id="cfg-last-updated" name="last_updated" type="text" />
+                  <label for="cfg-last-updated">Last Updated (YYYY-MM-DD)</label>
+                  <input id="cfg-last-updated" name="last_updated" type="date" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save Config</button>
               </form>

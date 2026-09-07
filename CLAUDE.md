@@ -43,7 +43,7 @@ Two tables:
 
 `sessions` was dropped in `migrations/004` when admin auth moved to Cloudflare Access; the Worker no longer mints or stores sessions.
 
-Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
+Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. All four date keys (`last_updated` and the three `stat_*_date` rows) are ISO `YYYY-MM-DD`, entered through `<input type="date">` and validated with `isIsoDateOrEmpty`. `last_updated` is rendered through `formatDate` in `src/lib/i18n.ts`, which localises it for the footer while the stored ISO value feeds the sitemap's `<lastmod>` and schema.org `dateModified`. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
 
 `src/lib/content-schema.ts` is the single source for the icon and category vocabularies, the icon-to-emoji map, and the URL/date validators. The admin form options, the public rendering, and the API validation all read from it.
 

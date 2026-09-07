@@ -1,5 +1,5 @@
 ---
-import { t, type Lang } from '../lib/i18n';
+import { formatDate, t, type Lang } from '../lib/i18n';
 
 interface Props {
   contactEmail: string;
@@ -8,11 +8,20 @@ interface Props {
 }
 
 const { contactEmail, lastUpdated, lang } = Astro.props;
+
+// `last_updated` is stored ISO so the sitemap and schema.org can use it; the
+// footer shows the locale-formatted reading.
+const lastUpdatedLabel = formatDate(lastUpdated, lang);
+// Only a real ISO date belongs in `datetime`; a legacy free-text row would be
+// an invalid machine-readable value.
+const lastUpdatedIso = /^\d{4}-\d{2}-\d{2}$/.test(lastUpdated) ? lastUpdated : undefined;
 ---
 
 <footer class="footer" role="contentinfo">
   <div class="footer-slogan">{t(lang, 'slogan')}</div>
-  <div class="footer-meta">{t(lang, 'lastUpdated')}: {lastUpdated}</div>
+  <div class="footer-meta">
+    {t(lang, 'lastUpdated')}: <time datetime={lastUpdatedIso}>{lastUpdatedLabel}</time>
+  </div>
   <div class="footer-links">
     {/*
       The popup is a sibling of the button, not a descendant. A <button> takes

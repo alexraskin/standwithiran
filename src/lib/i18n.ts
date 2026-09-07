@@ -65,3 +65,34 @@ export function otherLocale(lang: Lang): Lang {
 export function localePath(lang: Lang): string {
   return lang === 'en' ? '/' : '/fa/';
 }
+
+/**
+ * Formats an ISO `YYYY-MM-DD` config date for display.
+ *
+ * `last_updated` is stored as ISO now that the admin field is a date picker,
+ * but the footer used to print whatever free text was typed in ("Feb 7, 2026").
+ * Formatting here keeps that reading while making the stored value machine
+ * readable for the sitemap's `<lastmod>` and schema.org `dateModified`.
+ *
+ * Anything that is not an ISO date is passed through untouched, so a legacy
+ * row written before the migration still renders as whatever it says.
+ *
+ * Farsi is formatted on the Gregorian calendar (`-u-ca-gregory`), matching what
+ * the page showed before. Dropping that subtag would switch it to the Persian
+ * calendar, which is a content decision, not a formatting one.
+ */
+export function formatDate(value: string, lang: Lang): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  // UTC throughout: formatting a UTC midnight in a behind-UTC zone rolls the
+  // date back a day.
+  return new Intl.DateTimeFormat(lang === 'fa' ? 'fa-IR-u-ca-gregory' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsed);
+}
