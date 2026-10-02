@@ -6,7 +6,6 @@ import LangToggle from './LangToggle.astro';
 import SiteBanner from './SiteBanner.astro';
 import ProfilePanel from './ProfilePanel.astro';
 import StatsPanel from './StatsPanel.astro';
-import NewsPanel from './NewsPanel.astro';
 import ResourcesPanel from './ResourcesPanel.astro';
 import SharePanel from './SharePanel.astro';
 import SiteFooter from './SiteFooter.astro';
@@ -44,7 +43,6 @@ const description =
   <main class="container" dir={getDir(lang)}>
     <ProfilePanel description={description} lang={lang} />
     <StatsPanel lang={lang} stats={site.stats} />
-    <NewsPanel lang={lang} />
     <ResourcesPanel links={site.links} lang={lang} />
     <SharePanel lang={lang} />
     <SiteFooter contactEmail={site.contactEmail} lastUpdated={site.lastUpdated} lang={lang} />

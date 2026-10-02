@@ -71,10 +71,6 @@ Admin endpoints:
 - `POST /api/admin/links/reorder` with `{ ids }` — rewrites `sort_order` for the whole list in one `DB.batch`. A static route file wins over `[id].ts`, so it does not collide.
 - `GET/PUT /api/admin/config` — read all config; write only keys with a validator
 
-### News
-
-`src/lib/news.ts` fetches `https://azadiwire.org/feed.xml` at request time and parses it with regex (no XML library). Entities are decoded by `src/lib/entities.ts`, a small decoder that replaced the `he` package (95KB of server bundle for forty lines of parsing). Every extracted field, the link included, is decoded and then stripped, in that order. Returns up to 5 items. Served via `/api/news`. Failures return `null` — the component shows a fallback, the request does not 500.
-
 ### SEO
 
 `src/lib/seo.ts` is the single source for canonical URLs, per-locale title/description/OG copy, the `<h1>` text, and the OG image constants. **Changing site-wide meta copy means editing `seo.ts`, not `BaseLayout.astro`.** `BaseLayout` builds a schema.org `@graph` (WebSite + Organization + WebPage) and accepts an optional `jsonLd` prop for extra nodes; the index pages pass an `ItemList` of the D1 links via `resourcesItemList`.

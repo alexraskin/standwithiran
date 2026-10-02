@@ -38,11 +38,3 @@ export interface SiteData {
   contactEmail: string;
   lastUpdated: string;
 }
-
-export interface NewsItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  description: string;
-  category: string;
-}

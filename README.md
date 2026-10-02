@@ -1,6 +1,6 @@
 # Stand With Iran ✊
 
-Website supporting the people of Iran in their fight for freedom and human rights. Curates resources, organizations, fundraisers, and news.
+Website supporting the people of Iran in their fight for freedom and human rights. Curates resources, organizations, and fundraisers.
 
 **Woman, Life, Freedom — زن، زندگی، آزادی**
 
@@ -11,7 +11,6 @@ Built with [Astro](https://astro.build) on [Cloudflare Workers](https://develope
 - **Astro 6** (SSR) with `@astrojs/cloudflare` adapter
 - **Cloudflare Workers** runtime, **D1** database, `ASSETS` static binding
 - **i18n** — English at `/`, Farsi (RTL) at `/fa/`, both server-rendered
-- **News** — AzadiWire RSS fetched and parsed at the edge
 - **Admin CMS** at `/admin` — vanilla TS, D1-backed session cookie auth
 
 ## Project Structure
@@ -26,7 +25,6 @@ src/
 │   ├── 404.astro, 500.astro # real 404 / 500, no redirect
 │   └── api/
 │       ├── site.ts          # GET  — public site data
-│       ├── news.ts          # GET  — RSS items
 │       └── admin/
 │           ├── login.ts     # POST — mints a session, sets the cookie
 │           ├── logout.ts    # POST — revokes the session server side
@@ -37,10 +35,8 @@ src/
 ├── lib/
 │   ├── i18n.ts              # translations + t(lang, key)
 │   ├── site-data.ts         # getSiteData(db) — shared by SSR + /api/site
-│   ├── news.ts              # getNewsItems() — RSS parser
 │   ├── auth.ts              # session create/verify/destroy
 │   ├── content-schema.ts    # icons, categories, URL and date validators
-│   ├── entities.ts          # XML entity decoder used by the RSS parser
 │   └── types.ts
 └── styles/main.css
 
