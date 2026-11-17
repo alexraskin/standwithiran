@@ -1,5 +1,5 @@
 import { getCollection, getEntry } from 'astro:content';
-import type { Report, SiteData } from './types';
+import type { Report, SiteData, Victim, VictimStat } from './types';
 
 /** Fallbacks for stat dates, used when the YAML value is empty or unparsable.
  *  `war` has no entry on purpose: there is no defensible default start date, so
@@ -38,4 +38,18 @@ export async function getReports(): Promise<Report[]> {
   return reports
     .map(({ id, data }) => ({ id, ...data }))
     .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** src/data/victims.yaml, in file order within each group; groups are ordered
+ *  by the page via VICTIM_GROUPS. Separate from getSiteData because only
+ *  /victims/ needs it. */
+export async function getVictims(): Promise<Victim[]> {
+  const victims = await getCollection('victims');
+  return victims.map(({ id, data }) => ({ id, ...data }));
+}
+
+/** src/data/victim-stats.yaml, in file order. Only /victims/ needs it. */
+export async function getVictimStats(): Promise<VictimStat[]> {
+  const stats = await getCollection('victimStats');
+  return stats.map(({ id, data }) => ({ id, ...data }));
 }

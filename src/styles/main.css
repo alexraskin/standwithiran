@@ -1071,3 +1071,106 @@ a:hover {
     grid-column: 1 / -1;
   }
 }
+
+/* ---------- Victims ---------- */
+.victim-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victim-stat-figure {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--burgundy);
+}
+
+.victim-stat p {
+  margin-top: 0.5rem;
+}
+
+.victim-stat .text-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.victims {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: 0 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victim {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.victim h3 {
+  font-size: 1.375rem;
+}
+
+.victim-name-fa {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.victim-meta {
+  margin-block: 0.25rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.victim .text-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+}
+
+.org-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.org-card {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.org-card h3 {
+  font-size: 1.25rem;
+}
+
+.org-card h3 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.org-card h3 a:hover {
+  color: var(--burgundy);
+  text-decoration: underline;
+}
+
+.org-card p {
+  margin-top: 0.5rem;
+}
+
+.victim .text-link,
+.victim-stat .text-link {
+  white-space: normal;
+}
