@@ -1,21 +1,15 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 
-import cloudflare from '@astrojs/cloudflare';
-
 // https://astro.build/config
 export default defineConfig({
-  adapter: cloudflare(),
   site: 'https://standwithiran.org',
-  // Every route reads D1 at request time. With the default 'static' output a
-  // route that forgets `export const prerender = false` is prerendered at build
-  // time and fails on env.DB.
-  output: 'server',
+  // Static output, served from S3 behind CloudFront (infrastructure/terraform).
   security: {
     // Astro hashes every inline script and style it emits and renders the
-    // matching script-src/style-src. In SSR it sends this as a response header,
-    // so frame-ancestors is honoured here. Hand-written inline scripts add
-    // their own hash through src/middleware.ts.
+    // policy as a <meta> tag in static builds. Browsers ignore frame-ancestors
+    // in a meta CSP, so CloudFront's response headers policy sends it (plus
+    // X-Frame-Options) as a real header.
     csp: {
       algorithm: 'SHA-256',
       directives: [
@@ -43,10 +37,30 @@ export default defineConfig({
       name: 'Newsreader',
       cssVariable: '--font-newsreader',
       display: 'swap',
-      weights: [400, 500, 600],
-      styles: ['normal', 'italic'],
+      weights: [500, 600],
+      styles: ['normal'],
       subsets: ['latin'],
       fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      display: 'swap',
+      weights: [400, 500, 600],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['system-ui', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Vazirmatn',
+      cssVariable: '--font-vazirmatn',
+      display: 'swap',
+      weights: [400, 500, 700],
+      styles: ['normal'],
+      subsets: ['arabic'],
+      fallbacks: ['Tahoma', 'sans-serif'],
     },
   ],
 });

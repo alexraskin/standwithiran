@@ -1,0 +1,53 @@
+---
+import Icon from './Icon.astro';
+import { NAV_LABEL, otherLocale, pageHref, PAGES, t, type Lang, type Page } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+  /** Current section; undefined on the 404 page. */
+  page?: Page;
+}
+
+const { lang, page } = Astro.props;
+const other = otherLocale(lang);
+// Switch to the same section in the other language.
+const switchHref = pageHref(other, page ?? '');
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="wordmark" href={pageHref(lang, '')} lang="en">Stand With Iran</a>
+
+    {/* `popover` gives the mobile menu toggle, Escape and light dismiss with no JS;
+        on desktop the CSS shows the nav inline and hides the button. */}
+    <nav id="site-nav" class="site-nav" popover aria-label={t(lang, 'mainNav')}>
+      <ul>
+        {PAGES.map((p) => (
+          <li>
+            <a href={pageHref(lang, p)} aria-current={p === page ? 'page' : undefined}>
+              {t(lang, NAV_LABEL[p])}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <p class="lang-switch" aria-label={t(lang, 'language')}>
+      {lang === 'en' ? (
+        <>
+          <span aria-current="true">EN</span> /
+          <a href={switchHref} hreflang={other} lang={other}>فارسی</a>
+        </>
+      ) : (
+        <>
+          <a href={switchHref} hreflang={other} lang={other}>EN</a> /
+          <span aria-current="true">فارسی</span>
+        </>
+      )}
+    </p>
+
+    <button class="menu-btn" type="button" popovertarget="site-nav" aria-label={t(lang, 'menu')}>
+      <Icon name="menu" />
+    </button>
+  </div>
+</header>

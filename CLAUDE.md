@@ -6,91 +6,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Command | Action |
 | :------ | :----- |
-| `npm run dev` | Astro dev server at `localhost:4321` (uses local D1 via Miniflare) |
-| `npm run build` | Build SSR bundle to `./dist/` |
-| `npm run preview` | Build + run `astro preview` |
-| `npm run deploy` | `astro build && wrangler deploy` |
-| `npm run db:migrate` | Apply `migrations/*.sql` to the remote D1 (`standwithiran-db`) |
-| `npm run db:migrate:local` | Apply migrations to the local D1 replica under `.wrangler/` |
-| `npm run cf-typegen` | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc` bindings |
+| `npm run dev` | Astro dev server at `localhost:4321` |
+| `npm run check` | `astro check`: typecheck plus content-schema validation of `src/data/*.yaml` |
+| `npm run build` | Static build to `./dist/` |
+| `mise run build` | `npm ci` + check + build (what CI runs) |
+| `mise run test` | `node --test` check for the CloudFront router function |
+| `mise run tf:init` / `tf:plan` / `tf:apply` | Terraform for `$TF_ENV` (default `prod`). `tf:plan` depends on `build` and `test` |
+| `mise run lint` | All pre-commit hooks (fmt, tflint, terraform-docs, gitleaks, actionlint, …) |
 
-`npm run check` runs `astro check` (typecheck). It also runs in CI before the
-build. There is no unit test suite and no linter configured. Node >= 22.12 is
-required.
-
-Local dev needs no admin credentials: Cloudflare Access does not exist in front of `localhost`, so `src/lib/auth.ts` bypasses the check under `import.meta.env.DEV`. That flag is substituted at build time and is always false in a production bundle, so the bypass cannot ship. Production needs two Worker vars, set with `npx wrangler secret put CF_ACCESS_TEAM_DOMAIN` and `npx wrangler secret put CF_ACCESS_AUD`.
+There is no unit test suite beyond the router check. Node 22 is required (pinned in `mise.toml`). First use needs `mise trust`.
 
 ## Architecture
 
-Astro 6 SSR app deployed as a single Cloudflare Worker via `@astrojs/cloudflare`. `output: 'server'` in `astro.config.mjs` makes SSR the default, so no route needs `export const prerender = false`; everything reads from D1 at request time. Static files in `public/` are served through the `ASSETS` binding.
+The site is Astro 6 with static output (no adapter). It is served from a private S3 bucket behind CloudFront, and everything is built at deploy time. There is no server, database, admin UI or API.
 
-**Runtime bindings** (see `wrangler.jsonc`, typed in `worker-configuration.d.ts`):
-- `env.DB` — D1 database `standwithiran-db`
-- `env.ASSETS` — static asset fetcher
-- `env.CF_ACCESS_TEAM_DOMAIN`, `env.CF_ACCESS_AUD` — Access application identity; read by `src/lib/auth.ts`
+### Content (YAML)
 
-Access bindings via `import { env } from 'cloudflare:workers'` (not via `Astro.locals`). This pattern is consistent across pages and API routes.
-
-The two `CF_ACCESS_*` vars are account-specific and do not exist until the Access application is created, so they are absent from `wrangler.jsonc` and `wrangler types` cannot discover them. They are declared by hand on `Cloudflare.Env` in `src/env.d.ts`, which survives regeneration of `worker-configuration.d.ts`. Putting them in `wrangler.jsonc` `vars` instead would make `wrangler types` narrow them to literal string types.
-
-**Type environment caveat:** `worker-configuration.d.ts` declares a global `interface Element` for HTMLRewriter that merges with the DOM `Element` and leaves `remove()` ambiguous. Any generic constrained by `Element` (`querySelector<T>`, `querySelectorAll<T>`) therefore fails to compile in client-side scripts. The CMS script in `admin.astro` casts instead; do the same in new client code.
-
-### Data model (D1)
-
-Two tables:
-- `links` — ordered resource list (`sort_order ASC`), with `featured` flag and `category`/`icon` strings.
-- `config` — generic key/value store. All site-wide editable content (banner, profile description EN + FA, contact email, last-updated date, the four stat-counter dates) lives here.
-
-`sessions` was dropped in `migrations/004` when admin auth moved to Cloudflare Access; the Worker no longer mints or stores sessions.
-
-Every writable config key is declared with a validator in `src/pages/api/admin/config.ts` (`VALIDATORS`); a key that is not listed is rejected with a 400 rather than silently skipped. All five date keys (`last_updated` and the four `stat_*_date` rows) are ISO `YYYY-MM-DD`, entered through `<input type="date">` and validated with `isIsoDateOrEmpty`. `last_updated` is rendered through `formatDate` in `src/lib/i18n.ts`, which localises it for the footer while the stored ISO value feeds the sitemap's `<lastmod>` and schema.org `dateModified`. **Adding a new editable site field means updating both that map and `getSiteData` in `src/lib/site-data.ts`**, which is the single shared reader used by SSR pages and `/api/site`.
-
-`stat_war_date` is the one counter with no entry in `DEFAULT_STAT_DATES`: there is no defensible default start date, so `StatsPanel` omits the block entirely while the value is empty and the strip keeps its original three counters. Setting it promotes the war count to the primary slot, drops Amini to secondary, and switches the strip to the wrapping four-block layout (`.stats-strip-wrap`).
-
-`src/lib/content-schema.ts` is the single source for the icon and category vocabularies, the icon-to-emoji map, and the URL/date validators. The admin form options, the public rendering, and the API validation all read from it.
+- **Where it lives:** all editable content is in `src/data/`.
+  - `links.yaml` is an array of `{id, title, url, icon, category, featured, documentation}`. File order is display order. `featured` links lead /take-action/; `documentation` links appear on /victims/, /evidence/ and in the footer.
+  - `timeline.yaml` is an array of `{id, year, title, title_fa, summary, summary_fa, featured}`, oldest first. `featured` entries show on the home page; /timeline/ shows all.
+  - `reports.yaml` is an array of `{id, title, source, date, summary, url, category}` for /evidence/ (category from `REPORT_CATEGORIES`). Empty for now; the page falls back to the documentation links. Read with `getReports()`, not `getSiteData()`, because Astro warns on every read of an empty collection.
+  - `site.yaml` holds one `main` entry with `banner`, `profile` (`description`, `description_fa`), `stats` (`amini`, `protest`, `blackout`, `war`), `contact_email` and `last_updated`.
+- **Validation:** `src/content.config.ts` loads both files as content collections through `file()` and validates them with zod. The refinements reuse `src/lib/content-schema.ts`: `isHttpUrl`, `isIcon`, `isCategory`, `isBannerType`, `isIsoDateOrEmpty`. Bad content fails `astro check` and the build. Nothing else validates it.
+- **Reading:** `getSiteData()` in `src/lib/site-data.ts` is the single reader (except reports), used by `BaseLayout`, the pages and `sitemap.xml.ts`. It returns `SiteData` (`src/lib/types.ts`). **Adding a content field means updating the YAML, the schema in `content.config.ts`, `SiteData` and `getSiteData`.**
+- **Stat counters:**
+  - `stats.war` has no entry in `DEFAULT_STAT_DATES`. While it is empty, `StatsPanel` omits the block and keeps three counters; setting it puts the war count first.
+  - Day counts are rendered at build time as a no-JS fallback, then recomputed in the browser from each block's `data-since` (epoch ms) by the script in `StatsPanel.astro`. No rebuild is needed for them to advance.
+- **Dates:** all of them are ISO `YYYY-MM-DD`. `last_updated` is localised for the footer by `formatDate` in `src/lib/i18n.ts`. It also feeds the sitemap `<lastmod>` and schema.org `dateModified`.
 
 ### i18n
 
-Astro `i18n` config declares `en` (default, no prefix) and `fa` (`/fa/`). Translations are a flat object keyed by locale in `src/lib/i18n.ts` — UI strings live in code, content strings (banner, profile) live in D1. The Farsi page sets `dir="rtl"` and pulls `profile.description_fa` from config.
+Astro `i18n` declares `en` (default, no prefix) and `fa` (`/fa/`). UI strings are in `src/lib/i18n.ts`. Content strings (banner, profile, timeline) are in `src/data/`. Farsi pages set `dir="rtl"`, use Vazirmatn and no letter-spacing (`--track: 0`), and use `profile.description_fa` (shown on /timeline/).
 
-### Admin CMS
+Pages: the home page renders through `src/components/HomePage.astro` (`index.astro` and `fa/index.astro` only pick the language). The sections `timeline`, `victims`, `evidence`, `take-action` live in `src/pages/[...locale]/` and get both locales from `localeStaticPaths()`. `PAGES` in `i18n.ts` is the nav order and drives the header, footer and sitemap; `pageHref(lang, page)` builds links. `BaseLayout` renders the header, banner and footer and takes `page` (omitted only by 404, which is then noindex).
 
-`/admin` (`src/pages/admin.astro`) is a single-page CMS. Its script is a normal processed Astro `<script>` (typed and bundled), not `is:inline`. The page is gated server side: an unauthenticated request receives only a notice, never the CMS markup.
+Styling is one stylesheet, `src/styles/main.css`, with design tokens on `:root`. The mobile menu is a native `popover`, no JS.
 
-Authentication is **Cloudflare Access** (Zero Trust). There is no login form, no password, and no session table. The Access application must cover both `standwithiran.org/admin*` and `standwithiran.org/api/admin/*`, with a policy naming the allowed identities.
+### Hosting (`infrastructure/terraform/`)
 
-1. Access authenticates the visitor at the edge and forwards the request with a signed RS256 JWT in the `Cf-Access-Jwt-Assertion` header (mirrored in the `CF_Authorization` cookie).
-2. `src/lib/auth.ts` verifies that assertion: RS256 pinned (so `alg: none` and HS256-with-the-public-key forgeries are rejected), signature checked against the JWKS at `https://<team>/cdn-cgi/access/certs` (cached one hour per isolate, refetched once on an unknown `kid` so key rotation does not lock the admin out), `iss` equal to the team domain, `aud` containing `CF_ACCESS_AUD`, and `exp`/`nbf`/`iat` inside a 60 second skew.
-3. Admin endpoints keep calling `verifyToken(request)`; `admin.astro` calls `isAuthenticated`. Missing config fails closed with a 500.
-4. Logout is a link to `/cdn-cgi/access/logout`, handled by Cloudflare, not by the Worker.
+The layout follows the user's terraform conventions. The root config is shared, and environments differ only in `envs/<env>.{tfvars,backend.hcl}`. State lives in `alexraskin-tfstate` under `standwithiran/<env>/`. Everything runs in `us-east-1`, because CloudFront only accepts ACM certs from there.
 
-**Verifying is not optional.** The header is attacker-controlled on any path Access does not cover — a preview deployment URL, a route added later — so trusting it unverified would be no auth at all. The `aud` check is what stops a valid token minted for a different Access application on the same team from being replayed here.
+`main.tf` only wires one module per service in `modules/`. The root builds the bucket policy (`data.tf`), because it needs ARNs from both `s3` and `cloudfront`. `moved.tf` maps the old flat addresses and can go once every env has applied.
 
-Admin endpoints:
-- `GET/POST /api/admin/links`, `PUT/DELETE /api/admin/links/[id]` — CRUD on `links`. Ids are validated and a write matching no row returns 404. URLs must be `http`/`https`.
-- `POST /api/admin/links/reorder` with `{ ids }` — rewrites `sort_order` for the whole list in one `DB.batch`. A static route file wins over `[id].ts`, so it does not collide.
-- `GET/PUT /api/admin/config` — read all config; write only keys with a validator
+- **`modules/s3`: bucket and upload.**
+  - A private bucket `standwithiran-<env>-web-<account>`.
+  - **`dist/` is uploaded by Terraform** as one `aws_s3_object` per file. This is the deploy, and removing a file from the build deletes its object.
+  - Cache-Control is set per path: `_astro/` immutable, `.html`/`.xml` `max-age=0, must-revalidate`, everything else one day. So no CloudFront invalidation is needed.
+- **`modules/acm`: cert** for the apex and www. Its validation records come from `cloudflare_dns`.
+- **`modules/cloudfront`: distribution.** OAC, Managed-CachingOptimized, and 403/404 → `/404.html` with status 404.
+- **`modules/cloudfront/router.js`: CloudFront Function (viewer-request).**
+  - 301s `www.` to the apex.
+  - Maps `/x/` and `/x` to `/x/index.html`.
+  - Its check is `router.test.mjs`.
+- **Response headers policy: security headers.** Sends `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, HSTS, `Permissions-Policy`, COOP and `Content-Security-Policy: frame-ancestors 'none'`.
+- **`modules/cloudflare_dns`: Cloudflare records.** DNS stays on Cloudflare, so the ACM validation records and the DNS-only (`proxied = false`) apex/www CNAMEs live here. The CNAMEs are always enabled. The provider token comes from SSM `/infrastructure/cloudflare/api_token` (us-east-1).
+- **`bootstrap/`: deploy role.** Applied by hand. It creates the GitHub OIDC role `github-deploy-standwithiran-<env>`, scoped to `standwithiran-<env>-*`, tag-scoped for CloudFront and ACM.
+
+CI is `.github/workflows/deploy.yml`. It runs on push to main and on manual dispatch, using the `prod` environment with vars `AWS_ROLE_ARN`/`AWS_REGION`. The steps are `tf:init` → `tf:plan` → `tf:apply`.
+
+### CSP
+
+The CSP comes from `security.csp` in `astro.config.mjs`. Astro hashes the inline scripts and styles it emits. In static output the policy is a `<meta>` tag, and browsers ignore `frame-ancestors` there, so the CloudFront headers policy sends `frame-ancestors 'none'` as a header instead. Browsers enforce both policies. The JSON-LD block needs no hash, because `type="application/ld+json"` is a data block.
 
 ### SEO
 
-`src/lib/seo.ts` is the single source for canonical URLs, per-locale title/description/OG copy, the `<h1>` text, and the OG image constants. **Changing site-wide meta copy means editing `seo.ts`, not `BaseLayout.astro`.** `BaseLayout` builds a schema.org `@graph` (WebSite + Organization + WebPage) and accepts an optional `jsonLd` prop for extra nodes; the index pages pass an `ItemList` of the D1 links via `resourcesItemList`.
+`src/lib/seo.ts` is the single source for canonical URLs (`canonicalFor(lang, page)`), per-locale title/description/OG copy, per-section `pageSeo` (title doubles as the section `<h1>`), the home `<h1>` text and the OG image constants. **Changing site-wide meta copy means editing `seo.ts`, not `BaseLayout.astro`.** `BaseLayout` builds a schema.org `@graph` (WebSite + Organization + WebPage) and takes an optional `jsonLd` prop. /take-action/ uses it to pass an `ItemList` of the links via `resourcesItemList`.
 
-`public/images/og-image.jpg` is a 1200x630 social card generated from the hero photo. Regenerate it if the hero art or wordmark changes, and keep the dimensions in `OG_IMAGE` in sync.
+`public/images/og-image.jpg` is a 1200x630 social card generated from the hero photo. Regenerate it if the hero art or wordmark changes, and keep `OG_IMAGE` in sync.
 
-The favicon set (`public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) is generated from one source, `scripts/generate-icons.mjs`. Edit the mark there, then run `npm i --no-save sharp png-to-ico && node scripts/generate-icons.mjs` — do not hand-edit the committed SVG or PNGs. `public/site.webmanifest` and the `Organization.logo` node in `BaseLayout.astro` point at `icon-512.png`.
+The favicon set is generated from `scripts/generate-icons.mjs`. Run `npm i --no-save sharp png-to-ico && node scripts/generate-icons.mjs`, and do not hand-edit the committed SVG or PNGs.
 
-`src/middleware.ts` 301-redirects `www.standwithiran.org` to the apex host (both are bound as custom domains in `wrangler.jsonc`), sets `X-Robots-Tag: noindex` on `/api/*` and `/admin`, and applies the security headers (`X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`) to every SSR response. `public/_headers` only applies to static assets served by the `ASSETS` binding, so it does **not** cover those SSR routes.
-
-The CSP comes from `security.csp` in `astro.config.mjs`. Astro hashes the inline scripts and styles it generates and emits the policy as a response header in SSR, so `frame-ancestors` is honoured there. `Astro.csp.insertScriptHash` does **not** reach that header, so do not rely on it; the JSON-LD block needs no hash because `type="application/ld+json"` is a data block that `script-src` does not govern.
-
-### Sitemap & error pages
-
-`src/pages/sitemap.xml.ts` is a hand-rolled SSR endpoint emitting `hreflang` alternates and an image entry for `/` and `/fa/`, with `<lastmod>` read from the `last_updated` config row. `404.astro` returns a real 404 and `500.astro` a real error page; neither redirects to `/`, which previously produced soft 404s.
+`src/pages/sitemap.xml.ts` is a static endpoint that emits every page in both locales with `hreflang` alternates, plus an image entry for the home pages. `404.astro` builds to `404.html`, and CloudFront serves it with a real 404 status.
 
 ## Conventions
 
-- `output: 'server'` makes every route SSR by default, so `prerender = false` is no longer needed anywhere. Do not reintroduce it.
-- `output: 'server'` also turns on Astro's `security.checkOrigin`, which rejects cross-origin POST/PUT/DELETE carrying form content types. Admin requests send `Content-Type: application/json` and pass.
-- Both locales render through `src/components/HomePage.astro`. `index.astro` and `fa/index.astro` only pick the language.
-- When changing D1 bindings or adding secrets, run `npm run cf-typegen` to refresh `worker-configuration.d.ts`.
-- Migrations are append-only numbered SQL files in `migrations/`. `wrangler d1 migrations apply` tracks which have run.
+- Do not add an adapter or `output: 'server'`. Hosting is static S3, and anything that needs a request-time server does not belong here.
+- Changing a response header means editing the CloudFront response headers policy in `cloudfront.tf`. There is no middleware.

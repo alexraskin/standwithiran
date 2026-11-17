@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import Timeline from '../../components/Timeline.astro';
+import { localeStaticPaths, t, type Lang } from '../../lib/i18n';
+import { getSiteData } from '../../lib/site-data';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { lang } = Astro.props as { lang: Lang };
+const site = await getSiteData();
+const description =
+  lang === 'fa' ? site.profile.description_fa || site.profile.description : site.profile.description;
+---
+
+<BaseLayout lang={lang} page="timeline">
+  <PageHead lang={lang} page="timeline" intro={t(lang, 'timelineSub')} />
+  <div class="wrap page-body">
+    <Timeline events={site.timeline} lang={lang} vertical level="h2" />
+  </div>
+  <section class="section section-surface" aria-labelledby="background-heading">
+    <div class="wrap prose">
+      <h2 id="background-heading">{t(lang, 'background')}</h2>
+      {description.split('\n\n').map((para) => <p>{para}</p>)}
+    </div>
+  </section>
+</BaseLayout>

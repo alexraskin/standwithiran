@@ -1,8 +1,6 @@
 /**
- * Single source for the vocabularies the CMS offers and the API accepts.
- * Previously the icon and category lists were declared in admin.astro while the
- * icon-to-emoji map lived in ResourcesPanel.astro, and the API validated
- * neither, so a value outside the list reached the page with no CSS class.
+ * Single source for the icon, category and report-category vocabularies, and the
+ * validators src/content.config.ts applies to src/data/*.yaml.
  */
 export const ICON_EMOJI = {
   heart: '❤️',
@@ -31,14 +29,20 @@ export const CATEGORIES = [
   'news',
 ] as const;
 
+/** Evidence page sections, in display order. Labels: `rep_*` in src/lib/i18n.ts. */
+export const REPORT_CATEGORIES = [
+  'human_rights',
+  'political_prisoners',
+  'executions',
+  'internet',
+  'womens_rights',
+  'protest_repression',
+] as const;
+
 export const BANNER_TYPES = ['info', 'urgent', 'success'] as const;
 
 export const DEFAULT_ICON = 'globe';
 export const DEFAULT_CATEGORY = 'information';
-
-export function iconEmoji(icon: string): string {
-  return ICON_EMOJI[icon as keyof typeof ICON_EMOJI] ?? '🔗';
-}
 
 export function isIcon(value: string): boolean {
   return Object.hasOwn(ICON_EMOJI, value);

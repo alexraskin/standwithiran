@@ -4,119 +4,63 @@ Website supporting the people of Iran in their fight for freedom and human right
 
 **Woman, Life, Freedom — زن، زندگی، آزادی**
 
-Built with [Astro](https://astro.build) on [Cloudflare Workers](https://developers.cloudflare.com/workers/), backed by [D1](https://developers.cloudflare.com/d1/).
+A static [Astro](https://astro.build) site served from S3 behind CloudFront. Content lives in YAML in this repo.
 
 ## Stack
 
-- **Astro 6** (SSR) with `@astrojs/cloudflare` adapter
-- **Cloudflare Workers** runtime, **D1** database, `ASSETS` static binding
-- **i18n** — English at `/`, Farsi (RTL) at `/fa/`, both server-rendered
-- **Admin CMS** at `/admin` — vanilla TS, D1-backed session cookie auth
+- **Astro 6**, static output. English at `/`, Farsi (RTL) at `/fa/`.
+- **Content** in `src/data/*.yaml`, validated at build time by `src/content.config.ts`.
+- **AWS**: a private S3 bucket behind CloudFront with OAC, plus an ACM cert. Defined in `infrastructure/terraform/`.
+- **DNS** stays on Cloudflare as DNS-only CNAMEs to CloudFront, managed by the same Terraform.
 
-## Project Structure
+## Editing content
 
-```
-src/
-├── pages/
-│   ├── index.astro          # English home (SSR)
-│   ├── fa/index.astro       # Farsi home (SSR, RTL)
-│   ├── admin.astro          # CMS (login + links/config editor)
-│   ├── sitemap.xml.ts       # SSR sitemap with hreflang
-│   ├── 404.astro, 500.astro # real 404 / 500, no redirect
-│   └── api/
-│       ├── site.ts          # GET  — public site data
-│       └── admin/
-│           ├── login.ts     # POST — mints a session, sets the cookie
-│           ├── logout.ts    # POST — revokes the session server side
-│           ├── links/       # GET/POST/PUT/DELETE + POST reorder
-│           └── config.ts    # GET/PUT — validated config keys
-├── components/              # HomePage (shared by both locales), panels
-├── layouts/BaseLayout.astro # html/head/meta/JSON-LD/fonts
-├── lib/
-│   ├── i18n.ts              # translations + t(lang, key)
-│   ├── site-data.ts         # getSiteData(db) — shared by SSR + /api/site
-│   ├── auth.ts              # session create/verify/destroy
-│   ├── content-schema.ts    # icons, categories, URL and date validators
-│   └── types.ts
-└── styles/main.css
+Edit, commit, push to `main`. CI rebuilds and deploys.
 
-migrations/                  # D1 schema + seed data
-public/                      # favicon, robots.txt, _headers, images/
-```
+| File | What |
+| :--- | :--- |
+| `src/data/links.yaml` | Resource links. File order is display order. `icon`/`category` must be in `src/lib/content-schema.ts`. |
+| `src/data/site.yaml` | Banner, profile (EN + FA), stat counter dates, contact email, `last_updated` |
+| `src/lib/i18n.ts` | UI strings |
 
-## Local Development
+Dates are ISO `YYYY-MM-DD`. Leave `stats.war` as `""` to hide that counter. If the YAML is invalid, `npm run check` / `npm run build` fails and names the field.
+
+The day counters update in the browser from the start dates, so they stay current without a rebuild.
+
+## Local development
 
 ```sh
+mise trust && mise install
 npm install
-
-# First time: apply migrations to local D1 replica
-npm run db:migrate:local
-
-# Set admin password for local dev
-echo "ADMIN_PASSWORD=localdev" > .dev.vars
-
-npm run dev   # http://localhost:4321
+npm run dev        # http://localhost:4321
 ```
-
-Visit `/` (English), `/fa/` (Farsi), or `/admin` (log in with the password from `.dev.vars`).
-
-## Auth
-
-`/admin` is gated server side: an unauthenticated request never receives the CMS
-markup, only the login form.
-
-1. `POST /api/admin/login` compares the submitted password against
-   `ADMIN_PASSWORD` in constant time, then mints a 256-bit random token, stores
-   `sha256(token)` in the `sessions` table with a 12 hour expiry, and returns it
-   as an `httpOnly`, `SameSite=Strict` cookie.
-2. Admin endpoints call `verifyToken(request)`, which looks the hashed cookie up
-   and checks the expiry.
-3. `POST /api/admin/logout` deletes the row, so a captured cookie stops working.
-
-The cookie holds no password material, sessions expire server side, and expired
-rows are swept on each login.
 
 ## Deploy
 
-First deploy only — set the admin password as a Worker secret:
+CI (`.github/workflows/deploy.yml`) runs `mise run tf:init`, then `tf:plan` (which runs `build` first), then `tf:apply`. Terraform uploads `dist/` as S3 objects:
 
-```sh
-npx wrangler secret put ADMIN_PASSWORD
-```
+- `_astro/` is immutable.
+- HTML and the sitemap revalidate on every request, so no invalidation is needed.
 
-Apply migrations to the production D1 database:
+GitHub `prod` environment needs vars `AWS_ROLE_ARN` (bootstrap output) and `AWS_REGION=us-east-1`. The Cloudflare token is read from SSM `/infrastructure/cloudflare/api_token` (us-east-1).
 
-```sh
-npm run db:migrate
-```
+Locally: `mise run tf:init tf:plan tf:apply` with AWS creds.
 
-Deploy:
+### First-time setup
 
-```sh
-npm run deploy
-```
+1. `cd infrastructure/terraform/bootstrap && terraform init && terraform apply` creates the GitHub OIDC deploy role.
+2. Run `mise run tf:init tf:plan tf:apply` to create the bucket, cert, CloudFront, ACM validation records, and apex/www DNS records.
+3. Smoke test the site at `https://standwithiran.org`.
 
-## Editing Content
-
-Almost everything is edited through the admin UI at `/admin`:
-
-- **Banner** — enabled/disabled, type (info/urgent/success), text, link URL
-- **Profile description** — English and Farsi paragraphs (the About section)
-- **Site config** — contact email, last-updated date
-- **Stat counters** — the three dates the day counters are measured from
-- **Links** — add/edit/reorder/delete; each has title, URL, icon, category, featured flag
-
-UI strings (button labels, section titles, etc.) live in code at `src/lib/i18n.ts`.
+The apex/www DNS records are always managed by Terraform.
 
 ## Commands
 
-| Command                 | Action                                        |
-| :---------------------- | :-------------------------------------------- |
-| `npm run dev`           | Start dev server at `localhost:4321`          |
-| `npm run check`         | `astro check` (typecheck; also runs in CI)    |
-| `npm run build`         | Build production bundle to `./dist/`          |
-| `npm run preview`       | Build and preview locally                     |
-| `npm run deploy`        | Build + `wrangler deploy`                     |
-| `npm run db:migrate`    | Apply migrations to the remote D1             |
-| `npm run db:migrate:local` | Apply migrations to the local D1 replica   |
-| `npm run cf-typegen`    | Regenerate `worker-configuration.d.ts`        |
+| Command | Action |
+| :--- | :--- |
+| `npm run dev` | Dev server at `localhost:4321` |
+| `npm run check` | `astro check`: typecheck + content schema |
+| `mise run build` | `npm ci` + check + build to `dist/` |
+| `mise run test` | CloudFront router function check |
+| `mise run tf:plan` / `tf:apply` | Build, then plan/apply (`TF_ENV`, default `prod`) |
+| `mise run lint` | All pre-commit hooks |

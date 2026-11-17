@@ -1,13 +1,9 @@
 ---
-// A real 404 rather than a redirect to `/`. Redirecting every unknown URL to the
-// homepage produced soft 404s: search engines index the bogus URLs as duplicates
-// of the homepage instead of dropping them.
+// A real 404 rather than a redirect to `/`, so search engines drop bogus URLs
+// instead of indexing them as duplicates of the homepage. CloudFront serves
+// this file with a 404 status for any missing key.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import FlagStripe from '../components/FlagStripe.astro';
-
-
-Astro.response.status = 404;
-Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');
+import { t } from '../lib/i18n';
 ---
 
 <BaseLayout
@@ -15,21 +11,14 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');
   title="Page not found — Stand With Iran"
   description="This page does not exist. Return to Stand With Iran for resources, organizations, and ways to help."
 >
-  <FlagStripe />
-  <main class="container" dir="ltr">
-    <section class="panel">
-      <div class="panel-header header-blue">
-        <h1 class="panel-heading">PAGE NOT FOUND</h1>
-      </div>
-      <div class="panel-body profile-body">
-        <div class="profile-desc">
-          <p>This page does not exist or has moved.</p>
-          <p>
-            <a href="/">Stand With Iran home</a> &nbsp;|&nbsp;
-            <a href="/fa/" hreflang="fa" lang="fa">فارسی</a>
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
+  <header class="page-head wrap">
+    <p class="eyebrow">404</p>
+    <h1>{t('en', 'notFoundTitle')}</h1>
+    <p class="lede">{t('en', 'notFoundText')}</p>
+    <p class="lede" lang="fa" dir="rtl">{t('fa', 'notFoundText')}</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/">{t('en', 'backHome')}</a>
+      <a class="btn btn-outline" href="/fa/" hreflang="fa" lang="fa">{t('fa', 'backHome')}</a>
+    </div>
+  </header>
 </BaseLayout>

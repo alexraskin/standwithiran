@@ -1,0 +1,26 @@
+---
+import { localizeDigits, type Lang } from '../lib/i18n';
+import type { TimelineEvent } from '../lib/types';
+
+interface Props {
+  events: TimelineEvent[];
+  lang: Lang;
+  /** Always vertical (full timeline page); otherwise horizontal on wide screens. */
+  vertical?: boolean;
+  /** Heading level for event titles. */
+  level?: 'h2' | 'h3';
+}
+
+const { events, lang, vertical = false, level: Heading = 'h3' } = Astro.props;
+const fa = lang === 'fa';
+---
+
+<ol class:list={['timeline', { 'timeline-vertical': vertical }]}>
+  {events.map((e) => (
+    <li>
+      <span class="tl-year">{localizeDigits(e.year, lang)}</span>
+      <Heading class="tl-title">{fa ? e.title_fa : e.title}</Heading>
+      <p>{fa ? e.summary_fa : e.summary}</p>
+    </li>
+  ))}
+</ol>

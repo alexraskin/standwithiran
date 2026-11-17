@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import LinkList from '../../components/LinkList.astro';
+import { localeStaticPaths, t, type Lang } from '../../lib/i18n';
+import { getSiteData } from '../../lib/site-data';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { lang } = Astro.props as { lang: Lang };
+const site = await getSiteData();
+---
+
+<BaseLayout lang={lang} page="victims">
+  <PageHead lang={lang} page="victims" intro={t(lang, 'victimsIntro')} />
+  <section class="wrap page-body" aria-labelledby="docs-heading">
+    <h2 id="docs-heading" class="list-heading">{t(lang, 'documentation')}</h2>
+    <LinkList links={site.links.filter((l) => l.documentation)} lang={lang} />
+  </section>
+</BaseLayout>

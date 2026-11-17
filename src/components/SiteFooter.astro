@@ -1,112 +1,61 @@
 ---
-import { formatDate, t, type Lang } from '../lib/i18n';
+import { formatDate, NAV_LABEL, pageHref, PAGES, t, type Lang } from '../lib/i18n';
+import type { Link } from '../lib/types';
 
 interface Props {
   contactEmail: string;
   lastUpdated: string;
   lang: Lang;
+  /** Related projects: the `documentation: true` links. */
+  related: Link[];
 }
 
-const { contactEmail, lastUpdated, lang } = Astro.props;
+const { contactEmail, lastUpdated, lang, related } = Astro.props;
 
-// `last_updated` is stored ISO so the sitemap and schema.org can use it; the
-// footer shows the locale-formatted reading.
-const lastUpdatedLabel = formatDate(lastUpdated, lang);
-// Only a real ISO date belongs in `datetime`; a legacy free-text row would be
-// an invalid machine-readable value.
+// Only a real ISO date belongs in `datetime`.
 const lastUpdatedIso = /^\d{4}-\d{2}-\d{2}$/.test(lastUpdated) ? lastUpdated : undefined;
 ---
 
-<footer class="footer" role="contentinfo">
-  <div class="footer-slogan">{t(lang, 'slogan')}</div>
-  <div class="footer-meta">
-    {t(lang, 'lastUpdated')}: <time datetime={lastUpdatedIso}>{lastUpdatedLabel}</time>
+<footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="footer-message">
+      <p class="footer-title">{t(lang, 'footerTitle')}</p>
+      <p class="footer-sub">{t(lang, 'footerSub')}</p>
+    </div>
+
+    <nav aria-label={t(lang, 'explore')}>
+      <ul class="footer-list">
+        {PAGES.map((p) => (
+          <li><a href={pageHref(lang, p)}>{t(lang, NAV_LABEL[p])}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    {related.length > 0 && (
+      <div>
+        <h2 class="footer-heading">{t(lang, 'related')}</h2>
+        <ul class="footer-list">
+          {related.map((link) => (
+            <li><a href={link.url} target="_blank" rel="noopener noreferrer" lang="en">{link.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    )}
   </div>
-  <div class="footer-links">
-    {/*
-      The popup is a sibling of the button, not a descendant. A <button> takes
-      phrasing content only, so the previous <div><p>…</p></div> inside it was
-      invalid, and once opened it folded the whole terms paragraph into the
-      button's accessible name.
-    */}
-    <div class="footer-disclosure">
-      <button
-        type="button"
-        class="footer-trigger"
-        data-popup="contact"
-        aria-expanded="false"
-        aria-controls="footer-popup-contact"
-      >
-        {t(lang, 'contact')}
-      </button>
-      <div class="footer-popup" id="footer-popup-contact" hidden>
-        {contactEmail && <a href={`mailto:${contactEmail}`}>{contactEmail}</a>}
-      </div>
-    </div>
-    <span class="footer-sep" aria-hidden="true">|</span>
-    <div class="footer-disclosure">
-      <button
-        type="button"
-        class="footer-trigger"
-        data-popup="terms"
-        aria-expanded="false"
-        aria-controls="footer-popup-terms"
-      >
-        {t(lang, 'terms')}
-      </button>
-      <div class="footer-popup" id="footer-popup-terms" hidden>
-        <p>{t(lang, 'termsText')}</p>
-      </div>
-    </div>
+
+  <div class="wrap footer-bottom">
+    <p>
+      {t(lang, 'lastUpdated')}:{' '}
+      <time datetime={lastUpdatedIso}>{formatDate(lastUpdated, lang)}</time>
+    </p>
+    <p>
+      {t(lang, 'photoBy')}:{' '}
+      <a href="https://unsplash.com/photos/illuminated-bridge-reflects-in-still-water-at-night-XA3X-mKRu5Q?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" target="_blank" rel="noopener" lang="en">Mahdi Karimi / Unsplash</a>
+    </p>
+    {contactEmail && (
+      <p>{t(lang, 'contact')}: <a href={`mailto:${contactEmail}`} dir="ltr">{contactEmail}</a></p>
+    )}
+    <p><a href={pageHref(lang, 'terms')}>{t(lang, 'terms')}</a></p>
+    <p><a href={pageHref(lang, 'privacy')}>{t(lang, 'privacy')}</a></p>
   </div>
 </footer>
-
-<style>
-  .footer-disclosure {
-    position: relative;
-    display: inline-block;
-  }
-  button.footer-trigger {
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-  }
-</style>
-
-<script>
-  const disclosures = Array.from(
-    document.querySelectorAll<HTMLButtonElement>('.footer-trigger'),
-  ).map((trigger) => ({
-    trigger,
-    popup: document.getElementById(trigger.getAttribute('aria-controls') ?? ''),
-  }));
-
-  function close(entry: (typeof disclosures)[number]) {
-    entry.trigger.setAttribute('aria-expanded', 'false');
-    if (entry.popup) entry.popup.hidden = true;
-  }
-
-  function closeAll(except?: HTMLElement) {
-    for (const entry of disclosures) {
-      if (entry.trigger !== except) close(entry);
-    }
-  }
-
-  for (const entry of disclosures) {
-    entry.trigger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = entry.trigger.getAttribute('aria-expanded') === 'true';
-      closeAll(entry.trigger);
-      entry.trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
-      if (entry.popup) entry.popup.hidden = open;
-    });
-  }
-
-  document.addEventListener('click', () => closeAll());
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAll();
-  });
-</script>

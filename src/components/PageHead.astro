@@ -1,0 +1,18 @@
+---
+import { t, type Lang } from '../lib/i18n';
+import { pageSeo } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  page: keyof (typeof pageSeo)['en'];
+  intro?: string;
+}
+
+const { lang, page, intro } = Astro.props;
+---
+
+<header class="page-head wrap">
+  <p class="eyebrow">{t(lang, 'explore')}</p>
+  <h1>{pageSeo[lang][page].title}</h1>
+  {intro && <p class="lede">{intro}</p>}
+</header>

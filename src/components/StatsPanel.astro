@@ -1,68 +1,67 @@
 ---
-import { t, type Lang } from '../lib/i18n';
+import { formatDate, t, type Lang } from '../lib/i18n';
 import { DEFAULT_STAT_DATES } from '../lib/site-data';
 import type { StatDates } from '../lib/types';
 
 interface Props {
   lang: Lang;
-  /** ISO dates from D1 config. These used to be literals in this file, which
-   *  made the page's most time-sensitive numbers the only content an admin
-   *  could not edit. */
+  /** ISO dates from src/data/site.yaml. */
   stats: StatDates;
 }
 
 const { lang, stats } = Astro.props;
 
-const now = Date.now();
-
 const parseIso = (value: string) => Date.parse(`${value}T00:00:00Z`);
 
-/** Never reports a negative count for a date in the future. */
-const daysBetween = (startMs: number) => Math.max(0, Math.floor((now - startMs) / 86_400_000));
-
-/** Falls back to the seeded date when a config row is missing or unparseable. */
-function daysSince(value: string, fallback: string): number {
+/** Falls back to the seeded date when the value is empty or unparsable. */
+function startMs(value: string, fallback: string): number {
   const parsed = parseIso(value);
-  return daysBetween(Number.isNaN(parsed) ? parseIso(fallback) : parsed);
+  return Number.isNaN(parsed) ? parseIso(fallback) : parsed;
 }
 
-/** For counters with no seeded fallback. Returns null so the caller can drop
- *  the block rather than render a count from a date nobody set. */
-function daysSinceOptional(value: string): number | null {
-  const parsed = parseIso(value);
-  return Number.isNaN(parsed) ? null : daysBetween(parsed);
-}
+/** Never reports a negative count for a date in the future. Duplicated in the
+ *  script below, which recomputes the count in the browser. */
+const daysSince = (ms: number) => Math.max(0, Math.floor((Date.now() - ms) / 86_400_000));
 
 const numLocale = lang === 'fa' ? 'fa-IR' : 'en-US';
-const fmt = (n: number) => n.toLocaleString(numLocale);
 
-// The war counter is optional. While `stat_war_date` is unset the strip is
-// exactly the three counters it has always been; once set, the war count takes
-// the primary slot and Amini drops to secondary.
-const warDays = daysSinceOptional(stats.war);
+// The war counter is optional and has no fallback date. While it is unset the
+// strip is three counters; once set, the war count leads.
+const warMs = parseIso(stats.war);
+const hasWar = !Number.isNaN(warMs);
 
 const blocks = [
-  ...(warDays === null
-    ? []
-    : [{ value: warDays, label: t(lang, 'statWar'), primary: true }]),
-  {
-    value: daysSince(stats.amini, DEFAULT_STAT_DATES.amini),
-    label: t(lang, 'statDays'),
-    primary: warDays === null,
-  },
-  { value: daysSince(stats.protest, DEFAULT_STAT_DATES.protest), label: t(lang, 'statProtest'), primary: false },
-  { value: daysSince(stats.blackout, DEFAULT_STAT_DATES.blackout), label: t(lang, 'statBlackout'), primary: false },
-];
+  ...(hasWar ? [{ since: warMs, label: t(lang, 'statWar') }] : []),
+  { since: startMs(stats.amini, DEFAULT_STAT_DATES.amini), label: t(lang, 'statDays') },
+  { since: startMs(stats.protest, DEFAULT_STAT_DATES.protest), label: t(lang, 'statProtest') },
+  { since: startMs(stats.blackout, DEFAULT_STAT_DATES.blackout), label: t(lang, 'statBlackout') },
+].map((b) => ({ ...b, iso: new Date(b.since).toISOString().slice(0, 10) }));
 ---
 
-<section class:list={['stats-strip', { 'stats-strip-wrap': blocks.length > 3 }]}>
-  {blocks.map((block, i) => (
-    <>
-      {i > 0 && <div class="stat-divider" />}
-      <div class:list={['stat-block', { 'stat-primary': block.primary }]}>
-        <span class="stat-number">{fmt(block.value)}</span>
-        <span class="stat-label">{block.label}</span>
+<section class="stats" aria-labelledby="stats-heading">
+  <h2 id="stats-heading" class="sr-only">{t(lang, 'statsHeading')}</h2>
+  <dl class="wrap stats-strip" data-locale={numLocale}>
+    {blocks.map((block) => (
+      <div class="stat">
+        <dt class="stat-label">{block.label}</dt>
+        {/* Build-time count is the no-JS fallback; the script makes it current. */}
+        <dd class="stat-number" data-since={block.since}>
+          {daysSince(block.since).toLocaleString(numLocale)}
+        </dd>
+        <dd class="stat-context">
+          {t(lang, 'since')} <time datetime={block.iso}>{formatDate(block.iso, lang)}</time>
+        </dd>
       </div>
-    </>
-  ))}
+    ))}
+  </dl>
 </section>
+
+<script>
+  // The page is static, so the build-time counts go stale; recompute on load.
+  const strip = document.querySelector<HTMLElement>('.stats-strip');
+  const locale = strip?.dataset.locale;
+  for (const el of document.querySelectorAll<HTMLElement>('[data-since]')) {
+    const days = Math.max(0, Math.floor((Date.now() - Number(el.dataset.since)) / 86_400_000));
+    el.textContent = days.toLocaleString(locale);
+  }
+</script>

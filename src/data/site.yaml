@@ -1,0 +1,43 @@
+# Site-wide content. Dates are ISO YYYY-MM-DD; an empty stats.war hides that counter.
+main:
+  banner:
+    enabled: true
+    type: urgent
+    text: "Iran Victims"
+    link: "https://iranvictims.com/"
+  profile:
+    description: |-
+      The Iranian freedom movement has persisted for over four decades with little global awareness. What started in 1979 continues today.
+
+      People are demanding basic protections: the ability to speak without prosecution, equal treatment regardless of gender, and safety in daily life. These requests reflect universal principles, not regional politics.
+
+      Iran's contributions to human civilization span millennia. Ancient Persia developed early legal codes protecting individual rights. The region produced breakthrough work in mathematics, astronomy, and literature that influenced cultures worldwide.
+
+      Modern Iran operates under a system that contradicts this legacy. Citizens face restrictions that would be unacceptable in most of the world.
+
+      Global response has been weak and inconsistent. Brief periods of attention fade quickly. Policy remains largely unchanged.
+
+      What Iranians want is straightforward: they want other nations to acknowledge what is occurring and act on that knowledge. They are asking for solidarity based on shared human values, not charity or intervention.
+
+      The question is whether the international community will finally pay sustained attention to a struggle that has gone on far too long.
+    description_fa: |-
+      جنبش آزادی‌خواهی ایران بیش از چهار دهه است که ادامه دارد و توجه جهانی کمی به آن شده است. آنچه در سال ۱۳۵۷ آغاز شد، امروز هم جریان دارد.
+
+      مردم خواستار حقوق پایه‌ای هستند: آزادی بیان بدون پیگرد قانونی، برابری صرف نظر از جنسیت، و امنیت در زندگی روزمره. این خواسته‌ها بازتاب اصول جهانی‌اند، نه سیاست‌های منطقه‌ای.
+
+      سهم ایران در تمدن بشری هزاران سال قدمت دارد. ایران باستان از نخستین قوانینی بود که از حقوق فردی حمایت می‌کرد. این سرزمین در ریاضیات، نجوم و ادبیات دستاوردهایی داشت که فرهنگ‌های جهان را تحت تأثیر قرار داد.
+
+      ایران امروز زیر سیستمی اداره می‌شود که با این میراث در تضاد است. شهروندان با محدودیت‌هایی روبرو هستند که در بیشتر نقاط جهان غیرقابل قبول است.
+
+      واکنش جهانی ضعیف و ناپیوسته بوده است. دوره‌های کوتاه توجه به سرعت فروکش می‌کنند. سیاست‌ها عمدتاً بدون تغییر مانده‌اند.
+
+      خواسته ایرانیان روشن است: می‌خواهند سایر ملت‌ها آنچه را که رخ می‌دهد بشناسند و بر اساس آن عمل کنند. آن‌ها همبستگی بر پایه ارزش‌های مشترک انسانی می‌خواهند، نه ترحم یا دخالت.
+
+      پرسش این است که آیا جامعه بین‌الملل سرانجام توجه پایداری به مبارزه‌ای خواهد داشت که بیش از حد طولانی شده است.
+  stats:
+    amini: "2022-09-16"
+    protest: "2025-12-28"
+    blackout: "2026-01-08"
+    war: "2026-02-28"
+  contact_email: "hi@standwithiran.org"
+  last_updated: "2026-09-07"

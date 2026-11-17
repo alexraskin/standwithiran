@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import LinkList from '../../components/LinkList.astro';
+import { REPORT_CATEGORIES } from '../../lib/content-schema';
+import { formatDate, localeStaticPaths, t, type Lang, type TranslationKey } from '../../lib/i18n';
+import { getReports, getSiteData } from '../../lib/site-data';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { lang } = Astro.props as { lang: Lang };
+const site = await getSiteData();
+const reports = await getReports();
+
+const groups = REPORT_CATEGORIES.map((category) => ({
+  category,
+  reports: reports.filter((r) => r.category === category),
+})).filter((g) => g.reports.length > 0);
+---
+
+<BaseLayout lang={lang} page="evidence">
+  <PageHead lang={lang} page="evidence" intro={t(lang, 'evidenceIntro')} />
+  <div class="wrap page-body">
+    {groups.length === 0 ? (
+      <section aria-labelledby="docs-heading">
+        <h2 id="docs-heading" class="list-heading">{t(lang, 'documentation')}</h2>
+        <p class="muted">{t(lang, 'evidenceEmpty')}</p>
+        <LinkList links={site.links.filter((l) => l.documentation)} lang={lang} />
+      </section>
+    ) : (
+      groups.map((g) => (
+        <section class="report-group" aria-labelledby={`cat-${g.category}`}>
+          <h2 id={`cat-${g.category}`} class="list-heading">
+            {t(lang, `rep_${g.category}` as TranslationKey)}
+          </h2>
+          <ul class="reports">
+            {g.reports.map((r) => (
+              <li class="report">
+                <h3>{r.title}</h3>
+                <p class="report-meta">
+                  {r.source} · <time datetime={r.date}>{formatDate(r.date, lang)}</time>
+                </p>
+                <p>{r.summary}</p>
+                <a class="text-link" href={r.url} target="_blank" rel="noopener noreferrer">
+                  {t(lang, 'readReport')} <span class="arrow" aria-hidden="true">→</span>
+                  <span class="sr-only">{t(lang, 'opensNewTab')}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
+</BaseLayout>

@@ -12,11 +12,11 @@ const { banner } = Astro.props;
 ---
 
 {banner.enabled && (
-  <div class={`banner banner-${banner.type}`}>
+  <div class={`banner banner-${banner.type}`} lang="en">
     {banner.link ? (
       <a href={banner.link} target="_blank" rel="noopener" class="banner-link">
         <span>{banner.text}</span>
-        <span class="banner-arrow">&rarr;</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
     ) : (
       <span>{banner.text}</span>

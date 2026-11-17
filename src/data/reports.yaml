@@ -1,0 +1,12 @@
+# Reports from independent human rights organizations, shown on /evidence/
+# newest first. Only add real, published reports; link the original.
+# category: one of REPORT_CATEGORIES in src/lib/content-schema.ts.
+#
+# - id: amnesty-2026-example
+#   title: "Exact report title"
+#   source: "Publishing organization"
+#   date: "2026-01-31"
+#   summary: "One or two factual sentences."
+#   url: "https://..."
+#   category: executions
+[]

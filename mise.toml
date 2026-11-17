@@ -1,0 +1,49 @@
+[settings]
+lockfile = true
+
+[tools]
+node = "22"
+terraform = "1.17"
+pre-commit = "latest"
+tflint = "latest"
+terraform-docs = "0.20.0"  # matches terraform-docs/gh-actions, so CI and local agree
+trivy = "latest"
+
+[tasks.dev]
+description = "Astro dev server at localhost:4321"
+run = "npm run dev"
+
+[tasks.build]
+description = "Typecheck and build the static site into dist/"
+run = ["npm ci", "npm run check", "npm run build"]
+
+[tasks.test]
+description = "CloudFront router function check"
+run = "node --test infrastructure/terraform/modules/cloudfront/router.test.mjs"
+
+[tasks."tf:init"]
+description = "terraform init for $TF_ENV (default prod)"
+dir = "infrastructure/terraform"
+run = "terraform init -input=false -reconfigure -backend-config=envs/${TF_ENV:-prod}.backend.hcl"
+
+# Terraform uploads dist/ as aws_s3_object resources, so the plan needs a fresh build.
+[tasks."tf:plan"]
+description = "terraform plan for $TF_ENV (default prod)"
+depends = ["build", "test"]
+dir = "infrastructure/terraform"
+run = "terraform plan -input=false -var-file=envs/${TF_ENV:-prod}.tfvars -out=${TF_ENV:-prod}.tfplan"
+
+[tasks."tf:apply"]
+description = "terraform apply the saved plan for $TF_ENV (default prod)"
+dir = "infrastructure/terraform"
+run = "terraform apply ${TF_ENV:-prod}.tfplan"
+
+[tasks."tf:destroy"]
+description = "terraform destroy $TF_ENV (required, no default); asks for confirmation"
+depends = ["build"]
+dir = "infrastructure/terraform"
+run = "terraform destroy -var-file=envs/${TF_ENV:?set TF_ENV explicitly}.tfvars"
+
+[tasks.lint]
+description = "Run every pre-commit hook on all files"
+run = "pre-commit run --all-files"

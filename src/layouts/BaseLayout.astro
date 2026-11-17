@@ -1,28 +1,36 @@
 ---
 import { Font } from 'astro:assets';
 import '../styles/main.css';
-import { getDir, otherLocale, type Lang } from '../lib/i18n';
-import { canonicalFor, isoDate, OG_IMAGE, seo, SITE_NAME, SITE_URL } from '../lib/seo';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteBanner from '../components/SiteBanner.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getDir, t, type Lang, type Page } from '../lib/i18n';
+import { canonicalFor, isoDate, OG_IMAGE, pageSeo, seo, SITE_NAME, SITE_URL } from '../lib/seo';
+import { getSiteData } from '../lib/site-data';
 
 interface Props {
   lang: Lang;
+  /** Section being rendered. Omitted only by 404.astro, which is noindex with no canonical. */
+  page?: Page;
   title?: string;
   description?: string;
-  /** `last_updated` from D1 config; surfaced as schema.org dateModified. */
-  lastUpdated?: string;
   /** Extra JSON-LD nodes appended to the page graph. */
   jsonLd?: Record<string, unknown>[];
 }
 
-const { lang, title, description, lastUpdated = '', jsonLd = [] } = Astro.props;
+const { lang, page, jsonLd = [] } = Astro.props;
 
+const site = await getSiteData();
 const copy = seo[lang];
-const pageTitle = title ?? copy.title;
-const pageDescription = description ?? copy.description;
+const section = page ? pageSeo[lang][page] : undefined;
+const pageTitle = Astro.props.title ?? (section ? `${section.title} — ${SITE_NAME}` : copy.title);
+const pageDescription = Astro.props.description ?? section?.description ?? copy.description;
+const ogTitle = section ? pageTitle : copy.ogTitle;
+const ogDescription = section ? pageDescription : copy.ogDescription;
 const dir = getDir(lang);
-const canonical = canonicalFor(lang);
-const alternate = canonicalFor(otherLocale(lang));
-const dateModified = isoDate(lastUpdated);
+const indexable = page !== undefined;
+const canonical = canonicalFor(lang, page ?? '');
+const dateModified = isoDate(site.lastUpdated);
 
 const graph: Record<string, unknown>[] = [
   {
@@ -52,7 +60,7 @@ const graph: Record<string, unknown>[] = [
     '@type': 'WebPage',
     '@id': `${canonical}#webpage`,
     url: canonical,
-    name: copy.ogTitle,
+    name: ogTitle,
     description: pageDescription,
     inLanguage: lang === 'fa' ? 'fa-IR' : 'en-US',
     isPartOf: { '@id': `${SITE_URL}/#website` },
@@ -81,21 +89,27 @@ const jsonLdBody = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
     <meta name="description" content={pageDescription} />
     <meta
       name="robots"
-      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      content={indexable
+        ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+        : 'noindex'}
     />
-    <meta name="theme-color" content="#f4f2ec" />
+    <meta name="theme-color" content="#851a2b" />
 
-    <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="en" href={canonicalFor('en')} />
-    <link rel="alternate" hreflang="fa" href={canonicalFor('fa')} />
-    <link rel="alternate" hreflang="x-default" href={canonicalFor('en')} />
+    {indexable && (
+      <>
+        <link rel="canonical" href={canonical} />
+        <link rel="alternate" hreflang="en" href={canonicalFor('en', page)} />
+        <link rel="alternate" hreflang="fa" href={canonicalFor('fa', page)} />
+        <link rel="alternate" hreflang="x-default" href={canonicalFor('en', page)} />
+      </>
+    )}
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE_NAME} />
-    <meta property="og:title" content={copy.ogTitle} />
-    <meta property="og:description" content={copy.ogDescription} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
     <meta property="og:locale" content={lang === 'fa' ? 'fa_IR' : 'en_US'} />
     <meta property="og:locale:alternate" content={lang === 'fa' ? 'en_US' : 'fa_IR'} />
     <meta property="og:image" content={OG_IMAGE.url} />
@@ -107,27 +121,33 @@ const jsonLdBody = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonical} />
-    <meta name="twitter:title" content={copy.ogTitle} />
-    <meta name="twitter:description" content={copy.ogDescription} />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
     <meta name="twitter:image" content={OG_IMAGE.url} />
     <meta name="twitter:image:alt" content={OG_IMAGE.alt} />
 
     <script type="application/ld+json" is:inline set:html={jsonLdBody} />
 
-    <Font cssVariable="--font-newsreader" preload />
+    <Font cssVariable="--font-newsreader" preload={lang === 'en'} />
+    <Font cssVariable="--font-inter" preload={lang === 'en'} />
+    <Font cssVariable="--font-vazirmatn" preload={lang === 'fa'} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
-    <slot />
-    <noscript>
-      <div style="max-width:580px;margin:2rem auto;padding:0 1rem;font-family:sans-serif;color:#1c1a16">
-        <h2>{copy.ogTitle}</h2>
-        <p>{pageDescription}</p>
-        <p><a href={alternate}>{lang === 'en' ? 'فارسی' : 'English'}</a></p>
-      </div>
-    </noscript>
+    <a class="skip-link" href="#main">{t(lang, 'skip')}</a>
+    <SiteHeader lang={lang} page={page} />
+    <SiteBanner banner={site.banner} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter
+      lang={lang}
+      contactEmail={site.contactEmail}
+      lastUpdated={site.lastUpdated}
+      related={site.links.filter((l) => l.documentation)}
+    />
   </body>
 </html>

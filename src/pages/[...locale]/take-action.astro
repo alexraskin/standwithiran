@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import LinkList from '../../components/LinkList.astro';
+import SharePanel from '../../components/SharePanel.astro';
+import { localeStaticPaths, t, type Lang } from '../../lib/i18n';
+import { resourcesItemList } from '../../lib/seo';
+import { getSiteData } from '../../lib/site-data';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { lang } = Astro.props as { lang: Lang };
+const site = await getSiteData();
+const featured = site.links.filter((l) => l.featured);
+const rest = site.links.filter((l) => !l.featured);
+---
+
+<BaseLayout lang={lang} page="take-action" jsonLd={[resourcesItemList(site.links, lang)]}>
+  <PageHead lang={lang} page="take-action" intro={t(lang, 'actionIntro')} />
+  <div class="wrap page-body">
+    {featured.length > 0 && (
+      <section aria-labelledby="act-heading">
+        <h2 id="act-heading" class="list-heading">{t(lang, 'actNow')}</h2>
+        <LinkList links={featured} lang={lang} />
+      </section>
+    )}
+    <section aria-labelledby="resources-heading">
+      <h2 id="resources-heading" class="list-heading">{t(lang, 'resources')}</h2>
+      <LinkList links={rest} lang={lang} />
+    </section>
+    <SharePanel lang={lang} />
+  </div>
+</BaseLayout>

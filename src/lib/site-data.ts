@@ -1,50 +1,41 @@
-import type { LinkRow, SiteData } from './types';
+import { getCollection, getEntry } from 'astro:content';
+import type { Report, SiteData } from './types';
 
-/** Columns are named rather than selected with `*` so a schema change surfaces
- *  as a type error instead of an undefined field at render time. */
-const LINK_COLUMNS = 'id, title, url, icon, category, featured, sort_order';
-
-/** Fallbacks for stat dates, used when the config row is missing or unparseable.
+/** Fallbacks for stat dates, used when the YAML value is empty or unparsable.
  *  `war` has no entry on purpose: there is no defensible default start date, so
- *  the counter stays hidden until an admin sets one. */
+ *  the counter stays hidden until one is set. */
 export const DEFAULT_STAT_DATES = {
   amini: '2022-09-16',
   protest: '2025-12-28',
   blackout: '2026-01-08',
 } as const;
 
-export async function getSiteData(db: D1Database): Promise<SiteData> {
-  const [linksResult, configResult] = await Promise.all([
-    db.prepare(`SELECT ${LINK_COLUMNS} FROM links ORDER BY sort_order ASC`).all<LinkRow>(),
-    db.prepare('SELECT key, value FROM config').all<{ key: string; value: string }>(),
+/** Reads src/data/*.yaml at build time. Shared by both locales and the sitemap. */
+export async function getSiteData(): Promise<SiteData> {
+  const [links, timeline, site] = await Promise.all([
+    getCollection('links'),
+    getCollection('timeline'),
+    getEntry('site', 'main'),
   ]);
-
-  const config: Record<string, string> = {};
-  for (const row of configResult.results) {
-    config[row.key] = row.value;
-  }
-
-  const links = linksResult.results.map((row) => ({ ...row, featured: row.featured === 1 }));
+  if (!site) throw new Error("src/data/site.yaml has no 'main' entry");
+  const s = site.data;
 
   return {
-    links,
-    banner: {
-      enabled: config.banner_enabled === '1',
-      type: config.banner_type || 'info',
-      text: config.banner_text || '',
-      link: config.banner_link || '',
-    },
-    profile: {
-      description: config.profile_description || '',
-      description_fa: config.profile_description_fa || '',
-    },
-    stats: {
-      amini: config.stat_amini_date || DEFAULT_STAT_DATES.amini,
-      protest: config.stat_protest_date || DEFAULT_STAT_DATES.protest,
-      blackout: config.stat_blackout_date || DEFAULT_STAT_DATES.blackout,
-      war: config.stat_war_date || '',
-    },
-    contactEmail: config.contact_email || '',
-    lastUpdated: config.last_updated || '',
+    links: links.map(({ id, data }) => ({ id, ...data })),
+    timeline: timeline.map(({ id, data }) => ({ id, ...data })),
+    banner: s.banner,
+    profile: s.profile,
+    stats: s.stats,
+    contactEmail: s.contact_email,
+    lastUpdated: s.last_updated,
   };
+}
+
+/** src/data/reports.yaml, newest first. Separate from getSiteData because only
+ *  /evidence/ needs it, and Astro warns on every read while the file is empty. */
+export async function getReports(): Promise<Report[]> {
+  const reports = await getCollection('reports');
+  return reports
+    .map(({ id, data }) => ({ id, ...data }))
+    .sort((a, b) => b.date.localeCompare(a.date));
 }

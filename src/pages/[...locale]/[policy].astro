@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { legal, legalUpdated } from '../../data/legal';
+import { formatDate, LEGAL_PAGES, localeStaticPaths, pageHref, t, type Lang } from '../../lib/i18n';
+import { getSiteData } from '../../lib/site-data';
+
+export function getStaticPaths() {
+  return localeStaticPaths().flatMap(({ params, props }) =>
+    LEGAL_PAGES.map((policy) => ({ params: { ...params, policy }, props: { ...props, policy } })),
+  );
+}
+const { lang, policy } = Astro.props as { lang: Lang; policy: (typeof LEGAL_PAGES)[number] };
+const site = await getSiteData();
+---
+
+<BaseLayout lang={lang} page={policy}>
+  <PageHead lang={lang} page={policy} />
+  <article class="wrap page-body prose legal-copy">
+    <p class="muted">{t(lang, 'lastUpdated')}: <time datetime={legalUpdated}>{formatDate(legalUpdated, lang)}</time></p>
+    {legal[lang][policy].map(({ heading, paragraphs }) => (
+      <section>
+        <h2>{heading}</h2>
+        {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      </section>
+    ))}
+    <section>
+      <h2>{t(lang, 'contact')}</h2>
+      <p>{lang === 'en' ? 'For questions, corrections, or privacy requests, contact the site maintainers:' : 'برای پرسش، اصلاح یا درخواست حریم خصوصی با گردانندگان سایت تماس بگیرید:'} <a href={`mailto:${site.contactEmail}`} dir="ltr">{site.contactEmail}</a></p>
+      <p><a href={pageHref(lang, policy === 'terms' ? 'privacy' : 'terms')}>{t(lang, policy === 'terms' ? 'privacy' : 'terms')}</a></p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-copy section { margin-top: 2.5rem; }
+  .legal-copy h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+  .legal-copy a { text-decoration: underline; text-underline-offset: 0.2em; }
+</style>
