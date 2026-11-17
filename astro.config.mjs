@@ -24,6 +24,10 @@ export default defineConfig({
       ],
     },
   },
+  // No code blocks on the site; Shiki's inline styles would conflict with the CSP.
+  markdown: {
+    syntaxHighlight: false,
+  },
   i18n: {
     locales: ['en', 'fa'],
     defaultLocale: 'en',
@@ -37,7 +41,7 @@ export default defineConfig({
       name: 'Newsreader',
       cssVariable: '--font-newsreader',
       display: 'swap',
-      weights: [500, 600],
+      weights: [400, 500, 600],
       styles: ['normal'],
       subsets: ['latin'],
       fallbacks: ['Georgia', 'Times New Roman', 'serif'],
