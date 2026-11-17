@@ -8,6 +8,7 @@ import {
   isIcon,
   isIsoDateOrEmpty,
   REPORT_CATEGORIES,
+  VICTIM_GROUPS,
 } from './lib/content-schema';
 
 // Content is edited as YAML in src/data/. These schemas are the only validation
@@ -24,6 +25,8 @@ const links = defineCollection({
     category: z.string().refine(isCategory, 'unknown category, see CATEGORIES'),
     featured: z.boolean().default(false),
     documentation: z.boolean().default(false),
+    description: z.string().default(''),
+    description_fa: z.string().default(''),
   }),
 });
 
@@ -75,4 +78,30 @@ const site = defineCollection({
   }),
 });
 
-export const collections = { links, timeline, reports, site };
+const victims = defineCollection({
+  loader: file('src/data/victims.yaml'),
+  schema: z.object({
+    name: z.string().min(1),
+    name_fa: z.string().min(1),
+    age: z.number().int().positive().optional(),
+    place: z.string().min(1),
+    date: z.string().min(1).refine(isIsoDateOrEmpty, 'must be YYYY-MM-DD'),
+    summary: z.string().min(1),
+    source: z.string().min(1),
+    url: httpUrl,
+    group: z.enum(VICTIM_GROUPS),
+  }),
+});
+
+const victimStats = defineCollection({
+  loader: file('src/data/victim-stats.yaml'),
+  schema: z.object({
+    figure: z.string().min(1),
+    label: z.string().min(1),
+    label_fa: z.string().min(1),
+    source: z.string().min(1),
+    url: httpUrl,
+  }),
+});
+
+export const collections = { links, timeline, reports, site, victims, victimStats };

@@ -33,7 +33,14 @@ export const translations = {
     memorialTitle: 'Behind every count is a name.',
     memorialCta: 'Remember the victims',
     victimsIntro:
-      'This site does not publish names, photographs or casualty figures of its own. It points to independent organizations that document these cases. Check the sources behind each record, and treat unconfirmed reports as unconfirmed.',
+      'Every person below is documented by an independent organization, with a link to their record. They are a small selection of thousands. The full records are held by the organizations at the bottom of this page.',
+    victimsStatsHeading: 'The scale, as documented',
+    vic_uprising_2022: 'Killed in the 2022 uprising',
+    vic_executed: 'Executed after protest trials',
+    vic_protests_2025_26: 'Killed in the 2025–2026 protests',
+    victimRecord: 'Read their record',
+    victimsOrgsIntro:
+      'These organizations hold the full records. Every profile above links to one of their case files.',
     documentation: 'Documentation',
     evidenceIntro:
       'Reporting from independent human rights organizations, with links to the original sources.',
@@ -102,7 +109,14 @@ export const translations = {
     memorialTitle: 'پشت هر عدد، نامی است.',
     memorialCta: 'یاد قربانیان',
     victimsIntro:
-      'این سایت نام، عکس یا آمار قربانیان را خودش منتشر نمی‌کند و به سازمان‌های مستقلی ارجاع می‌دهد که این موارد را مستند می‌کنند. منابع هر پرونده را بررسی کنید و گزارش‌های تأییدنشده را تأییدنشده بدانید.',
+      'هر فردی که در زیر آمده است توسط سازمانی مستقل مستند شده و به پرونده‌ی او پیوند داده شده است. این‌ها گزیده‌ی کوچکی از هزاران نفرند. پرونده‌های کامل نزد سازمان‌هایی است که در پایین این صفحه آمده‌اند.',
+    victimsStatsHeading: 'ابعاد فاجعه، بر پایه‌ی مستندات',
+    vic_uprising_2022: 'کشته‌شدگان خیزش ۱۴۰۱',
+    vic_executed: 'اعدام‌شدگان پس از دادگاه‌های اعتراضات',
+    vic_protests_2025_26: 'کشته‌شدگان اعتراضات ۱۴۰۴',
+    victimRecord: 'خواندن پرونده‌ی او',
+    victimsOrgsIntro:
+      'پرونده‌های کامل نزد این سازمان‌هاست. هر پروفایل بالا به یکی از پرونده‌های آن‌ها پیوند دارد.',
     documentation: 'مستندسازی',
     evidenceIntro: 'گزارش‌های سازمان‌های مستقل حقوق بشری، با پیوند به منبع اصلی.',
     evidenceEmpty:

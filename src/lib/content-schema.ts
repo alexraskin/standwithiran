@@ -39,6 +39,9 @@ export const REPORT_CATEGORIES = [
   'protest_repression',
 ] as const;
 
+/** Victims page profile groups, in display order. Labels: `vic_*` in src/lib/i18n.ts. */
+export const VICTIM_GROUPS = ['uprising_2022', 'executed', 'protests_2025_26'] as const;
+
 export const BANNER_TYPES = ['info', 'urgent', 'success'] as const;
 
 export const DEFAULT_ICON = 'globe';
