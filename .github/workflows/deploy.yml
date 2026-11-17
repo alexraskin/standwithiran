@@ -3,6 +3,16 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'LICENSE'
+      - 'docs/**'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.terraform-docs.yml'
+      - '.tflint.hcl'
   workflow_dispatch:
 
 concurrency:
