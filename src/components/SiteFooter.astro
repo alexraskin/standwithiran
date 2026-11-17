@@ -1,5 +1,5 @@
 ---
-import { formatDate, NAV_LABEL, pageHref, PAGES, t, type Lang } from '../lib/i18n';
+import { formatDate, pageHref, t, type Lang } from '../lib/i18n';
 import type { Link } from '../lib/types';
 
 interface Props {
@@ -16,45 +16,40 @@ const { contactEmail, lastUpdated, lang, related } = Astro.props;
 const lastUpdatedIso = /^\d{4}-\d{2}-\d{2}$/.test(lastUpdated) ? lastUpdated : undefined;
 ---
 
-<footer class="site-footer">
-  <div class="wrap footer-top">
-    <div class="footer-message">
-      <p class="footer-title">{t(lang, 'footerTitle')}</p>
-      <p class="footer-sub">{t(lang, 'footerSub')}</p>
-    </div>
+<section class="wrap closing" aria-label={t(lang, 'related')}>
+  <p class="closing-title">{t(lang, 'footerTitle')} {t(lang, 'footerSub')}</p>
 
-    <nav aria-label={t(lang, 'explore')}>
-      <ul class="footer-list">
-        {PAGES.map((p) => (
-          <li><a href={pageHref(lang, p)}>{t(lang, NAV_LABEL[p])}</a></li>
+  {related.length > 0 && (
+    <div class="related">
+      <h2 class="related-heading">{t(lang, 'related')}</h2>
+      <ul class="related-list">
+        {related.map((link) => (
+          <li>
+            <a href={link.url} target="_blank" rel="noopener noreferrer" lang="en">
+              {link.title} <span class="arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
         ))}
       </ul>
-    </nav>
+    </div>
+  )}
+</section>
 
-    {related.length > 0 && (
-      <div>
-        <h2 class="footer-heading">{t(lang, 'related')}</h2>
-        <ul class="footer-list">
-          {related.map((link) => (
-            <li><a href={link.url} target="_blank" rel="noopener noreferrer" lang="en">{link.title}</a></li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
-
-  <div class="wrap footer-bottom">
-    <p>
-      {t(lang, 'lastUpdated')}:{' '}
-      <time datetime={lastUpdatedIso}>{formatDate(lastUpdated, lang)}</time>
-    </p>
-    <p>
-      {t(lang, 'heroCredit')}
-    </p>
-    {contactEmail && (
-      <p>{t(lang, 'contact')}: <a href={`mailto:${contactEmail}`} dir="ltr">{contactEmail}</a></p>
-    )}
-    <p><a href={pageHref(lang, 'terms')}>{t(lang, 'terms')}</a></p>
-    <p><a href={pageHref(lang, 'privacy')}>{t(lang, 'privacy')}</a></p>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-info">
+      <p class="footer-wordmark" lang="en">Stand With Iran</p>
+      {contactEmail && (
+        <p><a href={`mailto:${contactEmail}`} dir="ltr" aria-label={`${t(lang, 'contact')}: ${contactEmail}`}>{contactEmail}</a></p>
+      )}
+      <p>
+        {t(lang, 'lastUpdated')}:{' '}
+        <time datetime={lastUpdatedIso}>{formatDate(lastUpdated, lang)}</time>
+      </p>
+    </div>
+    <ul class="footer-legal">
+      <li><a href={pageHref(lang, 'terms')}>{t(lang, 'terms')}</a></li>
+      <li><a href={pageHref(lang, 'privacy')}>{t(lang, 'privacy')}</a></li>
+    </ul>
   </div>
 </footer>

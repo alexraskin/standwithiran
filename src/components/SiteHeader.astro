@@ -24,7 +24,11 @@ const switchHref = pageHref(other, page ?? '');
       <ul>
         {PAGES.map((p) => (
           <li>
-            <a href={pageHref(lang, p)} aria-current={p === page ? 'page' : undefined}>
+            <a
+              href={pageHref(lang, p)}
+              class:list={{ 'nav-cta': p === 'take-action' }}
+              aria-current={p === page ? 'page' : undefined}
+            >
               {t(lang, NAV_LABEL[p])}
             </a>
           </li>
@@ -32,19 +36,9 @@ const switchHref = pageHref(other, page ?? '');
       </ul>
     </nav>
 
-    <p class="lang-switch" aria-label={t(lang, 'language')}>
-      {lang === 'en' ? (
-        <>
-          <span aria-current="true">EN</span> /
-          <a href={switchHref} hreflang={other} lang={other}>فارسی</a>
-        </>
-      ) : (
-        <>
-          <a href={switchHref} hreflang={other} lang={other}>EN</a> /
-          <span aria-current="true">فارسی</span>
-        </>
-      )}
-    </p>
+    <a class="lang-switch" href={switchHref} hreflang={other} lang={other}>
+      {other === 'fa' ? 'فارسی' : 'English'}
+    </a>
 
     <button class="menu-btn" type="button" popovertarget="site-nav" aria-label={t(lang, 'menu')}>
       <Icon name="menu" />

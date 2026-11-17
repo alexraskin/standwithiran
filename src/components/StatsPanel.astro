@@ -35,7 +35,9 @@ const blocks = [
   { since: startMs(stats.amini, DEFAULT_STAT_DATES.amini), label: t(lang, 'statDays') },
   { since: startMs(stats.protest, DEFAULT_STAT_DATES.protest), label: t(lang, 'statProtest') },
   { since: startMs(stats.blackout, DEFAULT_STAT_DATES.blackout), label: t(lang, 'statBlackout') },
-].map((b) => ({ ...b, iso: new Date(b.since).toISOString().slice(0, 10) }));
+];
+
+const today = new Date().toISOString().slice(0, 10);
 ---
 
 <section class="stats" aria-labelledby="stats-heading">
@@ -48,12 +50,12 @@ const blocks = [
         <dd class="stat-number" data-since={block.since}>
           {daysSince(block.since).toLocaleString(numLocale)}
         </dd>
-        <dd class="stat-context">
-          {t(lang, 'since')} <time datetime={block.iso}>{formatDate(block.iso, lang)}</time>
-        </dd>
       </div>
     ))}
   </dl>
+  <p class="wrap stats-note">
+    {t(lang, 'asOf')} <time class="stats-date" datetime={today}>{formatDate(today, lang)}</time>.
+  </p>
 </section>
 
 <script>
@@ -63,5 +65,15 @@ const blocks = [
   for (const el of document.querySelectorAll<HTMLElement>('[data-since]')) {
     const days = Math.max(0, Math.floor((Date.now() - Number(el.dataset.since)) / 86_400_000));
     el.textContent = days.toLocaleString(locale);
+  }
+  const date = document.querySelector<HTMLTimeElement>('.stats-date');
+  if (date) {
+    const now = new Date();
+    date.dateTime = now.toISOString().slice(0, 10);
+    date.textContent = now.toLocaleDateString(locale === 'fa-IR' ? 'fa-IR-u-ca-gregory' : locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   }
 </script>
