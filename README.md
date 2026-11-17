@@ -1,66 +1,90 @@
-# Stand With Iran ✊
+# Stand With Iran
 
-Website supporting the people of Iran in their fight for freedom and human rights. Curates resources, organizations, and fundraisers.
+An open-source website supporting the people of Iran in their fight for freedom and human rights. It brings together resources, organizations, fundraisers, and historical context in English and Farsi.
 
 **Woman, Life, Freedom — زن، زندگی، آزادی**
 
-A static [Astro](https://astro.build) site served from S3 behind CloudFront. Content lives in YAML in this repo.
+[Visit the website](https://standwithiran.org) · [فارسی](https://standwithiran.org/fa/)
 
-## Stack
+Built with [Astro](https://astro.build) and TypeScript. The site generates static HTML, supports right-to-left Farsi layouts, and keeps its content in editable YAML files.
 
-- **Astro 6**, static output. English at `/`, Farsi (RTL) at `/fa/`.
-- **Content** in `src/data/*.yaml`, validated at build time by `src/content.config.ts`.
-- **AWS**: a private S3 bucket behind CloudFront with OAC, plus an ACM cert. Defined in `infrastructure/terraform/`.
-- **DNS** stays on Cloudflare as DNS-only CNAMEs to CloudFront, managed by the same Terraform.
+## Getting started
 
-## Editing content
-
-Edit, commit, push to `main`. CI rebuilds and deploys.
-
-| File | What |
-| :--- | :--- |
-| `src/data/links.yaml` | Resource links. File order is display order. `icon`/`category` must be in `src/lib/content-schema.ts`. |
-| `src/data/site.yaml` | Banner, profile (EN + FA), stat counter dates, contact email, `last_updated` |
-| `src/lib/i18n.ts` | UI strings |
-
-Dates are ISO `YYYY-MM-DD`. Leave `stats.war` as `""` to hide that counter. If the YAML is invalid, `npm run check` / `npm run build` fails and names the field.
-
-The day counters update in the browser from the start dates, so they stay current without a rebuild.
-
-## Local development
+Install [mise](https://mise.jdx.dev), then clone your fork or a local copy of this repository. From the project directory, install the configured tools and dependencies, build the site, and start the development server:
 
 ```sh
-mise trust && mise install
-npm install
-npm run dev        # http://localhost:4321
+mise trust
+mise install
+mise run build
+mise run dev
 ```
 
-## Deploy
+Open [localhost:4321](http://localhost:4321). Local development does not require AWS or Cloudflare credentials.
 
-CI (`.github/workflows/deploy.yml`) runs `mise run tf:init`, then `tf:plan` (which runs `build` first), then `tf:apply`. Terraform uploads `dist/` as S3 objects:
+Tool versions and development tasks are configured in [mise.toml](mise.toml).
 
-- `_astro/` is immutable.
-- HTML and the sitemap revalidate on every request, so no invalidation is needed.
+## Development
 
-GitHub `prod` environment needs vars `AWS_ROLE_ARN` (bootstrap output) and `AWS_REGION=us-east-1`. The Cloudflare token is read from SSM `/infrastructure/cloudflare/api_token` (us-east-1).
+| Command | Description |
+| --- | --- |
+| `mise run dev` | Start the development server |
+| `mise run build` | Install dependencies, run type and content checks, and build to `dist/` |
+| `mise run test` | Run the CloudFront router tests |
+| `mise run lint` | Run the configured pre-commit checks |
 
-Locally: `mise run tf:init tf:plan tf:apply` with AWS creds.
+Pages live in `src/pages/`, shared components in `src/components/`, and styles in `src/styles/`. English pages use `/`; Farsi pages use `/fa/`.
 
-### First-time setup
+## Updating content
 
-1. `cd infrastructure/terraform/bootstrap && terraform init && terraform apply` creates the GitHub OIDC deploy role.
-2. Run `mise run tf:init tf:plan tf:apply` to create the bucket, cert, CloudFront, ACM validation records, and apex/www DNS records.
-3. Smoke test the site at `https://standwithiran.org`.
+Most content changes do not require editing components:
 
-The apex/www DNS records are always managed by Terraform.
+| File | Contents |
+| --- | --- |
+| [src/data/links.yaml](src/data/links.yaml) | Resource links, organizations, and fundraisers |
+| [src/data/timeline.yaml](src/data/timeline.yaml) | Historical events with English and Farsi titles and summaries |
+| [src/data/reports.yaml](src/data/reports.yaml) | Published reports for the evidence page |
+| [src/data/site.yaml](src/data/site.yaml) | Banner, site description, counter dates, contact email, and last-updated date |
+| [src/lib/i18n.ts](src/lib/i18n.ts) | Translated interface text |
 
-## Commands
+Follow the existing entries and comments when adding content. Use original sources for reports and include the publisher, publication date, and a short factual summary. Keep English and Farsi text in sync where both are provided.
 
-| Command | Action |
-| :--- | :--- |
-| `npm run dev` | Dev server at `localhost:4321` |
-| `npm run check` | `astro check`: typecheck + content schema |
-| `mise run build` | `npm ci` + check + build to `dist/` |
-| `mise run test` | CloudFront router function check |
-| `mise run tf:plan` / `tf:apply` | Build, then plan/apply (`TF_ENV`, default `prod`) |
-| `mise run lint` | All pre-commit hooks |
+Content is validated by [src/content.config.ts](src/content.config.ts). Supported icons and categories are defined in [src/lib/content-schema.ts](src/lib/content-schema.ts). Dates use `YYYY-MM-DD`; timeline years use `YYYY` or `YYYY–YYYY`. Set `stats.war` to `""` to hide that counter. Day counters update in the browser without a rebuild.
+
+Run `mise run build` after editing content, then preview the affected pages in both languages.
+
+## Contributing
+
+Contributions are welcome: fix broken links, suggest resources, improve translations, correct content, or help with accessibility and design.
+
+1. Open an issue to report a bug, suggest a resource, or discuss a larger change. Include sources for factual corrections.
+2. Fork the repository and create a branch for your change.
+3. Make a focused change and run `mise run build`. For CloudFront router changes, also run `mise run test`.
+4. Open a pull request explaining what changed and how you checked it. Include screenshots for visual changes.
+
+You can also open an issue with a suggested correction if you prefer not to edit the code.
+
+## Deployment
+
+The production site runs on a private S3 bucket behind CloudFront, with an ACM certificate and Cloudflare DNS. Infrastructure is defined in [infrastructure/terraform/](infrastructure/terraform/).
+
+The [deployment workflow](.github/workflows/deploy.yml) runs on pushes to `main` and can also be triggered manually. It initializes Terraform, builds and tests the site, creates a plan, and applies it. Terraform uploads `dist/` to S3. Assets under `_astro/` are immutable; HTML and the sitemap revalidate on every request.
+
+Maintainers need:
+
+- GitHub `prod` environment variables `AWS_ROLE_ARN` (from the bootstrap output) and `AWS_REGION=us-east-1`.
+- A Cloudflare API token stored in AWS SSM at `/infrastructure/cloudflare/api_token` in `us-east-1`.
+- AWS credentials for local Terraform commands.
+
+For initial setup, apply the configuration in `infrastructure/terraform/bootstrap/` to create the GitHub OIDC deployment role. Then, from the repository root, run:
+
+```sh
+mise run tf:init
+mise run tf:plan
+mise run tf:apply
+```
+
+These commands use `TF_ENV=prod` by default. The plan task builds the site and runs the router tests; the apply task applies the saved plan. Terraform manages the bucket, certificate, CloudFront distribution, certificate validation records, and DNS-only apex/www records. After deployment, verify [standwithiran.org](https://standwithiran.org).
+
+## License
+
+Released under [The Unlicense](LICENSE).
