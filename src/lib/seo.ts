@@ -3,7 +3,7 @@ import { pageHref, type Lang, type Page } from './i18n';
 export const SITE_URL = 'https://standwithiran.org';
 export const SITE_NAME = 'Stand With Iran';
 
-/** 1200x630 JPEG. Regenerate if the hero art or wordmark changes. */
+/** 1200x630 JPEG from scripts/generate-og.mjs. Regenerate if the slogan, palette or wordmark changes. */
 export const OG_IMAGE = {
   url: `${SITE_URL}/images/og-image.jpg`,
   width: 1200,
