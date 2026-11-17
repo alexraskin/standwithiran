@@ -24,6 +24,10 @@ export default defineConfig({
       ],
     },
   },
+  // No code blocks on the site; Shiki's inline styles would conflict with the CSP.
+  markdown: {
+    syntaxHighlight: false,
+  },
   i18n: {
     locales: ['en', 'fa'],
     defaultLocale: 'en',
