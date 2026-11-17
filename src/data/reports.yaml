@@ -1,12 +1,115 @@
 # Reports from independent human rights organizations, shown on /evidence/
 # newest first. Only add real, published reports; link the original.
 # category: one of REPORT_CATEGORIES in src/lib/content-schema.ts.
-#
-# - id: amnesty-2026-example
-#   title: "Exact report title"
-#   source: "Publishing organization"
-#   date: "2026-01-31"
-#   summary: "One or two factual sentences."
-#   url: "https://..."
-#   category: executions
-[]
+- id: un-ffmi-2026-09
+  title: 'Iran: Civilians trapped between extreme State repression and violations arising from devastating conflict with US, Israel, UN Fact-Finding Mission finds'
+  source: UN Independent International Fact-Finding Mission on Iran (OHCHR)
+  date: '2026-09-17'
+  summary: The Mission found Iran's repression of the 2025-2026 protests amounted to crimes against humanity, including murder, imprisonment and torture, and found reasonable grounds to believe US strikes in Minab and Lamerd were war crimes.
+  url: https://www.ohchr.org/en/press-releases/2026/09/iran-civilians-trapped-between-extreme-state-repression-and-violations
+  category: protest_repression
+- id: amnesty-architects-of-atrocities-2026
+  title: 'Architects of Atrocities: State Machinery Orchestrating Crimes Against Humanity in Iran''s 2022 Woman Life Freedom Uprising'
+  source: Amnesty International
+  date: '2026-09-16'
+  summary: A 1,000+ page investigation finds Iranian authorities committed crimes against humanity to crush the 2022 uprising and identifies 87 officials who should be criminally investigated.
+  url: https://www.amnesty.org/en/latest/news/2026/09/iran-architects-of-crimes-against-humanity-to-suppress-protests-must-face-justice/
+  category: protest_repression
+- id: hrw-boroumand-execution-campaign-2026
+  title: 'Iran: Ongoing Unlawful Execution Campaign Against Protesters'
+  source: Human Rights Watch and Abdorrahman Boroumand Center
+  date: '2026-09-10'
+  summary: Between 18 March and the end of August 2026, authorities arbitrarily executed at least 59 men on politically motivated national security charges after grossly unfair trials, including 29 people arrested in the December 2025-January 2026 protests.
+  url: https://www.hrw.org/news/2026/09/10/iran-ongoing-unlawful-execution-campaign-against-protesters
+  category: executions
+- id: amnesty-death-sentences-executions-2025
+  title: Death Sentences and Executions 2025
+  source: Amnesty International
+  date: '2026-05-18'
+  summary: Amnesty recorded 2,707 executions worldwide in 2025, the highest since 1981. Iran accounted for at least 2,159, more than double its 2024 figure, with 998 for drug-related offences.
+  url: https://www.amnesty.org/en/latest/news/2026/05/executions-surge-highest-recorded-figure-44-years/
+  category: executions
+- id: ihrngo-ecpm-death-penalty-2025
+  title: 2025 Annual Report on the Death Penalty in Iran
+  source: Iran Human Rights (IHRNGO) and Together Against the Death Penalty (ECPM)
+  date: '2026-04-13'
+  summary: At least 1,639 people were executed in Iran in 2025, a 68% increase on 2024 and the highest recorded since 1989. At least 48 women were executed, and 795 people were executed for drug-related offences.
+  url: https://www.iranhr.net/en/reports/44/
+  category: executions
+- id: article19-tightening-the-net-china-iran-2026
+  title: 'Tightening the Net: China''s Infrastructure of Oppression in Iran'
+  source: ARTICLE 19
+  date: '2026-02-09'
+  summary: Documents how Chinese companies supplied filtering, deep packet inspection and surveillance technology used in Iran's digital repression, and how Iran imposed a near-total blackout during the January 2026 protests.
+  url: https://www.article19.org/wp-content/uploads/2026/02/A19-Tightening-the-Net-China-Iran-Report.pdf
+  category: internet
+- id: hrw-world-report-2026-iran
+  title: 'World Report 2026: Iran'
+  source: Human Rights Watch
+  date: '2026-02-04'
+  summary: Iran's human rights situation spiralled in 2025, with over 2,000 executions, mass arbitrary arrests, and continued persecution of women, ethnic and religious minorities and dissidents.
+  url: https://www.hrw.org/world-report/2026/country-chapters/iran
+  category: human_rights
+- id: filterwatch-total-blackout-jan-2026
+  title: 'Total Blackout: A Technical Breakdown of the January 2026 Shutdown'
+  source: Filterwatch (Miaan Group)
+  date: '2026-01-16'
+  summary: Technical analysis using IODA, Kentik and Cloudflare data of the 8 January 2026 shutdown, which severed global internet, domestic networks and phone services during the protests.
+  url: https://filter.watch/english/2026/01/16/investigative-report-technical-breakdown-of-the-january-2026-shutdown/
+  category: internet
+- id: freedom-house-freedom-on-the-net-2025-iran
+  title: 'Iran: Freedom on the Net 2025 Country Report'
+  source: Freedom House
+  date: '2025-11-12'
+  summary: Internet freedom remained highly restricted, with extensive censorship, surveillance and harassment, pressure to use a domestic internet, and a near-total shutdown in June 2025 after the coverage period.
+  url: https://freedomhouse.org/country/iran/freedom-net/2025
+  category: internet
+- id: boroumand-espionage-weaponized-2025
+  title: 'One More Excuse to Kill: Espionage Weaponized in Iran''s Unrelenting Assault on the Right to Life'
+  source: Abdorrahman Boroumand Center
+  date: '2025-09-24'
+  summary: With 1,055 executions recorded by 24 September 2025, the report documents rising executions for alleged espionage for Israel, from 4 in 2024 to 10 in 2025, under expanded national security laws.
+  url: https://www.iranrights.org/library/document/5218
+  category: executions
+- id: chri-political-prisoners-execution-risk-2025
+  title: Scores of Political Prisoners Will Be Executed in Iran Without an International Outcry
+  source: Center for Human Rights in Iran
+  date: '2025-08-21'
+  summary: At least 10 political prisoners were at imminent risk of execution and nearly 70 others at high risk, after flawed proceedings marked by fabricated charges, denial of counsel, torture and forced confessions.
+  url: https://iranhumanrights.org/2025/08/scores-of-political-prisoners-will-be-executed-in-iran-without-an-international-outcry/
+  category: political_prisoners
+- id: un-ffmi-report-2025
+  title: Report of the Independent International Fact-Finding Mission on the Islamic Republic of Iran (A/HRC/58/63)
+  source: UN Independent International Fact-Finding Mission on Iran
+  date: '2025-03-14'
+  summary: Consolidating two years of investigation, the Mission reaffirmed gross human rights violations and crimes against humanity in the 2022 protests, based on over 38,000 evidence items and 285 victim and witness interviews.
+  url: https://www.ohchr.org/sites/default/files/documents/hrbodies/hrcouncil/sessions-regular/session58/advance-version/a-hrc-58-63-AV.pdf
+  category: human_rights
+- id: un-special-rapporteur-sato-2025
+  title: 'Situation of human rights in the Islamic Republic of Iran: Report of the Special Rapporteur, Mai Sato (A/HRC/58/62)'
+  source: UN Special Rapporteur on Iran
+  date: '2025-03-12'
+  summary: The Special Rapporteur's first Human Rights Council report, covering 2024, examines the death penalty, discrimination and lack of transparency, with an emphasis on the gender-specific impact of violations.
+  url: https://digitallibrary.un.org/record/4081040/files/A_HRC_58_62-EN.pdf
+  category: womens_rights
+- id: chri-prisoners-denied-medical-care-2025
+  title: Iranian Authorities Are Killing Prisoners by Denying Lifesaving Medical Care
+  source: Center for Human Rights in Iran
+  date: '2025-03-12'
+  summary: At least four prisoners died in the first two months of 2025 from deliberate denial of critical medical care, a routine practice targeted in particular at political prisoners and prisoners of conscience.
+  url: https://iranhumanrights.org/2025/03/iranian-authorities-are-killing-prisoners-by-denying-lifesaving-medical-care/
+  category: political_prisoners
+- id: amnesty-compulsory-veiling-law-2024
+  title: 'Iran: New compulsory veiling law intensifies oppression of women and girls'
+  source: Amnesty International
+  date: '2024-12-10'
+  summary: The Chastity and Hijab law imposes the death penalty, flogging, prison terms, fines, travel bans and education and employment restrictions to crush resistance to compulsory veiling. Its promulgation was temporarily paused on 14 December 2024.
+  url: https://www.amnesty.org/en/latest/news/2024/12/iran-new-compulsory-veiling-law-intensifies-oppression-of-women-and-girls/
+  category: womens_rights
+- id: hrw-boot-on-my-neck-bahai-2024
+  title: '"The Boot on My Neck": Iranian Authorities'' Crime of Persecution Against Baha''is in Iran'
+  source: Human Rights Watch
+  date: '2024-04-01'
+  summary: The 49-page report finds Iran's systematic deprivation of Baha'is' fundamental rights, including arbitrary arrest, property confiscation and restrictions on education, employment and burial, amounts to the crime against humanity of persecution.
+  url: https://www.hrw.org/report/2024/04/01/boot-my-neck/iranian-authorities-crime-persecution-against-bahais-iran
+  category: human_rights
