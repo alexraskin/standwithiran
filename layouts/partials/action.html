@@ -1,0 +1,3 @@
+{{ $links := (site.GetPage "/resources").RegularPages.ByWeight }}
+<section><h2>{{ i18n "actNow" }}</h2>{{ partial "resources.html" (where $links "Params.featured" true) }}</section>
+<section><h2>{{ i18n "resources" }}</h2>{{ partial "resources.html" (where $links "Params.featured" false) }}</section>

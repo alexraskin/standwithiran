@@ -1,0 +1,13 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ if eq .Section "timeline" }}
+  <p class="lede">{{ .Description }}</p>
+  {{ partial "timeline.html" .RegularPages.ByWeight }}
+  <div class="prose">{{ .Content }}</div>
+{{ else }}
+  <div class="prose{{ if not (in (slice "terms" "privacy") .Section) }} lede{{ end }}">{{ .Content }}</div>
+  {{ if eq .Section "victims" }}{{ partial "victims.html" . }}{{ end }}
+  {{ if eq .Section "evidence" }}{{ partial "reports.html" . }}{{ end }}
+  {{ if eq .Section "take-action" }}{{ partial "action.html" . }}{{ end }}
+{{ end }}
+{{ end }}

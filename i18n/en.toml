@@ -1,0 +1,209 @@
+[skip]
+other = "Skip to content"
+
+[menu]
+other = "Menu"
+
+[navHome]
+other = "Home"
+
+[navTimeline]
+other = "Timeline"
+
+[navVictims]
+other = "Victims"
+
+[navEvidence]
+other = "Evidence"
+
+[navAction]
+other = "Take Action"
+
+[mainNav]
+other = "Main"
+
+[language]
+other = "Language"
+
+[heroEyebrow]
+other = "Iran, 1979 to today"
+
+[heroText]
+other = "For decades, Iranians have demanded freedom, dignity, and the right to determine their own future."
+
+[heroLearn]
+other = "Learn what’s happening"
+
+[heroVictims]
+other = "Remember the victims"
+
+[statsHeading]
+other = "Days since key events"
+
+[asOf]
+other = "Counted as of"
+
+[statDays]
+other = "Days since Mahsa Jina Amini"
+
+[statProtest]
+other = "Days since the latest protest"
+
+[statBlackout]
+other = "Days of internet blackout"
+
+[statWar]
+other = "Days since the war began"
+
+[timelineTitle]
+other = "Decades of resistance"
+
+[timelineSub]
+other = "Key moments in the ongoing fight for freedom in Iran."
+
+[timelineMore]
+other = "Read the full timeline"
+
+[background]
+other = "Background"
+
+[explore]
+other = "Explore"
+
+[open]
+other = "Open"
+
+[cardTimelineText]
+other = "Decades of resistance in Iran."
+
+[cardVictimsText]
+other = "The names behind the counts."
+
+[cardEvidenceText]
+other = "Reports from independent human rights organizations."
+
+[cardActionText]
+other = "Practical ways to support Iranians and raise awareness."
+
+[memorialTitle]
+other = "Behind every count is a name."
+
+[memorialCta]
+other = "Remember the victims"
+
+[victimsIntro]
+other = "Every person below is documented by an independent organization, with a link to their record. They are a small selection of thousands. The full records are held by the organizations at the bottom of this page."
+
+[victimsStatsHeading]
+other = "The scale, as documented"
+
+[vic_uprising_2022]
+other = "Killed in the 2022 uprising"
+
+[vic_executed]
+other = "Executed after protest trials"
+
+[vic_protests_2025_26]
+other = "Killed in the 2025–2026 protests"
+
+[victimRecord]
+other = "Read their record"
+
+[victimsOrgsIntro]
+other = "These organizations hold the full records. Every profile above links to one of their case files."
+
+[documentation]
+other = "Documentation"
+
+[evidenceIntro]
+other = "Reporting from independent human rights organizations, with links to the original sources."
+
+[evidenceEmpty]
+other = "No reports have been added yet. Until then, these organizations publish their documentation directly:"
+
+[readReport]
+other = "Read the original report"
+
+[actionIntro]
+other = "Practical ways to support Iranians and raise awareness."
+
+[actNow]
+other = "Act now"
+
+[resources]
+other = "Resources"
+
+[shareTitle]
+other = "Share this page"
+
+[copyLink]
+other = "Copy link"
+
+[copied]
+other = "Copied!"
+
+[opensNewTab]
+other = "(opens in a new tab)"
+
+[footerTitle]
+other = "Keep their stories alive."
+
+[footerSub]
+other = "Learn. Remember. Share."
+
+[related]
+other = "Related projects"
+
+[lastUpdated]
+other = "Last updated"
+
+[contact]
+other = "Contact"
+
+[terms]
+other = "Terms"
+
+[privacy]
+other = "Privacy policy"
+
+[notFoundTitle]
+other = "Page not found"
+
+[notFoundText]
+other = "This page does not exist or has moved."
+
+[backHome]
+other = "Back to the home page"
+
+[cat_information]
+other = "Information"
+
+[cat_organization]
+other = "Organization"
+
+[cat_fundraiser]
+other = "Fundraiser"
+
+[cat_demonstration]
+other = "Demonstration"
+
+[cat_news]
+other = "News"
+
+[rep_human_rights]
+other = "Human rights violations"
+
+[rep_political_prisoners]
+other = "Political prisoners"
+
+[rep_executions]
+other = "Executions"
+
+[rep_internet]
+other = "Internet restrictions"
+
+[rep_womens_rights]
+other = "Women’s rights"
+
+[rep_protest_repression]
+other = "Protest repression"

@@ -1,5 +1,5 @@
 // CloudFront Function (viewer-request, cloudfront-js-2.0).
-// www -> apex 301, and directory URLs to the index.html Astro writes for them.
+// www -> apex 301, and directory URLs to the index.html Hugo writes for them.
 function handler(event) {
   var r = event.request;
   var host = r.headers.host ? r.headers.host.value.toLowerCase() : "";

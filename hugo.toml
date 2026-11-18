@@ -1,0 +1,40 @@
+baseURL = 'https://standwithiran.org/'
+title = 'Stand With Iran'
+publishDir = 'dist'
+defaultContentLanguage = 'en'
+defaultContentLanguageInSubdir = false
+disableKinds = ['taxonomy', 'term', 'RSS']
+
+[languages.en]
+label = 'English'
+locale = 'en-US'
+weight = 1
+[languages.fa]
+label = 'فارسی'
+locale = 'fa-IR'
+direction = 'rtl'
+weight = 2
+
+[params]
+contact_email = 'hi@standwithiran.org'
+last_updated = '2026-11-17'
+mode = 'light'
+useCDN = false
+[params.banner]
+enabled = true
+text = 'Iran Victims'
+link = 'https://iranvictims.com/'
+[params.stats]
+amini = '2022-09-16'
+protest = '2025-12-28'
+blackout = '2026-01-08'
+war = '2026-02-28'
+
+[markup.goldmark.renderer]
+unsafe = false
+[markup.highlight]
+noClasses = false
+[outputs]
+home = ['HTML']
+section = ['HTML']
+page = ['HTML']
