@@ -2,7 +2,7 @@
 lockfile = true
 
 [tools]
-node = "22"
+hugo = "0.166.0"
 terraform = "1.17"
 pre-commit = "latest"
 tflint = "latest"
@@ -10,16 +10,16 @@ terraform-docs = "0.20.0"  # matches terraform-docs/gh-actions, so CI and local 
 trivy = "latest"
 
 [tasks.dev]
-description = "Astro dev server at localhost:4321"
-run = "npm run dev"
+description = "Hugo dev server at localhost:4321"
+run = "hugo server --port 4321 --disableLiveReload --renderToMemory"
 
 [tasks.build]
-description = "Typecheck and build the static site into dist/"
-run = ["npm ci", "npm run check", "npm run build"]
+description = "Validate content, build Hugo into dist/, and check generated pages"
+run = ["hugo --cleanDestinationDir --minify", "python3 scripts/check_site.py"]
 
 [tasks.test]
-description = "CloudFront router function check"
-run = "node --test infrastructure/terraform/modules/cloudfront/router.test.mjs"
+description = "Build Hugo and run content and generated-site checks"
+depends = ["build"]
 
 [tasks."tf:init"]
 description = "terraform init for $TF_ENV (default prod)"
@@ -29,7 +29,7 @@ run = "terraform init -input=false -reconfigure -backend-config=envs/${TF_ENV:-p
 # Terraform uploads dist/ as aws_s3_object resources, so the plan needs a fresh build.
 [tasks."tf:plan"]
 description = "terraform plan for $TF_ENV (default prod)"
-depends = ["build", "test"]
+depends = ["test"]
 dir = "infrastructure/terraform"
 run = "terraform plan -input=false -var-file=envs/${TF_ENV:-prod}.tfvars -out=${TF_ENV:-prod}.tfplan"
 

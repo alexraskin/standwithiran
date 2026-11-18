@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 data "aws_ssm_parameter" "cloudflare_api_token" {
-  name = "/infrastructure/cloudflare/api_token"
+  name = "/standwithiran/cloudflare/api_token"
 }
 
 data "aws_iam_policy_document" "site_bucket" {

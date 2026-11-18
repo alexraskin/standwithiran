@@ -1,0 +1,1 @@
+{{ $value := (time.AsTime .).Format "2006-01-02" }}<time datetime="{{ $value }}" dir="ltr">{{ partial "digits.html" $value }}</time>

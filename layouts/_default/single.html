@@ -1,0 +1,10 @@
+{{ define "main" }}
+<article>
+  <p class="breadcrumb"><a href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }}</a></p>
+  <h1{{ with .Params.body_lang }} lang="{{ . }}" dir="{{ if eq . "fa" }}rtl{{ else }}ltr{{ end }}"{{ end }}>{{ .Title }}</h1>
+  {{ with .Params.name_fa }}<p class="alternate-name" lang="fa" dir="rtl">{{ . }}</p>{{ end }}
+  {{ if .Params.year }}<p class="meta">{{ partial "digits.html" .Params.year }}</p>{{ else if .Params.date }}<p class="meta">{{ with .Params.place }}{{ . }} · {{ end }}{{ partial "date.html" .Date }}</p>{{ end }}
+  <div class="prose"{{ with .Params.body_lang }} lang="{{ . }}" dir="{{ if eq . "fa" }}rtl{{ else }}ltr{{ end }}"{{ end }}>{{ .Content }}</div>
+  {{ with .Params.source_url }}<p><a href="{{ . }}">{{ $.Params.source }}</a></p>{{ end }}
+</article>
+{{ end }}

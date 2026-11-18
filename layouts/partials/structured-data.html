@@ -1,0 +1,13 @@
+{{ $home := site.Home.Permalink }}
+{{ $organization := dict "@type" "Organization" "@id" (printf "%s#organization" site.BaseURL) "name" site.Title "url" site.BaseURL }}
+{{ $website := dict "@type" "WebSite" "@id" (printf "%s#website" $home) "name" site.Title "url" $home "inLanguage" .Language.Lang }}
+{{ $page := dict "@type" "WebPage" "@id" .Permalink "url" .Permalink "name" .Title "description" (.Description | default site.Home.Description) "inLanguage" .Language.Lang "dateModified" (.Lastmod.Format "2006-01-02") }}
+{{ $graph := slice $organization $website $page }}
+{{ if eq .Section "take-action" }}
+  {{ $items := slice }}
+  {{ range $i, $link := (site.GetPage "/resources").RegularPages.ByWeight }}
+    {{ $items = $items | append (dict "@type" "ListItem" "position" (add $i 1) "name" $link.Title "url" $link.Params.source_url) }}
+  {{ end }}
+  {{ $graph = $graph | append (dict "@type" "ItemList" "@id" (printf "%s#resources" .Permalink) "name" (i18n "resources") "numberOfItems" (len $items) "itemListElement" $items) }}
+{{ end }}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" $graph | jsonify | safeJS }}</script>

@@ -1,0 +1,3 @@
+<ol class="timeline">
+{{ range . }}<li id="{{ .File.ContentBaseName }}"><span class="timeline-year">{{ partial "digits.html" .Params.year }}</span><div><h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>{{ .Content }}</div></li>{{ end }}
+</ol>

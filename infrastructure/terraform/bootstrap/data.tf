@@ -46,11 +46,10 @@ data "aws_iam_policy_document" "deploy" {
     resources = ["arn:aws:s3:::${local.state_bucket}/${local.project}/${each.key}/*"]
   }
 
-  # SecureString under the AWS-managed aws/ssm key, which needs no kms:Decrypt grant.
   statement {
     sid       = "CloudflareToken"
     actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:us-east-1:${local.account_id}:parameter/infrastructure/cloudflare/api_token"]
+    resources = [aws_ssm_parameter.cloudflare_api_token.arn]
   }
 
   statement {

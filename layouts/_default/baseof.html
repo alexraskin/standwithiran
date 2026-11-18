@@ -1,0 +1,19 @@
+{{- $_ := partialCached "validate.html" . .Language.Lang -}}
+<!doctype html>
+<html lang="{{ .Language.Lang }}" dir="{{ .Language.Direction | default "ltr" }}">
+  {{ partial "header.html" . }}
+  <body>
+    <a class="skip-link" href="#main">{{ i18n "skip" }}</a>
+    <div class="content">
+      {{ partial "head.html" . }}
+      {{ with site.Params.banner }}{{ if .enabled }}
+      <aside class="announcement"><a href="{{ .link }}" lang="en">{{ .text }}</a></aside>
+      {{ end }}{{ end }}
+      <main id="main">{{ block "main" . }}{{ end }}</main>
+      {{ if ne .Kind "404" }}{{ partial "share.html" . }}{{ end }}
+      {{ partial "footer.html" . }}
+    </div>
+    {{ $script := resources.Get "js/site.js" | minify | fingerprint }}
+    <script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}" defer></script>
+  </body>
+</html>

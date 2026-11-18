@@ -32,7 +32,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       include_subdomains         = false
       override                   = true
     }
-    # Astro's CSP is a <meta> tag in static builds, where browsers ignore
+    # The site's CSP is a <meta> tag in static builds, where browsers ignore
     # frame-ancestors. The two policies are intersected, so this only adds it.
     content_security_policy {
       content_security_policy = "frame-ancestors 'none'"

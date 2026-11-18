@@ -1,0 +1,12 @@
+<footer class="site-footer">
+  <p class="footer-message">{{ i18n "footerTitle" }}</p>
+  <p>{{ i18n "footerSub" }}</p>
+  <nav class="related" aria-label="{{ i18n "related" }}">
+    {{ range where (site.GetPage "/resources").RegularPages.ByWeight "Params.documentation" true }}<a href="{{ .Params.source_url }}" lang="en">{{ .Title }}</a>{{ end }}
+  </nav>
+  <div class="footer-bottom">
+    <a href="mailto:{{ site.Params.contact_email }}" dir="ltr">{{ site.Params.contact_email }}</a>
+    <nav aria-label="{{ i18n "terms" }}">{{ range slice "terms" "privacy" }}{{ with site.GetPage . }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}{{ end }}</nav>
+  </div>
+  <p class="meta">{{ i18n "lastUpdated" }}: {{ partial "date.html" site.Params.last_updated }} · <a href="https://gohugo.io/">Hugo</a></p>
+</footer>

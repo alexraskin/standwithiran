@@ -32,7 +32,6 @@ resource "aws_s3_object" "this" {
   etag         = filemd5("${var.site_dir}/${each.value}")
   content_type = lookup(local.mime, reverse(split(".", each.value))[0], "application/octet-stream")
   cache_control = (
-    startswith(each.value, "_astro/") ? local.cache_immutable :
     can(regex("\\.(html|xml)$", each.value)) ? local.cache_html :
     local.cache_static
   )

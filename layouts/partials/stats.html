@@ -1,0 +1,12 @@
+<section class="counters" aria-labelledby="stats-heading">
+<h2 id="stats-heading">{{ i18n "statsHeading" }}</h2>
+<dl class="stats-strip">
+{{ range slice (dict "key" "war" "label" "statWar") (dict "key" "amini" "label" "statDays") (dict "key" "protest" "label" "statProtest") (dict "key" "blackout" "label" "statBlackout") }}
+{{ $label := .label }}{{ $date := index site.Params.stats .key }}
+{{ if not $date }}{{ $date = index (dict "amini" "2022-09-16" "protest" "2025-12-28" "blackout" "2026-01-08") .key }}{{ end }}
+{{ with $date }}
+{{ $start := time.AsTime . }}{{ $days := math.Max 0 (math.Floor (div (sub now.Unix $start.Unix) 86400.0)) }}
+<div><dt>{{ i18n $label }}</dt><dd data-since="{{ . }}">{{ partial "digits.html" (int $days) }}</dd></div>
+{{ end }}{{ end }}
+</dl><p class="meta">{{ i18n "asOf" }} <time data-today datetime="{{ now.Format "2006-01-02" }}">{{ partial "digits.html" (now.Format "2006-01-02") }}</time></p>
+</section>

@@ -1,0 +1,7 @@
+{{ $pages := .RegularPages }}
+{{ if not $pages }}<h2>{{ i18n "documentation" }}</h2><p>{{ i18n "evidenceEmpty" }}</p>{{ partial "resources.html" (where (site.GetPage "/resources").RegularPages.ByWeight "Params.documentation" true) }}{{ end }}
+{{ range slice "human_rights" "political_prisoners" "executions" "internet" "womens_rights" "protest_repression" }}
+{{ $group := where $pages "Params.category" . }}{{ if $group }}
+<section><h2>{{ i18n (printf "rep_%s" .) }}</h2>
+{{ range $group.ByDate.Reverse }}<article class="record" id="{{ .File.ContentBaseName }}"><h3 lang="{{ .Params.body_lang }}" dir="{{ if eq .Params.body_lang "fa" }}rtl{{ else }}ltr{{ end }}"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3><p class="meta"><bdi>{{ .Params.source }}</bdi> · {{ partial "date.html" .Date }}</p><div lang="{{ .Params.body_lang }}" dir="{{ if eq .Params.body_lang "fa" }}rtl{{ else }}ltr{{ end }}">{{ .Content }}</div><a href="{{ .Params.source_url }}">{{ i18n "readReport" }}</a></article>{{ end }}
+</section>{{ end }}{{ end }}

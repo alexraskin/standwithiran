@@ -1,0 +1,5 @@
+{{- $value := string . -}}
+{{- if eq site.Language.Lang "fa" -}}
+  {{- range $i, $digit := slice "۰" "۱" "۲" "۳" "۴" "۵" "۶" "۷" "۸" "۹" -}}{{- $value = replace $value (string $i) $digit -}}{{- end -}}
+{{- end -}}
+{{- return $value -}}

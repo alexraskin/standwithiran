@@ -1,0 +1,209 @@
+[skip]
+other = "رفتن به محتوا"
+
+[menu]
+other = "منو"
+
+[navHome]
+other = "خانه"
+
+[navTimeline]
+other = "گاه‌شمار"
+
+[navVictims]
+other = "قربانیان"
+
+[navEvidence]
+other = "مستندات"
+
+[navAction]
+other = "اقدام کنید"
+
+[mainNav]
+other = "اصلی"
+
+[language]
+other = "زبان"
+
+[heroEyebrow]
+other = "ایران، از ۱۳۵۷ تا امروز"
+
+[heroText]
+other = "ایرانیان دهه‌هاست که خواستار آزادی، کرامت و حق تعیین سرنوشت خود هستند."
+
+[heroLearn]
+other = "ببینید چه می‌گذرد"
+
+[heroVictims]
+other = "یاد قربانیان"
+
+[statsHeading]
+other = "روزشمار رویدادهای کلیدی"
+
+[asOf]
+other = "شمارش تا"
+
+[statDays]
+other = "روز از مهسا ژینا امینی"
+
+[statProtest]
+other = "روز از آخرین اعتراضات"
+
+[statBlackout]
+other = "روز قطع اینترنت"
+
+[statWar]
+other = "روز از آغاز جنگ"
+
+[timelineTitle]
+other = "دهه‌ها ایستادگی"
+
+[timelineSub]
+other = "لحظه‌های کلیدی در مبارزه‌ی پیوسته برای آزادی در ایران."
+
+[timelineMore]
+other = "دیدن گاه‌شمار کامل"
+
+[background]
+other = "پیشینه"
+
+[explore]
+other = "بیشتر بدانید"
+
+[open]
+other = "باز کنید"
+
+[cardTimelineText]
+other = "دهه‌ها ایستادگی در ایران."
+
+[cardVictimsText]
+other = "نام‌هایی پشت این اعداد."
+
+[cardEvidenceText]
+other = "گزارش‌های سازمان‌های مستقل حقوق بشری."
+
+[cardActionText]
+other = "راه‌های عملی برای حمایت از ایرانیان و آگاه‌سازی."
+
+[memorialTitle]
+other = "پشت هر عدد، نامی است."
+
+[memorialCta]
+other = "یاد قربانیان"
+
+[victimsIntro]
+other = "هر فردی که در زیر آمده است توسط سازمانی مستقل مستند شده و به پرونده‌ی او پیوند داده شده است. این‌ها گزیده‌ی کوچکی از هزاران نفرند. پرونده‌های کامل نزد سازمان‌هایی است که در پایین این صفحه آمده‌اند."
+
+[victimsStatsHeading]
+other = "ابعاد فاجعه، بر پایه‌ی مستندات"
+
+[vic_uprising_2022]
+other = "کشته‌شدگان خیزش ۱۴۰۱"
+
+[vic_executed]
+other = "اعدام‌شدگان پس از دادگاه‌های اعتراضات"
+
+[vic_protests_2025_26]
+other = "کشته‌شدگان اعتراضات ۱۴۰۴"
+
+[victimRecord]
+other = "خواندن پرونده‌ی او"
+
+[victimsOrgsIntro]
+other = "پرونده‌های کامل نزد این سازمان‌هاست. هر پروفایل بالا به یکی از پرونده‌های آن‌ها پیوند دارد."
+
+[documentation]
+other = "مستندسازی"
+
+[evidenceIntro]
+other = "گزارش‌های سازمان‌های مستقل حقوق بشری، با پیوند به منبع اصلی."
+
+[evidenceEmpty]
+other = "هنوز گزارشی افزوده نشده است. تا آن زمان، این سازمان‌ها مستندات خود را مستقیماً منتشر می‌کنند:"
+
+[readReport]
+other = "خواندن گزارش اصلی"
+
+[actionIntro]
+other = "راه‌های عملی برای حمایت از ایرانیان و آگاه‌سازی."
+
+[actNow]
+other = "همین حالا"
+
+[resources]
+other = "منابع"
+
+[shareTitle]
+other = "اشتراک‌گذاری این صفحه"
+
+[copyLink]
+other = "کپی لینک"
+
+[copied]
+other = "کپی شد!"
+
+[opensNewTab]
+other = "(در زبانه‌ی تازه باز می‌شود)"
+
+[footerTitle]
+other = "داستان‌هایشان را زنده نگه دارید."
+
+[footerSub]
+other = "بیاموزید. به یاد بسپارید. به اشتراک بگذارید."
+
+[related]
+other = "پروژه‌های مرتبط"
+
+[lastUpdated]
+other = "آخرین به‌روزرسانی"
+
+[contact]
+other = "تماس"
+
+[terms]
+other = "شرایط"
+
+[privacy]
+other = "حریم خصوصی"
+
+[notFoundTitle]
+other = "صفحه پیدا نشد"
+
+[notFoundText]
+other = "این صفحه وجود ندارد یا جابه‌جا شده است."
+
+[backHome]
+other = "بازگشت به صفحه‌ی اصلی"
+
+[cat_information]
+other = "اطلاعات"
+
+[cat_organization]
+other = "سازمان"
+
+[cat_fundraiser]
+other = "جمع‌آوری کمک"
+
+[cat_demonstration]
+other = "تجمع"
+
+[cat_news]
+other = "خبر"
+
+[rep_human_rights]
+other = "نقض حقوق بشر"
+
+[rep_political_prisoners]
+other = "زندانیان سیاسی"
+
+[rep_executions]
+other = "اعدام‌ها"
+
+[rep_internet]
+other = "محدودیت‌های اینترنت"
+
+[rep_womens_rights]
+other = "حقوق زنان"
+
+[rep_protest_repression]
+other = "سرکوب اعتراضات"

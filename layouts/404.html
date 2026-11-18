@@ -1,0 +1,5 @@
+{{ define "main" }}<h1>{{ i18n "notFoundTitle" }}</h1><p>{{ i18n "notFoundText" }}</p><p><a href="{{ site.Home.RelPermalink }}">{{ i18n "backHome" }}</a></p>
+{{/* CloudFront serves only /404.html for every missing URL, so the root page also carries the Farsi message. */}}
+{{ if eq .Language.Lang hugo.Sites.Default.Language.Lang }}{{ $fa := os.ReadFile "i18n/fa.toml" | transform.Unmarshal }}{{ range where hugo.Sites "Language.Lang" "fa" }}
+<section lang="fa" dir="rtl" class="not-found-alt"><h2>{{ $fa.notFoundTitle.other }}</h2><p>{{ $fa.notFoundText.other }}</p><p><a href="{{ .Home.RelPermalink }}">{{ $fa.backHome.other }}</a></p></section>
+{{ end }}{{ end }}{{ end }}

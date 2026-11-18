@@ -16,10 +16,9 @@ locals {
     ico         = "image/x-icon"
   }
 
-  # _astro/ is content-hashed by Astro. Browsers revalidate HTML and the sitemap;
+  # Browsers revalidate HTML and the sitemap;
   # CloudFront caches them for five minutes without requiring invalidations.
   # shortcut: old hashed assets are deleted on deploy; retain them before extending HTML TTL further.
-  cache_immutable = "public, max-age=31536000, immutable"
-  cache_static    = "public, max-age=86400, stale-while-revalidate=604800"
-  cache_html      = "public, max-age=0, s-maxage=300, must-revalidate"
+  cache_static = "public, max-age=86400, stale-while-revalidate=604800"
+  cache_html   = "public, max-age=0, s-maxage=300, must-revalidate"
 }

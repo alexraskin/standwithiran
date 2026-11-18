@@ -1,0 +1,21 @@
+{{ define "main" }}
+<section class="intro">
+  <h1>{{ .Title }}</h1>
+  <p class="slogan-translation" lang="{{ if eq .Language.Lang "en" }}fa{{ else }}en{{ end }}" dir="{{ if eq .Language.Lang "en" }}rtl{{ else }}ltr{{ end }}">{{ if eq .Language.Lang "en" }}زن، زندگی، آزادی{{ else }}Woman. Life. Freedom.{{ end }}</p>
+  <div class="lede">{{ .Content }}</div>
+  <p class="intro-links"><a href="{{ (site.GetPage "/timeline").RelPermalink }}">{{ i18n "heroLearn" }}</a><a href="{{ (site.GetPage "/victims").RelPermalink }}">{{ i18n "heroVictims" }}</a></p>
+</section>
+<section class="home-index" aria-labelledby="explore-heading">
+  <h2 id="explore-heading">{{ i18n "explore" }}</h2>
+  {{ range slice (dict "page" "timeline" "copy" "cardTimelineText") (dict "page" "victims" "copy" "cardVictimsText") (dict "page" "evidence" "copy" "cardEvidenceText") (dict "page" "take-action" "copy" "cardActionText") }}
+  {{ $page := site.GetPage .page }}
+  <article class="index-entry"><h3><a href="{{ $page.RelPermalink }}">{{ $page.Title }}</a></h3><p>{{ i18n .copy }}</p></article>
+  {{ end }}
+</section>
+<section aria-labelledby="timeline-heading">
+  <h2 id="timeline-heading">{{ i18n "timelineTitle" }}</h2>
+  {{ partial "timeline.html" (where (site.GetPage "/timeline").RegularPages.ByWeight "Params.featured" true) }}
+  <p><a href="{{ (site.GetPage "/timeline").RelPermalink }}">{{ i18n "timelineMore" }}</a></p>
+</section>
+{{ partial "stats.html" . }}
+{{ end }}

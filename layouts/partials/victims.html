@@ -1,0 +1,17 @@
+<section aria-labelledby="figures-heading">
+<h2 id="figures-heading">{{ i18n "victimsStatsHeading" }}</h2>
+<ul class="figures plain-list">{{ range (site.GetPage "/figures").RegularPages.ByWeight }}<li><strong>{{ partial "digits.html" .Title }}</strong>{{ .Content }}<a href="{{ .Params.source_url }}" lang="en">{{ .Params.source }}</a></li>{{ end }}</ul>
+</section>
+{{ $pages := .RegularPages }}
+{{ range slice "uprising_2022" "executed" "protests_2025_26" }}
+{{ $group := where $pages "Params.group" . }}{{ if $group }}
+<section><h2>{{ i18n (printf "vic_%s" .) }}</h2>
+{{ range $group.ByDate }}
+<article class="record" id="{{ .File.ContentBaseName }}">
+  <h3><a href="{{ .RelPermalink }}" lang="en" dir="ltr">{{ .Title }}</a><span class="alternate-name" lang="fa" dir="rtl">{{ .Params.name_fa }}</span></h3>
+  <p class="meta">{{ with .Params.age }}{{ if eq site.Language.Lang "fa" }}{{ partial "digits.html" . }} ساله{{ else }}Aged {{ . }}{{ end }} · {{ end }}<bdi>{{ .Params.place }}</bdi> · {{ partial "date.html" .Date }}</p>
+  <div lang="{{ .Params.body_lang }}" dir="{{ if eq .Params.body_lang "fa" }}rtl{{ else }}ltr{{ end }}">{{ .Content }}</div>
+  <a href="{{ .Params.source_url }}">{{ i18n "victimRecord" }} — <bdi>{{ .Params.source }}</bdi></a>
+</article>
+{{ end }}</section>{{ end }}{{ end }}
+<section><h2>{{ i18n "documentation" }}</h2><p>{{ i18n "victimsOrgsIntro" }}</p>{{ partial "resources.html" (where (site.GetPage "/resources").RegularPages.ByWeight "Params.documentation" true) }}</section>

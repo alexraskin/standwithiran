@@ -1,0 +1,38 @@
+{{/* Keep editorial mistakes out of the static build. Called once per locale. */}}
+{{ $reportCategories := slice "human_rights" "political_prisoners" "executions" "internet" "womens_rights" "protest_repression" }}
+{{ $victimGroups := slice "uprising_2022" "executed" "protests_2025_26" }}
+{{ $resourceCategories := slice "information" "organization" "fundraiser" "demonstration" "news" }}
+{{ range slice "timeline" "victims" "evidence" "resources" "figures" }}
+  {{ $section := . }}
+  {{ range (site.GetPage .).RegularPages }}
+    {{ $record := . }}
+    {{ if not .Title }}{{ errorf "%s: title is required" .File.Path }}{{ end }}
+    {{ if and (ne $section "resources") (not .Plain) }}{{ errorf "%s: Markdown body is required" .File.Path }}{{ end }}
+    {{ if ne $section "timeline" }}
+      {{ $url := urls.Parse (.Params.source_url | default "") }}
+      {{ if or (not (in (slice "http" "https") $url.Scheme)) (not $url.Host) }}{{ errorf "%s: source_url must be an absolute HTTP(S) URL" .File.Path }}{{ end }}
+      {{ if and (ne $section "resources") (not .Params.source) }}{{ errorf "%s: source is required" .File.Path }}{{ end }}
+    {{ end }}
+    {{ if eq $section "timeline" }}
+      {{ if not (findRE `^\d{4}(–\d{4})?$` (.Params.year | default "")) }}{{ errorf "%s: year must be YYYY or YYYY–YYYY" .File.Path }}{{ end }}
+    {{ else if eq $section "victims" }}
+      {{ if not (in $victimGroups .Params.group) }}{{ errorf "%s: invalid victim group" .File.Path }}{{ end }}
+      {{ if or (not .Params.name_fa) (not .Params.place) .Date.IsZero }}{{ errorf "%s: name_fa, place and date are required" .File.Path }}{{ end }}
+      {{ if isset .Params "age" }}{{ $age := float .Params.age }}{{ if or (le $age 0) (ne $age (float (int $age))) }}{{ errorf "%s: age must be a positive integer" $record.File.Path }}{{ end }}{{ end }}
+    {{ else if eq $section "evidence" }}
+      {{ if not (in $reportCategories .Params.category) }}{{ errorf "%s: invalid report category" .File.Path }}{{ end }}
+      {{ if .Date.IsZero }}{{ errorf "%s: date is required" .File.Path }}{{ end }}
+    {{ else if eq $section "resources" }}
+      {{ if not (in $resourceCategories .Params.category) }}{{ errorf "%s: invalid resource category" .File.Path }}{{ end }}
+    {{ end }}
+    {{ range slice "featured" "documentation" }}
+      {{ if isset $record.Params . }}{{ if ne (printf "%T" (index $record.Params .)) "bool" }}{{ errorf "%s: %s must be true or false" $record.File.Path . }}{{ end }}{{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ range $key, $date := site.Params.stats }}
+  {{ if $date }}{{ if not (findRE `^\d{4}-\d{2}-\d{2}$` $date) }}{{ errorf "stats.%s must be YYYY-MM-DD or empty" $key }}{{ else }}{{ $parsed := time.AsTime $date }}{{ end }}{{ end }}
+{{ end }}
+{{ with site.Params.banner }}{{ if .enabled }}
+{{ $url := urls.Parse .link }}{{ if or (not (in (slice "http" "https") $url.Scheme)) (not $url.Host) }}{{ errorf "banner.link must be an absolute HTTP(S) URL" }}{{ end }}
+{{ end }}{{ end }}
