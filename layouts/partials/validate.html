@@ -8,11 +8,9 @@
     {{ $record := . }}
     {{ if not .Title }}{{ errorf "%s: title is required" .File.Path }}{{ end }}
     {{ if and (ne $section "resources") (not .Plain) }}{{ errorf "%s: Markdown body is required" .File.Path }}{{ end }}
-    {{ if ne $section "timeline" }}
-      {{ $url := urls.Parse (.Params.source_url | default "") }}
-      {{ if or (not (in (slice "http" "https") $url.Scheme)) (not $url.Host) }}{{ errorf "%s: source_url must be an absolute HTTP(S) URL" .File.Path }}{{ end }}
-      {{ if and (ne $section "resources") (not .Params.source) }}{{ errorf "%s: source is required" .File.Path }}{{ end }}
-    {{ end }}
+    {{ $url := urls.Parse (.Params.source_url | default "") }}
+    {{ if or (not (in (slice "http" "https") $url.Scheme)) (not $url.Host) }}{{ errorf "%s: source_url must be an absolute HTTP(S) URL" .File.Path }}{{ end }}
+    {{ if and (ne $section "resources") (not .Params.source) }}{{ errorf "%s: source is required" .File.Path }}{{ end }}
     {{ if eq $section "timeline" }}
       {{ if not (findRE `^\d{4}(–\d{4})?$` (.Params.year | default "")) }}{{ errorf "%s: year must be YYYY or YYYY–YYYY" .File.Path }}{{ end }}
     {{ else if eq $section "victims" }}
