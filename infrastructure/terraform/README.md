@@ -27,3 +27,53 @@ The [deploy workflow](../../.github/workflows/deploy.yml) runs on every push to 
    ```
 
 `TF_ENV` defaults to `prod`. `tf:plan` builds and tests the site first; `tf:apply` applies the saved plan. Afterwards, check [standwithiran.org](https://standwithiran.org).
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.73.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_acm"></a> [acm](#module\_acm) | ./modules/acm | n/a |
+| <a name="module_cloudflare_dns"></a> [cloudflare\_dns](#module\_cloudflare\_dns) | ./modules/cloudflare_dns | n/a |
+| <a name="module_cloudfront"></a> [cloudfront](#module\_cloudfront) | ./modules/cloudfront | n/a |
+| <a name="module_s3"></a> [s3](#module\_s3) | ./modules/s3 | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.site_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_ssm_parameter.cloudflare_api_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | Must be us-east-1: CloudFront only accepts ACM certificates from there. | `string` | n/a | yes |
+| <a name="input_domain"></a> [domain](#input\_domain) | n/a | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#input\_environment) | n/a | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | `{}` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_bucket_name"></a> [bucket\_name](#output\_bucket\_name) | n/a |
+| <a name="output_distribution_domain"></a> [distribution\_domain](#output\_distribution\_domain) | n/a |
+| <a name="output_distribution_id"></a> [distribution\_id](#output\_distribution\_id) | n/a |
+<!-- END_TF_DOCS -->

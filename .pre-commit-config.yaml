@@ -17,7 +17,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
       - id: terraform_docs
         args:
-          - --args=--config=__GIT_WORKING_DIR__/.terraform-docs.yml
+          - --args=--config=.terraform-docs.yml
       - id: terraform_trivy
         stages: [pre-push]
         args:
