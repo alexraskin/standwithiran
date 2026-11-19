@@ -52,7 +52,6 @@ html[lang='fa'] h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); }
 .slogan-translation { font: 500 1.4rem/1.8 Vazirmatn, Newsreader, serif; color: var(--color-primary); text-align: start; }
 .lede { color: var(--color-text-muted); max-width: 65ch; }
 .intro .lede { font-size: 1.12rem; margin-top: 1.3rem; }
-.intro-links { display: flex; flex-wrap: wrap; gap: .7rem 1.7rem; font-size: .9rem; margin-top: 1.4rem; }
 .home-index { border-block: 1px solid var(--color-border); padding-bottom: 1.6rem; }
 .home-index > h2 { margin-top: 1.3rem; }
 .index-entry { display: grid; grid-template-columns: 13rem 1fr; gap: 1.4rem; padding-block: .75rem; }

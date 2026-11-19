@@ -18,10 +18,8 @@ weight = 2
 [params]
 contact_email = 'hi@standwithiran.org'
 last_updated = '2026-11-17'
-mode = 'light'
-useCDN = false
 [params.banner]
-enabled = true
+enabled = false
 text = 'Iran Victims'
 link = 'https://iranvictims.com/'
 [params.stats]

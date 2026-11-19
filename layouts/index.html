@@ -3,7 +3,6 @@
   <h1>{{ .Title }}</h1>
   <p class="slogan-translation" lang="{{ if eq .Language.Lang "en" }}fa{{ else }}en{{ end }}" dir="{{ if eq .Language.Lang "en" }}rtl{{ else }}ltr{{ end }}">{{ if eq .Language.Lang "en" }}زن، زندگی، آزادی{{ else }}Woman. Life. Freedom.{{ end }}</p>
   <div class="lede">{{ .Content }}</div>
-  <p class="intro-links"><a href="{{ (site.GetPage "/timeline").RelPermalink }}">{{ i18n "heroLearn" }}</a><a href="{{ (site.GetPage "/victims").RelPermalink }}">{{ i18n "heroVictims" }}</a></p>
 </section>
 <section class="home-index" aria-labelledby="explore-heading">
   <h2 id="explore-heading">{{ i18n "explore" }}</h2>
